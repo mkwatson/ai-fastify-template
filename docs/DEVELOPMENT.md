@@ -113,12 +113,9 @@ pnpm dev
 
 2. **Run quality checks frequently**
    ```bash
-   # Quick checks during development
+   # Available checks during development
    pnpm lint
-   pnpm type-check
-   
-   # Full pipeline before commit
-   pnpm ci
+   pnpm build
    ```
 
 3. **Commit changes**
@@ -129,27 +126,24 @@ pnpm dev
 
 ## Quality Assurance
 
-### Fail-Fast Pipeline
+### Quality Checks
 
-The project uses a fail-fast pipeline that must pass before merging:
+The project will use a fail-fast pipeline (coming with backend development):
 
 ```
-lint → type-check → graph → test → mutation → build
+lint → type-check → test → build
 ```
 
 ### Running Quality Checks
 
 ```bash
-# Complete pipeline
-pnpm ci
-
-# Individual steps
-pnpm lint           # Biome formatting and linting
-pnpm type-check     # TypeScript compilation
-pnpm graph          # Dependency graph validation
-pnpm test           # Unit and integration tests
-pnpm mutation       # Mutation testing (when available)
+# Currently available
+pnpm lint           # Code formatting and linting (when packages exist)
 pnpm build          # Production build
+
+# Coming with backend development
+pnpm type-check     # TypeScript compilation
+pnpm test           # Unit and integration tests
 ```
 
 ### Quality Standards

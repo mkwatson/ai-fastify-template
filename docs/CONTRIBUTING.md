@@ -46,7 +46,6 @@ This project follows a professional, inclusive environment. Please:
    ```bash
    pnpm turbo build --dry-run
    pnpm lint
-   pnpm type-check
    ```
 
 4. **Create a feature branch**
@@ -123,18 +122,16 @@ ai-fastify-template/
 
 ### Code Quality
 
-All contributions must pass the fail-fast pipeline:
+All contributions must pass the available quality checks:
 
 ```bash
-# Run complete pipeline
-pnpm ci
-
-# Individual steps
+# Currently available
+pnpm build          # Build all packages
 pnpm lint           # Code formatting and style
-pnpm type-check     # TypeScript compilation
-pnpm graph          # Import dependency validation
+
+# Coming with backend development
 pnpm test           # Unit and integration tests
-pnpm mutation       # Mutation testing (when available)
+pnpm type-check     # TypeScript compilation
 ```
 
 ### TypeScript Standards
@@ -243,7 +240,8 @@ BREAKING CHANGE: User IDs are now UUIDs instead of numbers"
 
 1. **Ensure quality checks pass**
    ```bash
-   pnpm ci
+   pnpm build
+   pnpm lint
    ```
 
 2. **Update documentation**
@@ -309,7 +307,7 @@ This project is optimized for AI-assisted development. When working with AI agen
 
 ### When AI Gets Stuck
 
-1. **Check pipeline output**: `pnpm ci`
+1. **Check build output**: `pnpm build` and `pnpm lint`
 2. **Look for specific errors**: Focus on one constraint at a time
 3. **Reference existing patterns**: Point AI to similar implementations
 4. **Break down requests**: Smaller, focused changes work better
