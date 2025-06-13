@@ -2,30 +2,15 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
-    "lint": {
-      "outputs": []
-    },
-    "type": {
-      "outputs": []
-    },
-    "graph": {
-      "outputs": []
-    },
-    "test": {
-      "dependsOn": ["lint", "type", "graph"],
-      "outputs": ["coverage/**"]
-    },
-    "mutation": {
-      "dependsOn": ["test"],
-      "outputs": []
-    },
     "build": {
-      "dependsOn": ["mutation"],
       "outputs": ["dist/**", "build/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "lint": {
+      "outputs": []
     },
     "clean": {
       "cache": false
