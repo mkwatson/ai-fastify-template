@@ -130,7 +130,7 @@ Will contain shared libraries:
 ### Workspace Configuration
 ```yaml
 # pnpm-workspace.yaml
-packages: ["apps/*", "packages/*"]
+packages: ["apps/*","packages/*"]
 ```
 
 ## Development Workflow
@@ -220,10 +220,10 @@ pnpm test   # Will show "0 packages"
 ### Advanced Debugging
 
 ```bash
-# Direct turbo commands for debugging
-pnpm turbo build --verbose    # Verbose build output
-pnpm turbo clean              # Clear turbo cache
-pnpm turbo build --dry-run    # See what would run
+# Advanced turbo commands for debugging
+pnpm build --verbosity=2     # Verbose build output with detailed logs
+pnpm clean                   # Clear build artifacts and cache
+pnpm build --dry-run         # See what would run without executing
 ```
 
 ### Getting Help

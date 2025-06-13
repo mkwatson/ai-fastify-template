@@ -543,8 +543,8 @@ describe('User Routes', () => {
 
 **TypeScript Errors**
 ```bash
-# Check for type errors
-pnpm type-check
+# Check for type errors (coming with MAR-11+)
+# pnpm type-check
 
 # Common fixes:
 # 1. Add explicit return types
@@ -582,7 +582,7 @@ pnpm graph
 
 ### When AI Gets Stuck
 
-1. **Check the pipeline**: Run `pnpm ci` to see specific errors
+1. **Check the pipeline**: Run `pnpm lint && pnpm build` to see specific errors
 2. **Focus on one error**: Fix one constraint violation at a time
 3. **Reference existing patterns**: Look at similar implementations in the codebase
 4. **Break down the request**: Make smaller, more focused changes

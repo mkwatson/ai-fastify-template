@@ -129,7 +129,7 @@ All contributions must pass the available quality checks:
 pnpm build          # Build all packages
 pnpm lint           # Code formatting and style
 
-# Coming with backend development
+# Coming with backend development (MAR-11+)
 pnpm test           # Unit and integration tests
 pnpm type-check     # TypeScript compilation
 ```
@@ -242,6 +242,10 @@ BREAKING CHANGE: User IDs are now UUIDs instead of numbers"
    ```bash
    pnpm build
    pnpm lint
+   
+   # Coming with MAR-11+: Full pipeline
+   # pnpm test
+   # pnpm type-check
    ```
 
 2. **Update documentation**

@@ -40,7 +40,7 @@ git --version     # >= 2.0.0
    pnpm list --depth=0
    
    # Verify turbo works
-   pnpm turbo --version
+   pnpm build --dry-run
    
    # Run dry-run build
    pnpm build --dry-run
@@ -131,19 +131,24 @@ pnpm dev
 The project will use a fail-fast pipeline (coming with backend development):
 
 ```
-lint → type-check → test → build
+lint → type-check → graph → test → mutation → build
 ```
+
+**Current Status**: Only `lint` and `build` are implemented. Full pipeline coming with MAR-11+.
 
 ### Running Quality Checks
 
 ```bash
 # Currently available
-pnpm lint           # Code formatting and linting (when packages exist)
+pnpm lint           # Code formatting and linting
 pnpm build          # Production build
+pnpm clean          # Clear build artifacts
 
-# Coming with backend development
+# Coming with backend development (MAR-11+)
 pnpm type-check     # TypeScript compilation
 pnpm test           # Unit and integration tests
+pnpm graph          # Dependency validation
+pnpm mutation       # Mutation testing (if implemented)
 ```
 
 ### Quality Standards
@@ -165,35 +170,36 @@ cat turbo.json
 
 # Standard commands (use these)
 pnpm build              # Build all packages
-pnpm clean              # Clear cache
+pnpm clean              # Clear build artifacts and cache
 
 # Advanced debugging (when needed)
-pnpm turbo build --verbose    # Verbose output
-pnpm turbo clean              # Direct cache clear
+pnpm build --verbosity=2  # Verbose output with detailed logs
+pnpm clean                 # Clear cache and build artifacts
 ```
 
 ### Pipeline Configuration
 
+**Current turbo.json** (foundation only):
 ```json
 {
   "tasks": {
-    "lint": {
-      "outputs": []
-    },
-    "type-check": {
-      "dependsOn": ["lint"],
-      "outputs": []
-    },
-    "graph": {
-      "dependsOn": ["type-check"],
-      "outputs": []
-    },
-    "test": {
-      "dependsOn": ["graph"],
-      "outputs": ["coverage/**"]
-    },
-    "mutation": {
-      "dependsOn": ["test"],
+    "build": { "outputs": ["dist/**", "build/**"] },
+    "dev": { "cache": false, "persistent": true },
+    "lint": { "outputs": [] },
+    "clean": { "cache": false }
+  }
+}
+```
+
+**Future pipeline** (coming with MAR-11+):
+```json
+{
+  "tasks": {
+    "lint": { "outputs": [] },
+    "type-check": { "dependsOn": ["lint"], "outputs": [] },
+    "graph": { "dependsOn": ["type-check"], "outputs": [] },
+    "test": { "dependsOn": ["graph"], "outputs": ["coverage/**"] },
+    "mutation": { "dependsOn": ["test"],
       "outputs": []
     },
     "build": {
@@ -253,7 +259,7 @@ pnpm clean
 rm -rf .turbo
 
 # Force rebuild (advanced)
-pnpm turbo build --force
+pnpm build --force
 ```
 
 **Import/Export Errors**
@@ -272,9 +278,9 @@ cat packages/my-package/package.json
 pnpm build              # Standard build
 pnpm clean              # Clear cache
 
-# Advanced turbo debugging
-pnpm turbo build --verbose    # Verbose output
-pnpm turbo build --dry-run    # See what would run
+# Advanced debugging
+pnpm build --verbosity=2     # Verbose output with detailed logs
+pnpm build --dry-run         # See what would run without executing
 
 # Dependency analysis
 pnpm why package-name
@@ -290,8 +296,8 @@ pnpm list --depth=0
 time pnpm build
 
 # Advanced analysis (when needed)
-pnpm turbo build --summarize    # Cache efficiency
-pnpm turbo build --profile      # Performance profiling
+pnpm build --summarize          # Cache efficiency analysis
+pnpm build --profile            # Performance profiling
 ```
 
 ### Development Performance
@@ -302,13 +308,13 @@ pnpm turbo build --profile      # Performance profiling
 
 ### Optimization Tips
 
-1. **Use turbo filtering (advanced)**
+1. **Use filtering for large workspaces (advanced)**
    ```bash
-   # Only build affected packages
-   pnpm turbo build --filter=...my-app
+   # Only build affected packages (when multiple packages exist)
+   pnpm build --filter=...my-app
    
    # Build specific package and dependencies
-   pnpm turbo build --filter=my-app...
+   pnpm build --filter=my-app...
    ```
 
 2. **Leverage caching**
@@ -332,7 +338,12 @@ pnpm turbo build --profile      # Performance profiling
 
 1. **Quality assurance**
    ```bash
-   pnpm ci
+   # Run all available quality checks
+   pnpm lint
+   pnpm build
+   
+   # Coming with MAR-11+: Full pipeline
+   # pnpm test && pnpm type-check
    ```
 
 2. **Documentation updates**
@@ -355,8 +366,13 @@ pnpm turbo build --profile      # Performance profiling
 
 2. **Final testing**
    ```bash
-   pnpm ci
-   pnpm test:e2e  # When available
+   # Run all quality checks
+   pnpm lint
+   pnpm build
+   
+   # Coming with MAR-11+: Full testing
+   # pnpm test
+   # pnpm test:e2e  # When available
    ```
 
 3. **Create release**
