@@ -1,0 +1,19 @@
+{
+  "name": "ai-fastify-template",
+  "version": "1.0.0",
+  "description": "AI-optimized backend template using Fastify + TypeScript with comprehensive guardrails",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test"
+  },
+  "keywords": ["fastify", "typescript", "ai", "template", "backend"],
+  "author": "Mark Watson",
+  "license": "MIT",
+  "packageManager": "pnpm@10.8.0",
+  "devDependencies": {
+    "turbo": "^2.5.4"
+  }
+}
