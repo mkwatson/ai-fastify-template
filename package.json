@@ -1,0 +1,47 @@
+{
+  "name": "ai-fastify-template",
+  "version": "1.0.0",
+  "description": "AI-optimized backend template using Fastify + TypeScript with comprehensive guardrails",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "clean": "turbo clean",
+    "format": "turbo format",
+    "type-check": "turbo type-check"
+  },
+  "keywords": [
+    "fastify",
+    "typescript",
+    "ai",
+    "template",
+    "backend",
+    "monorepo",
+    "turborepo",
+    "pnpm"
+  ],
+  "author": {
+    "name": "Mark Watson",
+    "email": "mark@example.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/mkwatson/ai-fastify-template#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mkwatson/ai-fastify-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mkwatson/ai-fastify-template/issues"
+  },
+  "packageManager": "pnpm@10.8.0",
+  "devDependencies": {
+    "turbo": "^2.5.4"
+  }
+}
