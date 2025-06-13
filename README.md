@@ -56,7 +56,7 @@ pnpm test             # Run all test suites
 pnpm type-check       # TypeScript compilation check
 
 # Quality assurance
-pnpm lint             # Lint all code (coming with Biome)
+pnpm lint             # Code formatting and linting (Biome - coming soon)
 pnpm clean            # Clean build artifacts
 ```
 
@@ -124,7 +124,7 @@ Contains deployable applications:
 - Apps should be thin, delegating logic to packages
 
 ### Packages Directory (`packages/`)
-**Status: Empty - First packages coming with backend development**
+**Status: Empty - Shared packages planned for future development**
 
 Will contain shared libraries:
 - Reusable code across apps
