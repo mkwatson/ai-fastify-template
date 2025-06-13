@@ -12,10 +12,12 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "type": "turbo type",
+    "graph": "turbo graph",
     "test": "turbo test",
+    "mutation": "turbo mutation",
     "clean": "turbo clean",
-    "format": "turbo format",
-    "type-check": "turbo type-check"
+    "ci": "turbo build"
   },
   "keywords": [
     "fastify",

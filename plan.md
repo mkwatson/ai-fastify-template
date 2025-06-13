@@ -48,7 +48,11 @@ Each step below follows this **AI coding agent workflow** using Linear API, GitH
    # mcp_Linear_get_issue(id="ticket-id")
    # mcp_Linear_get_issue_git_branch_name(id="ticket-id") 
    
-   # Create and push branch
+   # CRITICAL: Always start from latest main
+   git checkout main
+   git pull origin main
+   
+   # Create and push branch from updated main
    git checkout -b mar-10-bootstrap-monorepo
    git push -u origin mar-10-bootstrap-monorepo
    
@@ -549,7 +553,7 @@ const stream: FastifyPluginAsync = async (fastify): Promise<void> => {
     // Cleanup on client disconnect
     request.raw.on('close', () => {
       clearInterval(streamInterval);
-    });
+  });
   });
 };
 
@@ -823,13 +827,13 @@ git commit -m "feat: integrate Fern to generate TS SDK + docs from OpenAPI"
 Update turbo.json:
 ```
 {
-  "pipeline": {
+  "tasks": {
     "lint":   { "outputs": [] },
     "type":   { "outputs": [] },
     "graph":  { "outputs": [] },
-    "test":   { "dependsOn": ["lint", "type", "graph"], "outputs": [] },
+    "test":   { "dependsOn": ["lint", "type", "graph"], "outputs": ["coverage/**"] },
     "mutation": { "dependsOn": ["test"], "outputs": [] },
-    "build":  { "dependsOn": ["mutation"] }
+    "build":  { "dependsOn": ["mutation"], "outputs": ["dist/**", "build/**"] }
   }
 }
 ```
