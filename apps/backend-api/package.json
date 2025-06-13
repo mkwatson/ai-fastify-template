@@ -2,33 +2,61 @@
   "name": "backend-api",
   "version": "1.0.0",
   "type": "module",
-  "description": "This project was bootstrapped with Fastify-CLI.",
-  "main": "app.ts",
+  "description": "Production-ready Fastify backend API with TypeScript and comprehensive validation",
+  "main": "build/server.js",
+  "types": "build/server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/server.d.ts",
+      "import": "./build/server.js"
+    }
+  },
   "directories": {
+    "src": "src",
+    "build": "build",
     "test": "test"
   },
   "scripts": {
     "dev": "fastify start -l info src/server.ts -w",
     "build": "tsc",
     "start": "node build/server.js",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "fastify",
+    "typescript",
+    "api",
+    "backend",
+    "server",
+    "rest",
+    "microservice"
+  ],
+  "author": {
+    "name": "Mark Watson",
+    "email": "mark@example.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
     "@fastify/sensible": "^6.0.0",
     "fastify": "^5.0.0",
-    "fastify-cli": "^7.4.0",
-    "fastify-plugin": "^5.0.0",
-    "pino-pretty": "^13.0.0"
+    "fastify-plugin": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.1.0",
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
+    "fastify-cli": "^7.4.0",
     "fastify-tsconfig": "^3.0.0",
+    "pino-pretty": "^13.0.0",
     "ts-node": "^10.4.0",
     "typescript": "~5.8.2"
   }
