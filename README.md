@@ -41,7 +41,7 @@ cd ai-fastify-template
 pnpm install
 
 # Verify setup
-pnpm turbo build --dry-run
+pnpm build --dry-run
 ```
 
 ### Development
@@ -89,10 +89,10 @@ ai-fastify-template/
 ### Currently Working
 ```bash
 # Foundation
-pnpm build            # Build all packages (turbo build)
-pnpm dev              # Development mode (turbo dev) 
-pnpm lint             # Lint all code (turbo lint)
-pnpm clean            # Clean build artifacts (turbo clean)
+pnpm build            # Build all packages
+pnpm dev              # Development mode
+pnpm lint             # Lint all code
+pnpm clean            # Clean build artifacts
 ```
 
 ### Coming with Backend API (MAR-11)
@@ -216,6 +216,15 @@ pnpm test   # Will show "0 packages"
 - Follow the plan.md for step-by-step implementation
 - Start with MAR-11 (Backend API) for first working application
 - Refer to docs/ for detailed guidelines
+
+### Advanced Debugging
+
+```bash
+# Direct turbo commands for debugging
+pnpm turbo build --verbose    # Verbose build output
+pnpm turbo clean              # Clear turbo cache
+pnpm turbo build --dry-run    # See what would run
+```
 
 ### Getting Help
 

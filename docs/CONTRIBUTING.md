@@ -44,7 +44,7 @@ This project follows a professional, inclusive environment. Please:
 
 3. **Verify setup**
    ```bash
-   pnpm turbo build --dry-run
+   pnpm build --dry-run
    pnpm lint
    ```
 

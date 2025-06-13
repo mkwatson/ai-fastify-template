@@ -43,7 +43,7 @@ git --version     # >= 2.0.0
    pnpm turbo --version
    
    # Run dry-run build
-   pnpm turbo build --dry-run
+   pnpm build --dry-run
    ```
 
 3. **Set up development environment**
@@ -163,11 +163,13 @@ TurboRepo provides intelligent caching and parallel execution:
 # View pipeline configuration
 cat turbo.json
 
-# Run with verbose output
-pnpm turbo build --verbose
+# Standard commands (use these)
+pnpm build              # Build all packages
+pnpm clean              # Clear cache
 
-# Clear cache if needed
-pnpm turbo clean
+# Advanced debugging (when needed)
+pnpm turbo build --verbose    # Verbose output
+pnpm turbo clean              # Direct cache clear
 ```
 
 ### Pipeline Configuration
@@ -210,11 +212,11 @@ pnpm turbo clean
 
 ```bash
 # First run (cache miss)
-pnpm turbo build
+pnpm build
 # → Takes full time
 
 # Second run (cache hit)
-pnpm turbo build
+pnpm build
 # → Nearly instant with "FULL TURBO"
 ```
 
@@ -247,10 +249,10 @@ pnpm install
 **Turbo Cache Issues**
 ```bash
 # Clear turbo cache
-pnpm turbo clean
+pnpm clean
 rm -rf .turbo
 
-# Force rebuild
+# Force rebuild (advanced)
 pnpm turbo build --force
 ```
 
@@ -266,17 +268,17 @@ cat packages/my-package/package.json
 ### Debug Tools
 
 ```bash
-# Verbose turbo output
-pnpm turbo build --verbose
+# Standard debugging
+pnpm build              # Standard build
+pnpm clean              # Clear cache
+
+# Advanced turbo debugging
+pnpm turbo build --verbose    # Verbose output
+pnpm turbo build --dry-run    # See what would run
 
 # Dependency analysis
 pnpm why package-name
-
-# Workspace info
 pnpm list --depth=0
-
-# Package resolution
-pnpm resolve package-name
 ```
 
 ## Performance
@@ -285,13 +287,11 @@ pnpm resolve package-name
 
 ```bash
 # Measure build time
-time pnpm turbo build
+time pnpm build
 
-# Analyze cache efficiency
-pnpm turbo build --summarize
-
-# Profile specific tasks
-pnpm turbo build --profile
+# Advanced analysis (when needed)
+pnpm turbo build --summarize    # Cache efficiency
+pnpm turbo build --profile      # Performance profiling
 ```
 
 ### Development Performance
@@ -302,7 +302,7 @@ pnpm turbo build --profile
 
 ### Optimization Tips
 
-1. **Use turbo filtering**
+1. **Use turbo filtering (advanced)**
    ```bash
    # Only build affected packages
    pnpm turbo build --filter=...my-app
@@ -411,7 +411,7 @@ pnpm turbo build --profile
 ### Common Solutions
 
 - **Clean install**: `rm -rf node_modules pnpm-lock.yaml && pnpm install`
-- **Clear cache**: `pnpm turbo clean`
+- **Clear cache**: `pnpm clean`
 - **Reset git**: `git clean -fdx` (careful!)
 - **Update tools**: Ensure latest versions of Node.js and pnpm
 
