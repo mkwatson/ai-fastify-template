@@ -1,6 +1,6 @@
 # 🚀 AI Fastify Template
 
-> AI-optimized backend template using Fastify + TypeScript with comprehensive guardrails
+> Production-ready Fastify + TypeScript monorepo optimized for AI-assisted development
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
@@ -8,22 +8,27 @@
 
 ## Overview
 
-This template creates a production-ready Fastify + TypeScript monorepo specifically designed for **AI-assisted development**. It provides comprehensive guardrails that enable AI coding agents to work effectively without introducing technical debt or architectural violations.
+This template provides a production-ready foundation for building **LLM-powered backend applications** with comprehensive guardrails that enable AI coding agents to work effectively without introducing technical debt or architectural violations.
 
-### Key Features
+### Why This Template Exists
 
-- 🏗️ **Monorepo Structure** - pnpm workspaces + TurboRepo for scalable development
-- 🔒 **Type Safety** - Strict TypeScript configuration with comprehensive validation
-- 🤖 **AI-Optimized** - Designed for seamless AI coding assistant integration
-- ⚡ **Fast Feedback** - Fail-fast pipelines with comprehensive quality gates
-- 🛡️ **Security First** - Built-in validation, sanitization, and security best practices
+Modern AI coding assistants are powerful but can introduce subtle bugs, architectural violations, or security issues. This template provides:
+
+- **Immediate feedback loops** for AI agents through fail-fast pipelines
+- **Constraint-driven development** that guides AI toward correct patterns  
+- **Comprehensive quality gates** that catch issues before they reach production
+- **Clear architectural boundaries** that prevent spaghetti code
+
+### Primary Use Case
+
+Built for **LLM-powered applications** that require secure backend infrastructure. Perfect for developers who want to build AI apps (chatbots, content generation, etc.) without exposing API keys in client code or managing complex backend concerns like authentication, rate limiting, and usage tracking.
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
+- **Node.js** >= 18.0.0
+- **pnpm** >= 8.0.0
 
 ### Installation
 
@@ -35,76 +40,222 @@ cd ai-fastify-template
 # Install dependencies
 pnpm install
 
-# Start development
+# Verify setup
+pnpm turbo build --dry-run
+```
+
+### Development
+
+```bash
+# Start development (when apps are added)
 pnpm dev
+
+# Run quality checks
+pnpm lint
+pnpm type-check
+pnpm test
 ```
 
 ## Project Structure
 
 ```
 ai-fastify-template/
-├── apps/                 # Applications
-│   └── backend-api/      # Main Fastify API (coming soon)
-├── packages/             # Shared packages
-├── docs/                 # Documentation
-├── turbo.json           # TurboRepo configuration
-├── pnpm-workspace.yaml  # pnpm workspace configuration
-└── package.json         # Root package configuration
+├── apps/                    # Applications
+│   └── backend-api/         # Main Fastify API (coming in MAR-11)
+├── packages/                # Shared packages
+│   └── sdk/                 # Generated TypeScript SDK (coming in MAR-19)
+├── docs/                    # Documentation
+│   ├── CONTRIBUTING.md      # Contributing guidelines
+│   ├── DEVELOPMENT.md       # Development workflow
+│   ├── ARCHITECTURE.md      # Architecture overview
+│   └── AI_GUIDELINES.md     # AI agent guidance
+├── scripts/                 # Utility scripts
+├── .github/                 # GitHub workflows and templates
+├── turbo.json              # TurboRepo configuration
+├── pnpm-workspace.yaml     # pnpm workspace configuration
+└── package.json            # Root package configuration
 ```
-
-## Available Scripts
-
-```bash
-# Development
-pnpm dev          # Start all apps in development mode
-pnpm build        # Build all packages and apps
-pnpm test         # Run all tests
-pnpm lint         # Lint all code
-pnpm format       # Format all code
-pnpm type-check   # Type check all TypeScript
-pnpm clean        # Clean all build artifacts
-```
-
-## Architecture Principles
-
-### AI-First Design
-- **Constraint-driven development** that guides AI toward correct patterns
-- **Immediate feedback loops** for AI agents through fail-fast pipelines
-- **Clear architectural boundaries** that prevent spaghetti code
-
-### Quality Gates
-- **Strict TypeScript** - No `any` types, comprehensive type checking
-- **Runtime Validation** - Zod schemas for all inputs and environment variables
-- **Comprehensive Testing** - Unit, integration, and mutation testing
-- **Import Graph Validation** - Dependency cruiser prevents architectural violations
 
 ## Technology Stack
 
 | Category | Tool | Rationale |
 |----------|------|-----------|
-| **Runtime** | Node.js 18+ | Modern JavaScript features, excellent TypeScript support |
-| **Framework** | Fastify | High performance, TypeScript-first, extensive plugin ecosystem |
-| **Language** | TypeScript (strict) | Type safety, better IDE support, catches errors early |
-| **Package Manager** | pnpm | Fast, efficient, great monorepo support |
-| **Build System** | TurboRepo | Intelligent caching, parallel execution |
-| **Validation** | Zod | Runtime type validation, excellent TypeScript integration |
+| **Fast streaming API** | Fastify + fastify-sse | Essential for real-time AI responses |
+| **Single-binary format + lint** | Biome | Faster than ESLint+Prettier, fewer conflicts |
+| **Early type safety** | TypeScript (strict) | Catches AI-generated type errors immediately |
+| **Schema validation** | Zod (bodies & env) | Runtime validation prevents silent failures |
+| **Guard against spaghetti** | dependency-cruiser | Enforces clean architecture boundaries |
+| **High-trust tests** | Vitest + Stryker | Mutation testing catches subtle AI logic errors |
+| **Generated SDK & docs** | Fern | Auto-sync client/server contracts |
+| **Task caching** | pnpm workspaces + TurboRepo | Fast feedback for AI iteration cycles |
+| **Automated updates** | Renovate | Keeps dependencies current without manual work |
+| **CI→CD** | GitHub Actions → Vercel | Simple, reliable deployment pipeline |
+
+## Available Scripts
+
+### Root Level
+```bash
+# Development
+pnpm dev              # Start all apps in development mode
+pnpm build            # Build all packages and apps
+pnpm test             # Run all tests
+pnpm lint             # Lint all code
+pnpm type-check       # Type check all TypeScript
+
+# Quality Gates (fail-fast pipeline)
+pnpm ci               # Run complete CI pipeline
+pnpm graph            # Validate import dependencies
+pnpm mutation         # Run mutation tests
+
+# Utilities
+pnpm clean            # Clean all build artifacts
+pnpm format           # Format all code
+```
+
+### Turbo Pipeline
+
+The project uses a fail-fast pipeline with task dependencies:
+
+```
+lint → type-check → graph → test → mutation → build
+```
+
+Each step must pass before the next begins, ensuring quality at every stage.
+
+## Workspace Structure
+
+### Apps Directory (`apps/`)
+Contains deployable applications:
+- Each app has its own `package.json`
+- Apps can depend on packages but not other apps
+- Apps should be thin, delegating logic to packages
+
+### Packages Directory (`packages/`)
+Contains shared libraries:
+- Reusable code across apps
+- Can depend on other packages
+- Should have clear, focused responsibilities
+
+### Workspace Configuration
+```yaml
+# pnpm-workspace.yaml
+packages: ["apps/*", "packages/*"]
+```
+
+## Development Workflow
+
+### Adding New Packages
+
+```bash
+# Create new app
+mkdir apps/my-app
+cd apps/my-app
+pnpm init
+
+# Create new package  
+mkdir packages/my-package
+cd packages/my-package
+pnpm init
+```
+
+### Working with Dependencies
+
+```bash
+# Add dependency to specific package
+pnpm add --filter my-app fastify
+
+# Add dev dependency to workspace root
+pnpm add -Dw typescript
+
+# Install dependencies for all packages
+pnpm install
+```
+
+### Quality Checks
+
+```bash
+# Run full pipeline
+pnpm ci
+
+# Run specific checks
+pnpm lint           # Code formatting and style
+pnpm type-check     # TypeScript compilation
+pnpm graph          # Import dependency validation
+pnpm test           # Unit and integration tests
+pnpm mutation       # Mutation testing
+```
+
+## Architecture Principles
+
+### AI-First Design
+- **Constraint-driven development** guides AI toward correct patterns
+- **Immediate feedback loops** through fail-fast pipelines
+- **Clear architectural boundaries** prevent violations
+- **Comprehensive validation** catches AI-generated errors
+
+### Quality Gates
+- **Strict TypeScript** - No `any` types, comprehensive checking
+- **Runtime Validation** - Zod schemas for all inputs
+- **Import Graph Validation** - Prevents circular dependencies
+- **Mutation Testing** - Ensures tests validate actual logic
+- **Comprehensive Testing** - Unit, integration, and end-to-end
+
+### Security First
+- Environment variable validation
+- Input sanitization and validation
+- Secure defaults for all configurations
+- No secrets in client code
+
+## Troubleshooting
+
+### Common Issues
+
+**pnpm install fails**
+```bash
+# Clear cache and reinstall
+pnpm store prune
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+**Turbo cache issues**
+```bash
+# Clear turbo cache
+pnpm turbo clean
+rm -rf .turbo
+```
+
+**TypeScript errors**
+```bash
+# Check TypeScript configuration
+pnpm type-check
+# Fix imports and dependencies
+pnpm graph
+```
+
+**Pipeline failures**
+```bash
+# Run pipeline step by step
+pnpm lint
+pnpm type-check  
+pnpm graph
+pnpm test
+```
+
+### Getting Help
+
+- 📖 [Documentation](docs/)
+- 🐛 [Issue Tracker](https://github.com/mkwatson/ai-fastify-template/issues)
+- 💬 [Discussions](https://github.com/mkwatson/ai-fastify-template/discussions)
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run the quality checks (`pnpm lint && pnpm type-check && pnpm test`)
-5. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed guidelines.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+---
 
-- 📖 [Documentation](docs/)
-- 🐛 [Issue Tracker](https://github.com/mkwatson/ai-fastify-template/issues)
-- 💬 [Discussions](https://github.com/mkwatson/ai-fastify-template/discussions) 
+**Ready to build AI-powered applications?** This template provides the foundation you need to focus on your business logic while maintaining enterprise-grade quality and security. 
