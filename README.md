@@ -47,20 +47,25 @@ pnpm build --dry-run
 ### Development
 
 ```bash
-# Currently available (foundation only)
-pnpm build            # Build all packages (currently none)
-pnpm lint             # Lint all code (currently none)
+# Start development server
+pnpm dev              # Start all apps in development mode
 
-# Coming soon with backend-api
-pnpm dev              # Start development server
-pnpm test             # Run test suites
+# Build and test
+pnpm build            # Build all packages
+pnpm test             # Run all test suites
+pnpm type-check       # TypeScript compilation check
+
+# Quality assurance
+pnpm lint             # Code formatting and linting (Biome - coming soon)
+pnpm clean            # Clean build artifacts
 ```
 
 ## Project Structure
 
 ```
 ai-fastify-template/
-├── apps/                    # Applications (empty - coming in MAR-11)
+├── apps/                    # Applications ✅
+│   └── backend-api/         # Fastify backend API ✅
 ├── packages/                # Shared packages (empty - coming later)
 ├── docs/                    # Documentation ✅
 │   ├── CONTRIBUTING.md      # Contributing guidelines ✅
@@ -76,35 +81,33 @@ ai-fastify-template/
 
 | Category | Tool | Status | Rationale |
 |----------|------|--------|-----------|
-| **Fast streaming API** | Fastify + fastify-sse | 🔄 Planned | Essential for real-time AI responses |
+| **Fast streaming API** | Fastify + fastify-sse | ✅ Active | Essential for real-time AI responses |
 | **Single-binary format + lint** | Biome | 🔄 Planned | Faster than ESLint+Prettier, fewer conflicts |
-| **Early type safety** | TypeScript (strict) | 🔄 Planned | Catches AI-generated type errors immediately |
+| **Early type safety** | TypeScript (strict) | ✅ Active | Catches AI-generated type errors immediately |
 | **Schema validation** | Zod (bodies & env) | 🔄 Planned | Runtime validation prevents silent failures |
 | **Guard against spaghetti** | dependency-cruiser | 🔄 Planned | Enforces clean architecture boundaries |
-| **High-trust tests** | Vitest | 🔄 Planned | Fast, modern testing framework |
+| **High-trust tests** | Vitest | ✅ Active | Fast, modern testing framework |
 | **Task caching** | pnpm workspaces + TurboRepo | ✅ Active | Fast feedback for AI iteration cycles |
 
 ## Available Scripts
 
-### Currently Working
+### Core Development
 ```bash
-# Foundation
+# Development workflow
+pnpm dev              # Start all apps in development mode
 pnpm build            # Build all packages
-pnpm dev              # Development mode
-pnpm lint             # Lint all code
 pnpm clean            # Clean build artifacts
-```
 
-### Coming with Backend API (MAR-11)
-```bash
-# Quality Gates
-pnpm test             # Run test suites
+# Quality assurance
+pnpm test             # Run all test suites
+pnpm test:watch       # Run tests in watch mode
 pnpm type-check       # TypeScript compilation check
 ```
 
 ### Coming with Quality Tools (MAR-15+)
 ```bash
 # Advanced Quality Gates
+pnpm lint             # Code formatting and linting (Biome)
 pnpm graph            # Validate import dependencies
 pnpm mutation         # Run mutation tests (if implemented)
 ```
@@ -112,15 +115,16 @@ pnpm mutation         # Run mutation tests (if implemented)
 ## Workspace Structure
 
 ### Apps Directory (`apps/`)
-**Status: Empty - First app coming in MAR-11**
+**Status: ✅ Active - Backend API implemented**
 
-Will contain deployable applications:
+Contains deployable applications:
+- **`backend-api/`** - Production-ready Fastify server with TypeScript
 - Each app has its own `package.json`
 - Apps can depend on packages but not other apps
 - Apps should be thin, delegating logic to packages
 
 ### Packages Directory (`packages/`)
-**Status: Empty - First packages coming with backend development**
+**Status: Empty - Shared packages planned for future development**
 
 Will contain shared libraries:
 - Reusable code across apps
@@ -191,13 +195,16 @@ This template is in **active development**. Current state:
 - Comprehensive documentation
 - AI-first development guidelines
 
-🔄 **In Progress**
-- Backend API application (MAR-11)
-- TypeScript strict configuration
-- Zod validation patterns
+✅ **Backend API Complete (MAR-11)**
+- Production-ready Fastify server with TypeScript
+- Strict TypeScript configuration with enterprise standards
+- Comprehensive test setup with Vitest
+- Development and production scripts
 
-📋 **Planned**
+📋 **Next Steps**
 - Quality tooling (Biome, dependency-cruiser)
+- Zod validation patterns
+- SSE streaming capabilities
 - Testing framework (Vitest)
 - CI/CD pipeline
 
