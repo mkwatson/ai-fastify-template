@@ -1,13 +1,15 @@
-import { test } from 'node:test'
-import * as assert from 'node:assert'
-import { build } from '../helper'
+import { describe, it, expect, afterAll } from 'vitest'
+import { build } from '../helper.js'
 
-test('example is loaded', async (t) => {
-  const app = await build(t)
+describe('Example route', () => {
+  it('should return example message', async () => {
+    const app = await build({ after: afterAll })
 
-  const res = await app.inject({
-    url: '/example'
+    const res = await app.inject({
+      url: '/example'
+    })
+
+    expect(res.statusCode).toBe(200)
+    expect(res.payload).toBe('this is an example')
   })
-
-  assert.equal(res.payload, 'this is an example')
 })

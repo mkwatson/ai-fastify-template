@@ -1,12 +1,15 @@
-import { test } from 'node:test'
-import * as assert from 'node:assert'
-import { build } from '../helper'
+import { describe, it, expect, afterAll } from 'vitest'
+import { build } from '../helper.js'
 
-test('default root route', async (t) => {
-  const app = await build(t)
+describe('Root route', () => {
+  it('should return Hello World message', async () => {
+    const app = await build({ after: afterAll })
 
-  const res = await app.inject({
-    url: '/'
+    const res = await app.inject({
+      url: '/'
+    })
+    
+    expect(res.statusCode).toBe(200)
+    expect(JSON.parse(res.payload)).toEqual({ message: "Hello World!" })
   })
-  assert.deepStrictEqual(JSON.parse(res.payload), { root: true })
 })

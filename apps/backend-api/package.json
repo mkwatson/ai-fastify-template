@@ -20,9 +20,9 @@
     "dev": "fastify start -l info src/server.ts -w",
     "build": "tsc",
     "start": "node build/server.js",
-    "test": "vitest run",
+    "test": "pnpm build && vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "pnpm build && vitest run --coverage",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf build"
   },

@@ -1,13 +1,17 @@
 // This file contains code that we reuse between our tests.
 import * as path from 'node:path'
-import * as test from 'node:test'
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
 const helper = require('fastify-cli/helper.js')
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 export type TestContext = {
-  after: typeof test.after
+  after: (fn: () => void | Promise<void>) => void
 }
 
-const AppPath = path.join(__dirname, '..', 'src', 'app.ts')
+const AppPath = path.join(__dirname, '..', 'build', 'app.js')
 
 // Fill in this config with all the configurations
 // needed for testing the application
@@ -28,8 +32,7 @@ async function build (t: TestContext) {
   const app = await helper.build(argv, config())
 
   // Tear down our app after we are done
-  // eslint-disable-next-line no-void
-  t.after(() => void app.close())
+  t.after(() => app.close())
 
   return app
 }
