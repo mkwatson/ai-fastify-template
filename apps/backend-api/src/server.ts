@@ -1,25 +1,25 @@
-import Fastify from 'fastify'
-import app from './app.js'
+import Fastify from "fastify";
+import app from "./app.js";
 
 const server = Fastify({
   logger: {
-    level: 'info',
+    level: "info",
     transport: {
-      target: 'pino-pretty'
-    }
-  }
-})
+      target: "pino-pretty",
+    },
+  },
+});
 
-server.register(app)
+server.register(app);
 
 const start = async () => {
   try {
-    await server.listen({ port: 3000, host: '0.0.0.0' })
-    console.log('Server listening on http://localhost:3000')
+    await server.listen({ port: 3000, host: "0.0.0.0" });
+    console.log("Server listening on http://localhost:3000");
   } catch (err) {
-    server.log.error(err)
-    process.exit(1)
+    server.log.error(err);
+    process.exit(1);
   }
-}
+};
 
-start() 
+start();

@@ -11,7 +11,11 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "turbo lint",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "lint:ci": "turbo lint",
+    "format": "biome format . --write",
+    "check:staged": "biome check . --staged",
     "clean": "turbo clean",
     "test": "turbo test",
     "test:watch": "turbo test:watch",
@@ -42,6 +46,7 @@
   },
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "turbo": "^2.5.4"
   }
 }
