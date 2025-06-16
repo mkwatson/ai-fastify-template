@@ -1,4 +1,12 @@
 # AI Coding Assistant Rules for ai-fastify-template
+# Version: 1.0.0
+# Last Updated: 2025-06-16
+# Next Review: 2025-09-16
+
+## Version History
+# v1.0.0 (2025-06-16): Initial comprehensive AI guidelines
+# - Architecture principles, code patterns, testing requirements
+# - Security guidelines, file organization, error handling patterns
 
 ## Architecture Principles
 - Follow strict TypeScript - no `any` types

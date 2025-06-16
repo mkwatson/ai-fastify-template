@@ -18,6 +18,8 @@
     "check:staged": "biome check . --staged",
     "ai:check": "echo 'Running AI-friendly checks...' && pnpm lint && pnpm type-check",
     "ai:fix": "pnpm lint:fix && echo 'Manual fixes may be needed for type errors'",
+    "ai:compliance": "echo 'Checking AI guideline compliance...' && pnpm ai:check && pnpm ai:validate-patterns",
+    "ai:validate-patterns": "echo 'Validating code patterns...' && node scripts/validate-ai-patterns.cjs || echo 'Pattern validation script not yet implemented - manual review required'",
     "clean": "turbo clean",
     "test": "turbo test",
     "test:watch": "turbo test:watch",

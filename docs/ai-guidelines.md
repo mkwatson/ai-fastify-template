@@ -1,5 +1,19 @@
 # AI Development Guidelines
 
+**Version:** 1.0.0  
+**Last Updated:** June 16, 2025  
+**Next Review:** September 16, 2025
+
+## Version History
+
+### v1.0.0 (June 16, 2025)
+- **Initial Release:** Comprehensive AI development guidelines
+- **Coverage:** Architecture patterns, testing strategies, common pitfalls
+- **Tooling:** AI helper scripts and workflow integration
+- **Quality Gates:** Success metrics and red flag indicators
+
+---
+
 ## Why These Constraints Exist
 
 This template uses strict constraints to guide AI agents toward maintainable, secure code:
@@ -278,4 +292,355 @@ When AI agents encounter issues:
 3. **Read error messages**: Biome, TypeScript, and tests provide specific guidance
 4. **Fix one constraint at a time**: Don't try to fix everything at once
 
-The constraints are designed to guide toward correct solutions, not block progress. 
+The constraints are designed to guide toward correct solutions, not block progress.
+
+## Advanced Real-World Examples
+
+### Complex Async Error Handling
+
+```typescript
+// Good: Comprehensive async error handling with proper logging
+export class UserService {
+  async createUserWithProfile(userData: CreateUserInput): Promise<UserWithProfile> {
+    const transaction = await this.db.transaction();
+    
+    try {
+      // Step 1: Create user
+      const user = await transaction.users.create(userData);
+      this.logger.info({ userId: user.id }, 'User created successfully');
+      
+      // Step 2: Create profile with retry logic
+      const profile = await this.createProfileWithRetry(user.id, userData.profile, transaction);
+      
+      // Step 3: Send welcome email (non-blocking)
+      this.emailService.sendWelcomeEmail(user.email).catch(error => {
+        this.logger.error({ userId: user.id, error }, 'Failed to send welcome email');
+        // Don't fail the entire operation for email issues
+      });
+      
+      await transaction.commit();
+      return { ...user, profile };
+      
+    } catch (error) {
+      await transaction.rollback();
+      
+      if (error.code === 'UNIQUE_VIOLATION') {
+        throw this.fastify.httpErrors.conflict('User already exists');
+      }
+      
+      this.logger.error({ userData: { email: userData.email }, error }, 'User creation failed');
+      throw this.fastify.httpErrors.internalServerError('Failed to create user');
+    }
+  }
+  
+  private async createProfileWithRetry(
+    userId: string, 
+    profileData: ProfileInput, 
+    transaction: Transaction,
+    maxRetries = 3
+  ): Promise<Profile> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await transaction.profiles.create({ ...profileData, userId });
+      } catch (error) {
+        if (attempt === maxRetries) throw error;
+        
+        this.logger.warn({ userId, attempt, error }, 'Profile creation retry');
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      }
+    }
+    throw new Error('Max retries exceeded'); // This should never be reached
+  }
+}
+```
+
+### Advanced Validation with Conditional Logic
+
+```typescript
+// Good: Complex validation with business rules
+const CreateOrderSchema = z.object({
+  customerId: z.string().uuid(),
+  items: z.array(z.object({
+    productId: z.string().uuid(),
+    quantity: z.number().int().positive(),
+    customizations: z.record(z.string()).optional()
+  })).min(1).max(50),
+  shippingAddress: z.object({
+    street: z.string().min(1).max(100),
+    city: z.string().min(1).max(50),
+    postalCode: z.string().regex(/^\d{5}(-\d{4})?$/),
+    country: z.enum(['US', 'CA', 'MX'])
+  }),
+  paymentMethod: z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('credit_card'),
+      cardToken: z.string().min(1),
+      cvv: z.string().regex(/^\d{3,4}$/)
+    }),
+    z.object({
+      type: z.literal('paypal'),
+      paypalEmail: z.string().email()
+    })
+  ]),
+  promotionCode: z.string().optional()
+}).refine(data => {
+  // Business rule: Orders over $500 require phone verification
+  const totalValue = data.items.reduce((sum, item) => sum + (item.quantity * 100), 0); // Simplified
+  return totalValue <= 50000 || data.shippingAddress.phone !== undefined;
+}, {
+  message: "Orders over $500 require phone number for verification",
+  path: ["shippingAddress", "phone"]
+});
+
+// Route implementation with comprehensive error handling
+fastify.post('/orders', {
+  schema: {
+    body: CreateOrderSchema,
+    response: {
+      201: OrderResponseSchema,
+      400: ErrorResponseSchema,
+      409: ErrorResponseSchema,
+      422: ValidationErrorResponseSchema
+    }
+  }
+}, async (request, reply) => {
+  try {
+    const order = await orderService.createOrder(request.body, {
+      userId: request.user.id,
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent']
+    });
+    
+    return reply.code(201).send(order);
+    
+  } catch (error) {
+    if (error instanceof OrderValidationError) {
+      return reply.code(422).send({
+        error: 'Validation Failed',
+        message: error.message,
+        details: error.validationErrors
+      });
+    }
+    
+    if (error instanceof InsufficientInventoryError) {
+      return reply.code(409).send({
+        error: 'Insufficient Inventory',
+        message: 'Some items are no longer available',
+        unavailableItems: error.items
+      });
+    }
+    
+    // Log unexpected errors but don't expose details
+    request.log.error({ error, orderId: error.orderId }, 'Order creation failed');
+    throw fastify.httpErrors.internalServerError('Unable to process order');
+  }
+});
+```
+
+### Stream Processing with Error Boundaries
+
+```typescript
+// Good: Robust stream processing with proper cleanup
+export class DataProcessingService {
+  async processLargeDataset(
+    dataStream: Readable,
+    options: ProcessingOptions
+  ): Promise<ProcessingResult> {
+    const results: ProcessingResult = {
+      processed: 0,
+      errors: 0,
+      startTime: Date.now()
+    };
+    
+    const transform = new Transform({
+      objectMode: true,
+      transform: async (chunk, encoding, callback) => {
+        try {
+          const processed = await this.processChunk(chunk, options);
+          results.processed++;
+          callback(null, processed);
+        } catch (error) {
+          results.errors++;
+          this.logger.error({ chunk: chunk.id, error }, 'Chunk processing failed');
+          
+          if (options.failFast) {
+            callback(error);
+          } else {
+            // Continue processing, log error
+            callback(null, { id: chunk.id, error: error.message });
+          }
+        }
+      }
+    });
+    
+    const cleanup = () => {
+      dataStream.destroy();
+      transform.destroy();
+    };
+    
+    // Set up error boundaries
+    dataStream.on('error', (error) => {
+      this.logger.error({ error }, 'Data stream error');
+      cleanup();
+    });
+    
+    transform.on('error', (error) => {
+      this.logger.error({ error }, 'Transform stream error');
+      cleanup();
+    });
+    
+    // Process with timeout
+    const timeoutId = setTimeout(() => {
+      this.logger.warn({ results }, 'Processing timeout reached');
+      cleanup();
+    }, options.timeoutMs || 300000); // 5 minutes default
+    
+    try {
+      await pipeline(dataStream, transform, this.createOutputHandler(results));
+      clearTimeout(timeoutId);
+      
+      results.endTime = Date.now();
+      results.duration = results.endTime - results.startTime;
+      
+      return results;
+      
+    } catch (error) {
+      clearTimeout(timeoutId);
+      cleanup();
+      throw error;
+    }
+  }
+  
+  private createOutputHandler(results: ProcessingResult) {
+    return new Writable({
+      objectMode: true,
+      write(chunk, encoding, callback) {
+        // Handle processed results
+        if (chunk.error) {
+          results.errors++;
+        }
+        callback();
+      }
+    });
+  }
+}
+```
+
+### Enterprise-Grade Testing Patterns
+
+```typescript
+// Good: Comprehensive testing with realistic scenarios
+describe('OrderService Integration', () => {
+  let orderService: OrderService;
+  let mockDb: MockDatabase;
+  let mockPaymentService: MockPaymentService;
+  let mockInventoryService: MockInventoryService;
+  
+  beforeEach(async () => {
+    mockDb = new MockDatabase();
+    mockPaymentService = new MockPaymentService();
+    mockInventoryService = new MockInventoryService();
+    
+    orderService = new OrderService(
+      mockDb,
+      mockPaymentService,
+      mockInventoryService,
+      mockLogger
+    );
+  });
+  
+  describe('createOrder', () => {
+    it('should handle concurrent order creation for limited inventory', async () => {
+      // Setup: Product with limited inventory
+      const productId = 'product-123';
+      mockInventoryService.setStock(productId, 1); // Only 1 item available
+      
+      const orderData = {
+        customerId: 'customer-123',
+        items: [{ productId, quantity: 1 }]
+      };
+      
+      // Act: Create two orders simultaneously
+      const [result1, result2] = await Promise.allSettled([
+        orderService.createOrder(orderData),
+        orderService.createOrder(orderData)
+      ]);
+      
+      // Assert: One succeeds, one fails with inventory error
+      const successes = [result1, result2].filter(r => r.status === 'fulfilled');
+      const failures = [result1, result2].filter(r => r.status === 'rejected');
+      
+      expect(successes).toHaveLength(1);
+      expect(failures).toHaveLength(1);
+      expect(failures[0].reason).toBeInstanceOf(InsufficientInventoryError);
+    });
+    
+    it('should handle payment service timeout gracefully', async () => {
+      // Setup: Payment service that times out
+      mockPaymentService.simulateTimeout(5000);
+      
+      const orderData = createValidOrderData();
+      
+      // Act & Assert: Should fail with timeout error
+      await expect(orderService.createOrder(orderData))
+        .rejects.toThrow(PaymentTimeoutError);
+      
+      // Verify: Order was not saved to database
+      expect(mockDb.orders.findByCustomerId(orderData.customerId))
+        .resolves.toHaveLength(0);
+    });
+    
+    it('should rollback transaction on partial failure', async () => {
+      // Setup: Database that fails after user creation
+      mockDb.orders.create.mockImplementationOnce(async () => {
+        throw new Error('Database connection lost');
+      });
+      
+      const orderData = createValidOrderData();
+      
+      // Act: Attempt to create order
+      await expect(orderService.createOrder(orderData))
+        .rejects.toThrow('Database connection lost');
+      
+      // Assert: No partial data was saved
+      expect(mockDb.customers.findById(orderData.customerId))
+        .resolves.toBeNull();
+      expect(mockPaymentService.charges).toHaveLength(0);
+    });
+  });
+});
+
+// Helper function for test data generation
+function createValidOrderData(overrides: Partial<CreateOrderInput> = {}): CreateOrderInput {
+  return {
+    customerId: faker.string.uuid(),
+    items: [
+      {
+        productId: faker.string.uuid(),
+        quantity: faker.number.int({ min: 1, max: 5 }),
+        customizations: {}
+      }
+    ],
+    shippingAddress: {
+      street: faker.location.streetAddress(),
+      city: faker.location.city(),
+      postalCode: faker.location.zipCode(),
+      country: 'US'
+    },
+    paymentMethod: {
+      type: 'credit_card',
+      cardToken: faker.string.alphanumeric(20),
+      cvv: faker.string.numeric(3)
+    },
+    ...overrides
+  };
+}
+```
+
+These advanced examples demonstrate:
+- **Complex async patterns** with proper error boundaries
+- **Sophisticated validation** with business rules
+- **Stream processing** with cleanup and timeout handling  
+- **Enterprise testing** with realistic failure scenarios
+- **Transaction management** with rollback capabilities
+- **Concurrent operation** handling with race conditions 
