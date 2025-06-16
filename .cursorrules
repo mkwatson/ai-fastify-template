@@ -1,0 +1,62 @@
+# AI Coding Assistant Rules for ai-fastify-template
+# Version: 1.0.0
+# Last Updated: 2025-06-16
+# Next Review: 2025-09-16
+
+## Version History
+# v1.0.0 (2025-06-16): Initial comprehensive AI guidelines
+# - Architecture principles, code patterns, testing requirements
+# - Security guidelines, file organization, error handling patterns
+
+## Architecture Principles
+- Follow strict TypeScript - no `any` types
+- Use Zod for all runtime validation (env, request bodies, responses)
+- Keep routes thin - business logic goes in services
+- Services should not import from routes or plugins
+- Use dependency injection patterns for testability
+
+## Code Patterns
+- Prefer explicit error handling over throwing exceptions
+- Use Fastify's built-in validation and serialization
+- Always validate environment variables with Zod schemas
+- Use proper HTTP status codes (200, 201, 400, 401, 403, 404, 422, 500)
+- Implement proper logging with structured data
+
+## Testing Requirements
+- Write unit tests for all business logic
+- Write integration tests for all routes
+- Aim for >90% mutation test coverage
+- Mock external dependencies in tests
+
+## Common Pitfalls to Avoid
+- Don't use `fastify.register()` without proper encapsulation
+- Don't access `process.env` directly - use validated env schema
+- Don't mix async/await with callbacks
+- Don't forget to handle stream cleanup in SSE endpoints
+- Don't skip input validation on any public endpoint
+
+## File Organization
+- Routes: `src/routes/` - HTTP handlers only
+- Services: `src/services/` - Business logic
+- Plugins: `src/plugins/` - Fastify plugins
+- Types: `src/types/` - Shared TypeScript types
+- Utils: `src/utils/` - Pure utility functions
+
+## Formatting & Linting
+- Use Biome for all formatting and linting
+- Run `pnpm lint:fix` before committing
+- Follow 2-space indentation consistently
+- Use `Record<string, never>` for empty object types
+
+## Error Handling Patterns
+- Use Fastify's error handling mechanisms
+- Return structured error responses with proper status codes
+- Log errors with context for debugging
+- Validate all inputs at route boundaries
+
+## Security Guidelines
+- Never expose internal error details to clients
+- Validate all user inputs with Zod schemas
+- Use proper CORS configuration
+- Implement rate limiting for public endpoints
+- Sanitize all logged data to prevent information leakage 
