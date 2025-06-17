@@ -32,6 +32,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // eslint-disable-next-line no-void
   void fastify.register(AutoLoad, {
     dir: join(__dirname, "plugins"),
+    ignorePattern: /.*env\.(ts|js)$/,
     options: opts,
   });
 
