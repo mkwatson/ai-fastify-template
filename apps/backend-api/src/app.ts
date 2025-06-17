@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import AutoLoad from "@fastify/autoload";
 import type { AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import envPlugin from './plugins/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +19,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
   fastify,
   opts,
 ): Promise<void> => {
+  // Register env plugin first
+  await fastify.register(envPlugin);
+
   // Place here your custom code!
 
   // Do not touch the following lines
