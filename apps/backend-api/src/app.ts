@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import AutoLoad from "@fastify/autoload";
 import type { AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
-import envPlugin from './plugins/env.js';
+import envPlugin from "./plugins/env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
