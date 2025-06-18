@@ -1,0 +1,54 @@
+---
+name: "Backend API Patterns"
+description: "Fastify and backend-specific development patterns"
+type: "auto_attach"
+pattern: "apps/backend-api/**"
+---
+
+## Fastify-Specific Rules
+- All routes must have Zod validation schemas
+- Use Fastify plugin patterns for modularity
+- Business logic belongs in services, not routes
+- Use fastify.decorate() for dependency injection
+
+## Route Handler Pattern
+```typescript
+// ✅ Good: Thin route with validation
+export default async function routes(fastify: FastifyInstance) {
+  fastify.post('/users', {
+    schema: {
+      body: CreateUserSchema,
+      response: { 201: UserResponseSchema }
+    }
+  }, async (request, reply) => {
+    const user = await fastify.userService.create(request.body);
+    return reply.status(201).send(user);
+  });
+}
+```
+
+## Service Layer Pattern
+```typescript
+// ✅ Good: Service with clear responsibilities
+export class UserService {
+  constructor(private db: Database, private logger: Logger) {}
+
+  async create(userData: CreateUserInput): Promise<User> {
+    this.logger.info({ email: userData.email }, 'Creating user');
+    // Business logic here
+    return user;
+  }
+}
+```
+
+## Plugin Registration
+```typescript
+// ✅ Good: Proper plugin with dependencies
+export default fp(async (fastify) => {
+  const userService = new UserService(fastify.db, fastify.log);
+  fastify.decorate('userService', userService);
+}, {
+  name: 'user-service',
+  dependencies: ['database']
+});
+```

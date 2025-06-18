@@ -1,0 +1,9 @@
+---
+name: "Development Commands"
+description: "Common build, test, and development commands"
+type: "manual"
+---
+
+@shared-ai-commands.md
+
+Use these commands when asked about building, testing, or running the application.

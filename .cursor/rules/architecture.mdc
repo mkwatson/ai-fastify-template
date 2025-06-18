@@ -1,0 +1,37 @@
+---
+name: "Project Architecture"
+description: "Monorepo structure and architectural decisions"
+type: "agent_requested"
+---
+
+@shared-ai-architecture.md
+
+## Architectural Decisions
+When making architectural choices, consider:
+1. Monorepo boundaries and dependencies
+2. Package vs app classification
+3. Service layer separation
+4. Plugin organization
+5. Type definition placement
+
+## Package Creation Guidelines
+```bash
+# Create new app
+mkdir apps/my-app
+cd apps/my-app
+pnpm init
+
+# Create new package
+mkdir packages/my-package
+cd packages/my-package
+pnpm init
+```
+
+## Dependency Management
+```bash
+# Add dependency to specific package
+pnpm add --filter my-app fastify
+
+# Add dev dependency to workspace root
+pnpm add -Dw typescript
+```

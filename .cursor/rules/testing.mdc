@@ -1,0 +1,82 @@
+---
+name: "Testing Patterns"
+description: "Testing guidelines and patterns for unit and integration tests"
+type: "auto_attach"
+pattern: "test/**,**/*.test.ts,**/*.spec.ts"
+---
+
+## Testing Standards
+- Use Vitest with `describe/it/expect` pattern
+- Mock external dependencies in tests
+- Test both success and error cases
+- Located in `test/` directories alongside source
+
+## Unit Test Pattern
+```typescript
+// ✅ Good: Comprehensive unit test
+describe('UserService', () => {
+  let userService: UserServiceImpl;
+  let mockDb: ReturnType<typeof createMockDatabase>;
+
+  beforeEach(() => {
+    mockDb = createMockDatabase();
+    userService = new UserServiceImpl(mockDb, mockLogger);
+  });
+
+  describe('createUser', () => {
+    it('should create user with valid data', async () => {
+      const userData = { email: 'test@example.com', name: 'Test User' };
+      const expectedUser = { id: '1', ...userData };
+      mockDb.users.create.mockResolvedValue(expectedUser);
+
+      const result = await userService.createUser(userData);
+
+      expect(result).toEqual(expectedUser);
+      expect(mockDb.users.create).toHaveBeenCalledWith({
+        data: expect.objectContaining(userData),
+      });
+    });
+  });
+});
+```
+
+## Integration Test Pattern
+```typescript
+// ✅ Good: Integration test for routes
+describe('User Routes', () => {
+  let app: FastifyInstance;
+
+  beforeAll(async () => {
+    app = await build();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('should create user with valid data', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: { email: 'test@example.com', name: 'Test User' }
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      email: 'test@example.com',
+      name: 'Test User'
+    });
+  });
+});
+```
+
+## Test Helper Pattern
+```typescript
+// ✅ Good: Reusable test helper
+export async function build(): Promise<FastifyInstance> {
+  const app = Fastify({ logger: false });
+  await app.register(fp(App));
+  await app.ready();
+  return app;
+}
+```

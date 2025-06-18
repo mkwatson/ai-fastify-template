@@ -1,0 +1,18 @@
+---
+name: "Core Development Standards"
+description: "Essential coding standards and patterns for all files"
+type: "always"
+---
+
+@shared-ai-core.md
+
+## Formatting & Linting
+- Use Biome for all formatting and linting
+- Run `pnpm lint:fix` before committing
+- Follow 2-space indentation consistently
+
+## Security Guidelines
+- Validate all user inputs with Zod schemas
+- Use proper CORS configuration
+- Implement rate limiting for public endpoints
+- Sanitize all logged data to prevent information leakage

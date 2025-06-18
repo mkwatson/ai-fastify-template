@@ -275,49 +275,66 @@ git commit -m "chore: add Biome strict preset as sole formatter+lint"
 
 ## 4. AI-Specific Tooling & Guidelines
 
-*This step comes early to establish AI agent guidelines before adding complex logic.*
+*This step establishes enterprise-grade AI agent guidelines with modern tooling.*
 
-Create `.cursorrules` file in the root:
+Create shared AI guidance foundation:
 
-```
-# AI Coding Assistant Rules for ai-fastify-template
-
-## Architecture Principles
-- Follow strict TypeScript - no `any` types
-- Use Zod for all runtime validation (env, request bodies, responses)
-- Keep routes thin - business logic goes in services
-- Services should not import from routes or plugins
-- Use dependency injection patterns for testability
-
-## Code Patterns
-- Prefer explicit error handling over throwing exceptions
-- Use Fastify's built-in validation and serialization
-- Always validate environment variables with Zod schemas
-- Use proper HTTP status codes (200, 201, 400, 401, 403, 404, 422, 500)
-- Implement proper logging with structured data
-
-## Testing Requirements
-- Write unit tests for all business logic
-- Write integration tests for all routes
-- Aim for >90% mutation test coverage
-- Mock external dependencies in tests
-
-## Common Pitfalls to Avoid
-- Don't use `fastify.register()` without proper encapsulation
-- Don't access `process.env` directly - use validated env schema
-- Don't mix async/await with callbacks
-- Don't forget to handle stream cleanup in SSE endpoints
-- Don't skip input validation on any public endpoint
-
-## File Organization
-- Routes: `src/routes/` - HTTP handlers only
-- Services: `src/services/` - Business logic
-- Plugins: `src/plugins/` - Fastify plugins
-- Types: `src/types/` - Shared TypeScript types
-- Utils: `src/utils/` - Pure utility functions
+```bash
+# Create shared source files
+echo "# AI Core Standards..." > shared-ai-core.md
+echo "# Development Commands..." > shared-ai-commands.md  
+echo "# Project Architecture..." > shared-ai-architecture.md
 ```
 
-Create `docs/ai-guidelines.md`:
+Create modern Cursor rules system:
+
+```bash
+mkdir -p .cursor/rules
+```
+
+Create `.cursor/rules/always.mdc`:
+```yaml
+---
+name: "Core Development Standards"
+description: "Essential coding standards and patterns for all files"
+type: "always"
+---
+
+@shared-ai-core.md
+```
+
+Create `.cursor/rules/backend-api.mdc`:
+```yaml
+---
+name: "Backend API Patterns"
+description: "Fastify and backend-specific development patterns" 
+type: "auto_attach"
+pattern: "apps/backend-api/**"
+---
+
+## Fastify-Specific Rules
+- All routes must have Zod validation schemas
+- Use Fastify plugin patterns for modularity
+- Business logic belongs in services, not routes
+```
+
+Create optimized `CLAUDE.md`:
+```markdown
+# CLAUDE.md
+
+## Core Standards
+@shared-ai-core.md
+
+## Development Commands
+@shared-ai-commands.md
+
+## Claude-Specific Workflows
+- Multi-file operations and git management
+- Quality assurance automation
+- Branch and PR management
+```
+
+Create comprehensive `docs/AI_GUIDELINES.md`:
 
 ```markdown
 # AI Development Guidelines
