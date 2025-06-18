@@ -30,5 +30,5 @@ The `src/plugins/env.ts` uses Zod for comprehensive environment validation:
 - `docs/AI_GUIDELINES.md`: Comprehensive AI coding patterns
 
 ## Current Status
-✅ **Complete**: Monorepo foundation, backend API with Fastify, Zod validation, comprehensive testing
-🔄 **Planned**: Additional quality tooling, SSE streaming, SDK generation
+
+See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed project status and roadmap.

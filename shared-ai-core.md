@@ -68,8 +68,8 @@ const routes: FastifyPluginAsync = async (fastify) => {
 ## Quality Gates
 Before committing changes, ensure:
 1. `pnpm type-check` passes (no TypeScript errors)
-2. `pnpm lint` passes (Biome formatting/linting)
-3. `pnpm test` passes (all tests)
+2. `pnpm lint` passes (Biome linting and formatting)
+3. `pnpm test` passes (all tests, includes build)
 4. `pnpm build` succeeds
 
 ## Critical Rules

@@ -4,7 +4,8 @@ description: "Essential coding standards and patterns for all files"
 type: "always"
 ---
 
-@shared-ai-core.md
+**Quick Reference**: [shared-ai-core.md](../../../shared-ai-core.md)
+**Comprehensive Patterns**: [docs/AI_GUIDELINES.md](../../../docs/AI_GUIDELINES.md)
 
 ## Formatting & Linting
 - Use Biome for all formatting and linting

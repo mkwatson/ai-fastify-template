@@ -16,7 +16,7 @@ pnpm type-check             # TypeScript compilation check
 ```bash
 cd apps/backend-api
 pnpm lint                   # Biome linting and formatting
-pnpm test:coverage          # Run tests with coverage
+pnpm test:coverage          # Run tests with coverage (includes build)
 pnpm clean                  # Clean build artifacts
 ```
 
