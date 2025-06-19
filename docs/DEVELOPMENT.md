@@ -28,6 +28,7 @@ git --version     # >= 2.0.0
 ### Initial Setup
 
 1. **Clone and install**
+
    ```bash
    git clone https://github.com/mkwatson/ai-fastify-template.git
    cd ai-fastify-template
@@ -35,22 +36,24 @@ git --version     # >= 2.0.0
    ```
 
 2. **Verify installation**
+
    ```bash
    # Check workspace structure
    pnpm list --depth=0
-   
+
    # Verify turbo works
    pnpm build --dry-run
-   
+
    # Run dry-run build
    pnpm build --dry-run
    ```
 
 3. **Set up development environment**
+
    ```bash
    # Copy environment template (when available)
    cp .env.example .env.local
-   
+
    # Configure your editor for TypeScript
    # VS Code: Install recommended extensions
    # Cursor: AI rules are already configured
@@ -75,17 +78,19 @@ pnpm dev
 ### Creating New Features
 
 1. **Create feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. **Add new packages as needed**
+
    ```bash
    # New app
    mkdir apps/my-app
    cd apps/my-app
    pnpm init
-   
+
    # New shared package
    mkdir packages/my-package
    cd packages/my-package
@@ -93,13 +98,14 @@ pnpm dev
    ```
 
 3. **Install dependencies**
+
    ```bash
    # App-specific dependency
    pnpm add --filter my-app fastify
-   
+
    # Workspace dev dependency
    pnpm add -Dw @types/node
-   
+
    # Package dependency
    pnpm add --filter @ai-fastify-template/my-package zod
    ```
@@ -107,11 +113,13 @@ pnpm dev
 ### Development Loop
 
 1. **Make changes**
+
    - Write code following TypeScript strict mode
    - Add tests for new functionality
    - Update documentation as needed
 
 2. **Run quality checks frequently**
+
    ```bash
    # Available checks during development
    pnpm lint
@@ -180,6 +188,7 @@ pnpm clean                 # Clear cache and build artifacts
 ### Pipeline Configuration
 
 **Current turbo.json** (foundation only):
+
 ```json
 {
   "tasks": {
@@ -192,6 +201,7 @@ pnpm clean                 # Clear cache and build artifacts
 ```
 
 **Future pipeline** (coming with MAR-11+):
+
 ```json
 {
   "tasks": {
@@ -199,9 +209,7 @@ pnpm clean                 # Clear cache and build artifacts
     "type-check": { "dependsOn": ["lint"], "outputs": [] },
     "graph": { "dependsOn": ["type-check"], "outputs": [] },
     "test": { "dependsOn": ["graph"], "outputs": ["coverage/**"] },
-    "mutation": { "dependsOn": ["test"],
-      "outputs": []
-    },
+    "mutation": { "dependsOn": ["test"], "outputs": [] },
     "build": {
       "dependsOn": ["mutation"],
       "outputs": ["dist/**", "build/**"]
@@ -231,6 +239,7 @@ pnpm build
 ### Common Issues
 
 **TypeScript Errors**
+
 ```bash
 # Check specific package
 pnpm --filter my-app type-check
@@ -240,6 +249,7 @@ pnpm tsc --noEmit --pretty
 ```
 
 **Dependency Issues**
+
 ```bash
 # Check dependency graph
 pnpm graph
@@ -253,6 +263,7 @@ pnpm install
 ```
 
 **Turbo Cache Issues**
+
 ```bash
 # Clear turbo cache
 pnpm clean
@@ -263,6 +274,7 @@ pnpm build --force
 ```
 
 **Import/Export Errors**
+
 ```bash
 # Check for circular dependencies
 pnpm graph
@@ -309,25 +321,28 @@ pnpm build --profile            # Performance profiling
 ### Optimization Tips
 
 1. **Use filtering for large workspaces (advanced)**
+
    ```bash
    # Only build affected packages (when multiple packages exist)
    pnpm build --filter=...my-app
-   
+
    # Build specific package and dependencies
    pnpm build --filter=my-app...
    ```
 
 2. **Leverage caching**
+
    ```bash
    # Ensure outputs are configured correctly
    # Check turbo.json for proper output patterns
    ```
 
 3. **Optimize dependencies**
+
    ```bash
    # Use exact versions for stability
    pnpm add --save-exact package-name
-   
+
    # Audit bundle size
    pnpm dlx bundle-analyzer
    ```
@@ -337,16 +352,18 @@ pnpm build --profile            # Performance profiling
 ### Pre-Release Checklist
 
 1. **Quality assurance**
+
    ```bash
    # Run all available quality checks
    pnpm lint
    pnpm build
-   
+
    # Coming with MAR-11+: Full pipeline
    # pnpm test && pnpm type-check
    ```
 
 2. **Documentation updates**
+
    - Update README if needed
    - Update CHANGELOG
    - Verify all docs are current
@@ -360,22 +377,25 @@ pnpm build --profile            # Performance profiling
 ### Release Steps
 
 1. **Create release branch**
+
    ```bash
    git checkout -b release/v1.0.0
    ```
 
 2. **Final testing**
+
    ```bash
    # Run all quality checks
    pnpm lint
    pnpm build
-   
+
    # Coming with MAR-11+: Full testing
    # pnpm test
    # pnpm test:e2e  # When available
    ```
 
 3. **Create release**
+
    ```bash
    git tag v1.0.0
    git push origin v1.0.0
@@ -433,4 +453,4 @@ pnpm build --profile            # Performance profiling
 
 ---
 
-This workflow ensures consistent, high-quality development while leveraging the full power of the monorepo setup and AI-assisted development capabilities. 
+This workflow ensures consistent, high-quality development while leveraging the full power of the monorepo setup and AI-assisted development capabilities.

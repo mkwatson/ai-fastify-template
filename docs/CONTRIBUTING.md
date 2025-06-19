@@ -32,17 +32,20 @@ This project follows a professional, inclusive environment. Please:
 ### Setup
 
 1. **Fork and clone the repository**
+
    ```bash
    git clone https://github.com/your-username/ai-fastify-template.git
    cd ai-fastify-template
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Verify setup**
+
    ```bash
    pnpm build --dry-run
    pnpm lint
@@ -69,12 +72,13 @@ ai-fastify-template/
 ### Adding New Features
 
 1. **Create appropriate structure**
+
    ```bash
    # For new app
    mkdir apps/my-app
    cd apps/my-app
    pnpm init
-   
+
    # For new package
    mkdir packages/my-package
    cd packages/my-package
@@ -82,18 +86,20 @@ ai-fastify-template/
    ```
 
 2. **Follow naming conventions**
+
    - Apps: `kebab-case` (e.g., `backend-api`, `admin-dashboard`)
    - Packages: `@ai-fastify-template/package-name`
    - Files: `kebab-case.ts` or `camelCase.ts` for components
 
 3. **Add dependencies correctly**
+
    ```bash
    # App-specific dependency
    pnpm add --filter my-app fastify
-   
+
    # Workspace-wide dev dependency
    pnpm add -Dw typescript
-   
+
    # Package dependency
    pnpm add --filter @ai-fastify-template/my-package zod
    ```
@@ -101,18 +107,21 @@ ai-fastify-template/
 ### Architecture Guidelines
 
 #### Apps Directory
+
 - **Purpose**: Deployable applications
 - **Dependencies**: Can depend on packages, not other apps
 - **Structure**: Keep thin, delegate logic to packages
 - **Example**: REST API, GraphQL server, CLI tool
 
 #### Packages Directory
+
 - **Purpose**: Shared, reusable code
 - **Dependencies**: Can depend on other packages
 - **Structure**: Single responsibility, clear interfaces
 - **Example**: Database client, validation schemas, utilities
 
 #### Dependency Rules
+
 - Apps → Packages ✅
 - Packages → Packages ✅
 - Apps → Apps ❌
@@ -167,10 +176,10 @@ describe('Feature', () => {
     it('should behave correctly', () => {
       // Arrange
       const input = createTestInput();
-      
+
       // Act
       const result = functionUnderTest(input);
-      
+
       // Assert
       expect(result).toEqual(expectedOutput);
     });
@@ -239,16 +248,18 @@ BREAKING CHANGE: User IDs are now UUIDs instead of numbers"
 ### Before Submitting
 
 1. **Ensure quality checks pass**
+
    ```bash
    pnpm build
    pnpm lint
-   
+
    # Coming with MAR-11+: Full pipeline
    # pnpm test
    # pnpm type-check
    ```
 
 2. **Update documentation**
+
    - README if adding features
    - JSDoc for new public APIs
    - Architecture docs for significant changes
@@ -262,20 +273,24 @@ BREAKING CHANGE: User IDs are now UUIDs instead of numbers"
 
 ```markdown
 ## Summary
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] Code follows project style guidelines
 - [ ] Self-review completed
 - [ ] Documentation updated
@@ -326,8 +341,9 @@ This project is optimized for AI-assisted development. When working with AI agen
 ## Recognition
 
 Contributors will be recognized in:
+
 - GitHub contributors list
 - Release notes for significant contributions
 - Project documentation for major features
 
-Thank you for contributing to AI Fastify Template! 🚀 
+Thank you for contributing to AI Fastify Template! 🚀

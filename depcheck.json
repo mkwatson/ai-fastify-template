@@ -5,7 +5,7 @@
     "@types/*",
     "typescript",
     "turbo",
-    "@biomejs/biome",
+    "prettier",
     "eslint*",
     "@eslint/*",
     "@typescript-eslint/*",
