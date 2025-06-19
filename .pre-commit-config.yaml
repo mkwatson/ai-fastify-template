@@ -93,7 +93,7 @@ repos:
       - id: commitizen-check
         name: 📝 Conventional Commit Messages (Local)
         description: Enforce conventional commit format using cz check
-        entry: cz check --commit-msg-file
+        entry: npx cz check --commit-msg-file
         language: system
         stages: [commit-msg]
         pass_filenames: true
