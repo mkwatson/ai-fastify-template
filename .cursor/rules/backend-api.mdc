@@ -4,9 +4,9 @@ globs: ["apps/backend-api/**"]
 alwaysApply: false
 ---
 
-@shared-ai-core.md
+@../shared-ai-core.md
 
-For comprehensive enterprise patterns, see @AI_GUIDELINES.md:
+For comprehensive enterprise patterns, see @../docs/AI_GUIDELINES.md:
 - **Enterprise Patterns**: Advanced error handling, configuration management, plugin architecture
 - **Testing Excellence**: Comprehensive unit and integration testing strategies  
 - **Security & Performance**: Input validation, rate limiting, performance monitoring

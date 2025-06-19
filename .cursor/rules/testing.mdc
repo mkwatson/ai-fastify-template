@@ -4,9 +4,9 @@ globs: ["test/**", "**/*.test.ts", "**/*.spec.ts"]
 alwaysApply: false
 ---
 
-@shared-ai-core.md
+@../shared-ai-core.md
 
-For enterprise testing strategies, see @AI_GUIDELINES.md:
+For enterprise testing strategies, see @../docs/AI_GUIDELINES.md:
 - **Testing Excellence**: Comprehensive unit and integration testing with real databases
 - **Enterprise Patterns**: Advanced error handling patterns for testing
 - **Security & Performance**: Performance testing and validation patterns

@@ -3,7 +3,7 @@ description: "Monorepo structure and architectural decisions"
 alwaysApply: false
 ---
 
-@shared-ai-architecture.md
+@../shared-ai-architecture.md
 
 ## Architectural Decisions
 When making architectural choices, consider:

@@ -51,6 +51,9 @@
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@stryker-mutator/core": "^9.0.1",
+    "@stryker-mutator/vitest-runner": "^9.0.1",
+    "dependency-cruiser": "^16.10.3",
     "turbo": "^2.5.4"
   }
 }

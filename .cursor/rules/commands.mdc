@@ -3,6 +3,6 @@ description: "Common build, test, and development commands"
 alwaysApply: false
 ---
 
-@shared-ai-commands.md
+@../shared-ai-commands.md
 
 Use these commands when asked about building, testing, or running the application.
