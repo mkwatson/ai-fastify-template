@@ -87,16 +87,15 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-      # Conventional commit validation - WORKING SOLUTION
+      # Conventional commit validation - SIMPLE SOLUTION
       # Issue: Both conventional-pre-commit and commitizen pre-commit hooks have bugs
-      # Solution: Use local hook with commitizen check command (most reliable)
+      # Solution: Use shell command that works with commit-msg file
       - id: commitizen-check
         name: 📝 Conventional Commit Messages (Local)
         description: Enforce conventional commit format using cz check
-        entry: npx cz check --commit-msg-file
+        entry: sh -c 'npx cz check --commit-msg-file "$1"' --
         language: system
         stages: [commit-msg]
-        pass_filenames: true
 
   # ============================================================================
   # SECURITY & DEPENDENCY LAYER
