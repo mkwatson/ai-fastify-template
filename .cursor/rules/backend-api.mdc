@@ -1,14 +1,15 @@
 ---
-name: "Backend API Patterns"
 description: "Fastify and backend-specific development patterns"
-type: "auto_attach"
-pattern: "apps/backend-api/**"
+globs: ["apps/backend-api/**"]
+alwaysApply: false
 ---
 
-For comprehensive enterprise patterns, see [docs/AI_GUIDELINES.md](../../../docs/AI_GUIDELINES.md):
-- **Enterprise Patterns** (lines 616-784): Advanced error handling, configuration management, plugin architecture
-- **Testing Excellence** (lines 787-1003): Comprehensive unit and integration testing strategies
-- **Security & Performance** (lines 1005-1127): Input validation, rate limiting, performance monitoring
+@shared-ai-core.md
+
+For comprehensive enterprise patterns, see @AI_GUIDELINES.md:
+- **Enterprise Patterns**: Advanced error handling, configuration management, plugin architecture
+- **Testing Excellence**: Comprehensive unit and integration testing strategies  
+- **Security & Performance**: Input validation, rate limiting, performance monitoring
 
 ## Fastify-Specific Rules
 - All routes must have Zod validation schemas

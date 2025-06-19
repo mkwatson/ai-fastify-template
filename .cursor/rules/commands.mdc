@@ -1,7 +1,6 @@
 ---
-name: "Development Commands"
 description: "Common build, test, and development commands"
-type: "manual"
+alwaysApply: false
 ---
 
 @shared-ai-commands.md

@@ -1,14 +1,15 @@
 ---
-name: "Testing Patterns"
 description: "Testing guidelines and patterns for unit and integration tests"
-type: "auto_attach"
-pattern: "test/**,**/*.test.ts,**/*.spec.ts"
+globs: ["test/**", "**/*.test.ts", "**/*.spec.ts"]
+alwaysApply: false
 ---
 
-For enterprise testing strategies, see [docs/AI_GUIDELINES.md](../../../docs/AI_GUIDELINES.md):
-- **Testing Excellence** (lines 787-1003): Comprehensive unit and integration testing with real databases
-- **Enterprise Patterns** (lines 616-784): Advanced error handling patterns for testing
-- **Security & Performance** (lines 1005-1127): Performance testing and validation patterns
+@shared-ai-core.md
+
+For enterprise testing strategies, see @AI_GUIDELINES.md:
+- **Testing Excellence**: Comprehensive unit and integration testing with real databases
+- **Enterprise Patterns**: Advanced error handling patterns for testing
+- **Security & Performance**: Performance testing and validation patterns
 
 ## Testing Standards
 - Use Vitest with `describe/it/expect` pattern

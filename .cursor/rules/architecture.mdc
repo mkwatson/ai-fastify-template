@@ -1,7 +1,6 @@
 ---
-name: "Project Architecture"
-description: "Monorepo structure and architectural decisions"
-type: "agent_requested"
+description: "Monorepo structure and architectural decisions" 
+alwaysApply: false
 ---
 
 @shared-ai-architecture.md
