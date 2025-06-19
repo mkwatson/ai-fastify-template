@@ -1,0 +1,10 @@
+{
+  "allowlist": [],
+  "report-type": "important",
+  "package-manager": "pnpm",
+  "pass-enoaudit": true,
+  "low": false,
+  "moderate": true,
+  "high": true,
+  "critical": true
+}

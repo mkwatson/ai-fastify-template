@@ -233,6 +233,34 @@ pnpm clean                   # Clear build artifacts and cache
 pnpm build --dry-run         # See what would run without executing
 ```
 
+## 🤖 AI Coding Agent Guidelines
+
+We maintain comprehensive, consistent coding guidelines across our three primary AI coding tools—**OpenAI Codex**, **Anthropic's Claude Code**, and **Cursor IDE**.
+
+### File Structure
+
+- **[`AGENTS.md`](./AGENTS.md)** – Authoritative source for all coding guidelines
+- **[`CLAUDE.md`](./CLAUDE.md)** – Imports `AGENTS.md` for Claude Code integration  
+- **[`.cursor/rules/default.mdc`](./.cursor/rules/default.mdc)** – References `AGENTS.md` for Cursor IDE
+
+### Why This Structure?
+
+- **Single Source of Truth:** One definitive place for all guidelines
+- **Tool Compatibility:** Each tool's specific import/reference requirements handled
+- **Maintainability:** Update once, applies everywhere
+- **Extensibility:** Clear path for tool-specific additions if needed
+
+### Quality Integration
+
+Guidelines integrate with our quality pipeline:
+```bash
+pnpm ai:quick      # Quick validation (lint + types + patterns)
+pnpm ai:check      # Standard validation (includes security)
+pnpm ai:compliance # Full compliance validation
+```
+
+*Always edit AGENTS.md for shared guidelines. Tool-specific files should remain minimal imports/references.*
+
 ### Getting Help
 
 - 📖 [Documentation](docs/)
