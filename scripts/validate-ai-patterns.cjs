@@ -2,14 +2,14 @@
 
 /**
  * AI Guidelines Compliance Validator
- * Version: 1.0.0
+ * Version: 2.0.0
  *
- * Validates codebase adherence to AI development guidelines
+ * Validates project-specific business rules for AI development guidelines.
+ * Generic rules (no-any, formatting) are handled by Biome and ESLint.
  */
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { execSync } = require("node:child_process");
 
 class AIComplianceValidator {
   constructor() {
@@ -35,22 +35,12 @@ class AIComplianceValidator {
   checkFile(filePath, content) {
     this.checks++;
 
-    // Check 1: No 'any' types in TypeScript files
-    if (filePath.endsWith(".ts") && !filePath.includes(".d.ts")) {
-      const anyMatches = content.match(/:\s*any\b/g);
-      if (anyMatches) {
-        this.addViolation(
-          filePath,
-          null,
-          "NO_ANY_TYPES",
-          `Found ${anyMatches.length} 'any' type usage(s) - use specific types instead`,
-        );
-      }
-    }
-
-    // Check 2: Direct process.env access (should use validated env schema)
+    // Check 1: Direct process.env access (should use validated env schema)
     const processEnvMatches = content.match(/process\.env\./g);
-    if (processEnvMatches && !filePath.includes("env.ts")) {
+    if (processEnvMatches && 
+        !filePath.includes("env.ts") && 
+        !filePath.includes("validate-env") &&
+        !filePath.includes("test/")) {
       this.addViolation(
         filePath,
         null,
@@ -59,17 +49,17 @@ class AIComplianceValidator {
       );
     }
 
-    // Check 3: Proper error handling patterns
+    // Check 2: Proper error handling patterns in routes
     if (filePath.includes("/routes/") && content.includes("throw new Error(")) {
       this.addViolation(
         filePath,
         null,
         "IMPROPER_ERROR_HANDLING",
-        "Generic Error throwing in routes - use Fastify error handling patterns",
+        "Generic Error throwing in routes - use Fastify error handling patterns (fastify.httpErrors)",
       );
     }
 
-    // Check 4: Missing input validation in routes
+    // Check 3: Missing input validation in routes
     if (
       filePath.includes("/routes/") &&
       content.includes("request.body") &&
@@ -81,6 +71,35 @@ class AIComplianceValidator {
         null,
         "MISSING_INPUT_VALIDATION",
         "Route uses request.body without Zod schema validation",
+      );
+    }
+
+    // Check 4: Service layer dependency injection patterns
+    if (
+      filePath.includes("/services/") &&
+      content.includes("new ") &&
+      content.includes("class ") &&
+      !content.includes("constructor(")
+    ) {
+      this.addViolation(
+        filePath,
+        null,
+        "MISSING_DEPENDENCY_INJECTION",
+        "Service class should use dependency injection via constructor",
+      );
+    }
+
+    // Check 5: Plugin registration patterns
+    if (
+      filePath.includes("/plugins/") &&
+      content.includes("export default") &&
+      !content.includes("fastify-plugin")
+    ) {
+      this.addViolation(
+        filePath,
+        null,
+        "IMPROPER_PLUGIN_REGISTRATION",
+        "Fastify plugins should use fastify-plugin wrapper",
       );
     }
 
@@ -144,9 +163,10 @@ class AIComplianceValidator {
       }
 
       this.log("\n💡 Remediation Guide:", "info");
-      this.log("• Run `pnpm ai:fix` to auto-fix formatting issues", "info");
-      this.log("• Review AI guidelines: docs/ai-guidelines.md", "info");
-      this.log("• Check .cursorrules for specific patterns", "info");
+      this.log("• Run `pnpm lint:fix` to auto-fix formatting issues", "info");
+      this.log("• Run `pnpm lint:eslint` to check additional rules", "info");
+      this.log("• Review AI guidelines: AGENTS.md", "info");
+      this.log("• Check project patterns in existing code", "info");
     }
 
     return this.violations.length === 0;
