@@ -135,7 +135,7 @@ export default [
 
       // Async/await best practices
       'no-async-promise-executor': 'error',
-      'require-await': 'warn', // Warn instead of error for Fastify patterns
+      'require-await': 'off', // Allow async functions without await (common in Fastify plugins)
       'no-return-await': 'error',
       'promise/always-return': 'error',
       'promise/no-return-wrap': 'error',

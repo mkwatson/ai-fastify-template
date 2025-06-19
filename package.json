@@ -25,7 +25,14 @@
     "clean": "turbo clean",
     "test": "turbo test",
     "test:watch": "turbo test:watch",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "hooks:install": "pre-commit install && pre-commit install --hook-type commit-msg",
+    "hooks:uninstall": "pre-commit uninstall && pre-commit uninstall --hook-type commit-msg",
+    "hooks:update": "pre-commit autoupdate",
+    "hooks:run": "pre-commit run --all-files",
+    "hooks:run-manual": "pre-commit run --all-files --hook-stage manual",
+    "setup:dev": "pnpm install && pnpm hooks:install && echo '✅ Development environment ready!'",
+    "validate:commit": "pre-commit run --all-files && pnpm ai:compliance && echo '🎉 Full validation passed!'"
   },
   "keywords": [
     "fastify",

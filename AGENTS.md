@@ -239,26 +239,31 @@ pnpm build             # Production build verification
 Our ESLint configuration includes comprehensive rules specifically designed for AI coding agents:
 
 **Import Organization & Dependencies:**
+
 - Import grouping and alphabetization
 - Circular dependency detection (`import/no-cycle`)
 - Duplicate import prevention (`import/no-duplicates`)
 
 **Async/Await Best Practices:**
+
 - Promise executor validation
 - Proper async/await usage patterns
 - Promise handling enforcement
 
 **Performance & Security:**
+
 - Object spread over `Object.assign`
 - Prevention of unsafe regex patterns
 - Detection of potential object injection vulnerabilities
 
 **Test Quality (Vitest Integration):**
+
 - Test structure validation (`vitest/expect-expect`)
 - Prevention of disabled/focused tests in CI
 - Consistent test naming patterns
 
 **Custom AI Architectural Rules:**
+
 - No direct `process.env` access
 - Required Zod validation for request bodies
 - Fastify error handling patterns
