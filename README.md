@@ -28,7 +28,7 @@ Built for **LLM-powered applications** that require secure backend infrastructur
 ### Prerequisites
 
 - **Node.js** >= 18.0.0
-- **pnpm** >= 8.0.0  
+- **pnpm** >= 8.0.0
 - **Python** >= 3.8 (for pre-commit hooks)
 
 ### Installation
@@ -154,7 +154,7 @@ ai-fastify-template/
 ### Core Development
 
 ```bash
-# Development workflow  
+# Development workflow
 pnpm dev              # Start all apps in development mode
 pnpm build            # Build all packages
 pnpm clean            # Clean build artifacts
@@ -178,7 +178,7 @@ pnpm hooks:run        # Run all hooks manually
 
 # Quality validation
 pnpm ai:quick         # Fast quality check (lint + type-check)
-pnpm ai:compliance    # Full compliance check (all quality gates)  
+pnpm ai:compliance    # Full compliance check (all quality gates)
 pnpm validate:commit  # Complete validation (hooks + compliance)
 ```
 

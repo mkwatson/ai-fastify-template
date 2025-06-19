@@ -11,11 +11,13 @@ This project is an **enterprise-grade Fastify template** optimized for AI-assist
 Before you begin, ensure you have these installed:
 
 ### Required Dependencies
+
 - [ ] **Node.js** >= 18.0.0 ([Download](https://nodejs.org/))
 - [ ] **Git** ([Download](https://git-scm.com/downloads))
 - [ ] **Python** >= 3.8 ([Download](https://python.org/downloads/)) - for pre-commit hooks
 
 ### Optional but Recommended
+
 - [ ] **VS Code** or your preferred editor with TypeScript support
 - [ ] **pnpm** (will be installed automatically if missing)
 - [ ] **pre-commit** framework (will be installed automatically)
@@ -37,6 +39,7 @@ pnpm setup:dev
 ```
 
 This will automatically:
+
 - ✅ Install dependencies
 - ✅ Setup pre-commit hooks
 - ✅ Verify environment
@@ -47,6 +50,7 @@ This will automatically:
 If you prefer manual setup or the automated setup fails:
 
 ### Step 1: Install Dependencies
+
 ```bash
 # Install project dependencies
 pnpm install
@@ -56,6 +60,7 @@ pnpm --version
 ```
 
 ### Step 2: Setup Pre-commit Hooks
+
 ```bash
 # Install pre-commit framework (if not already installed)
 pip3 install pre-commit
@@ -68,6 +73,7 @@ pnpm hooks:run
 ```
 
 ### Step 3: Verify Setup
+
 ```bash
 # Check TypeScript configuration
 pnpm type-check
@@ -84,6 +90,7 @@ pnpm ai:compliance
 Run these commands to ensure everything is working:
 
 ### Basic Validation
+
 - [ ] `pnpm --version` - Shows pnpm version
 - [ ] `pnpm type-check` - No TypeScript errors
 - [ ] `pnpm lint` - No linting errors
@@ -91,11 +98,13 @@ Run these commands to ensure everything is working:
 - [ ] `pnpm build` - Builds successfully
 
 ### Pre-commit Hooks Validation
+
 - [ ] `pre-commit --version` - Shows pre-commit version
 - [ ] `pnpm hooks:run` - All hooks pass
 - [ ] Try a test commit: `git commit --allow-empty -m "test: validate hooks"`
 
 ### Development Server
+
 - [ ] `pnpm dev` - Development server starts
 - [ ] Visit `http://localhost:3000` - Returns "Hello World"
 - [ ] API responds correctly
@@ -103,6 +112,7 @@ Run these commands to ensure everything is working:
 ## 📚 Essential Knowledge
 
 ### Project Structure
+
 ```
 ai-fastify-template/
 ├── apps/backend-api/     # Main Fastify application
@@ -115,7 +125,9 @@ ai-fastify-template/
 ```
 
 ### Quality Gates Overview
+
 Every commit automatically runs:
+
 - 🔒 **GitLeaks** - Credential scanning
 - 🎨 **ESLint + Prettier** - Code formatting and linting
 - 🔷 **TypeScript** - Type checking
@@ -124,6 +136,7 @@ Every commit automatically runs:
 - 🛡️ **Security Audit** - Dependency vulnerability scanning
 
 ### Key Commands
+
 ```bash
 # Development
 pnpm dev              # Start development server
@@ -145,19 +158,23 @@ pnpm validate:commit  # Complete validation
 ## 🔄 Development Workflow
 
 ### Daily Development
+
 1. **Start development server**: `pnpm dev`
 2. **Make your changes** in `apps/backend-api/src/`
 3. **Test your changes**: `pnpm test`
 4. **Commit with quality gates**: `git commit -m "feat(scope): description"`
 
 ### Before Creating PR
+
 1. **Run full validation**: `pnpm validate:commit`
 2. **Ensure all tests pass**: `pnpm test`
 3. **Check for TypeScript errors**: `pnpm type-check`
 4. **Verify build works**: `pnpm build`
 
 ### Commit Message Format
+
 We use **conventional commits**:
+
 ```bash
 # Format: type(scope): description
 feat(api): add user authentication endpoint
@@ -171,14 +188,18 @@ Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`
 ## 🛠 IDE Setup
 
 ### VS Code (Recommended)
+
 Install these extensions:
+
 - [ ] **TypeScript** (built-in)
 - [ ] **ESLint** (dbaeumer.vscode-eslint)
 - [ ] **Prettier** (esbenp.prettier-vscode)
 - [ ] **GitLens** (eamodio.gitlens)
 
 ### Settings
+
 Add to your VS Code `settings.json`:
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -192,6 +213,7 @@ Add to your VS Code `settings.json`:
 ## 🚨 Common Issues
 
 ### Pre-commit Hooks Not Running
+
 ```bash
 # Reinstall hooks
 pnpm hooks:install
@@ -201,6 +223,7 @@ ls -la .git/hooks/
 ```
 
 ### Python/pre-commit Issues
+
 ```bash
 # Install pre-commit differently
 pip3 install --user pre-commit
@@ -209,6 +232,7 @@ brew install pre-commit  # macOS
 ```
 
 ### TypeScript Errors
+
 ```bash
 # Clear cache and rebuild
 pnpm clean
@@ -221,12 +245,14 @@ For more issues, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 ## 📖 Learning Resources
 
 ### Project Documentation
+
 - [ ] Read [README.md](../README.md) - Project overview
 - [ ] Read [ARCHITECTURE.md](./ARCHITECTURE.md) - System design
 - [ ] Read [DEVELOPMENT.md](./DEVELOPMENT.md) - Development workflow
 - [ ] Read [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines
 
 ### External Resources
+
 - [Fastify Documentation](https://fastify.io/docs/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Conventional Commits](https://conventionalcommits.org/)
@@ -237,34 +263,39 @@ For more issues, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 Once you're comfortable with the basics:
 
 ### AI-Assisted Development
+
 - This template is optimized for AI coding assistants
 - Quality gates catch AI-generated errors early
 - Clear architectural boundaries guide AI toward correct patterns
 
 ### Monorepo Structure
+
 - Uses pnpm workspaces + TurboRepo
 - Shared packages in `packages/` (planned)
 - Independent applications in `apps/`
 
 ### Quality Automation
+
 - Pre-commit hooks run on every commit
 - CI/CD pipeline validates all changes
 - Comprehensive testing with mutation testing (planned)
 
 ## 🎉 You're Ready!
 
-Once you've completed this checklist, you're ready to start contributing! 
+Once you've completed this checklist, you're ready to start contributing!
 
 ### Next Steps
+
 1. **Pick an issue** from the GitHub issues
 2. **Create a feature branch**: `git checkout -b feature/your-feature`
 3. **Make your changes** following the development workflow
 4. **Submit a Pull Request**
 
 ### Getting Help
+
 - 💬 **Ask questions** in GitHub Discussions
-- 🐛 **Report issues** in GitHub Issues  
+- 🐛 **Report issues** in GitHub Issues
 - 📚 **Check documentation** in the `docs/` folder
 - 🔍 **Search existing issues** before creating new ones
 
-Welcome to the team! 🚀 
+Welcome to the team! 🚀

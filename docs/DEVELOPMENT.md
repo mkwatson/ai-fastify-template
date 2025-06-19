@@ -33,10 +33,10 @@ python3 --version # >= 3.8.0 (for pre-commit hooks)
    ```bash
    git clone https://github.com/mkwatson/ai-fastify-template.git
    cd ai-fastify-template
-   
+
    # Quick setup (recommended)
    pnpm setup:dev
-   
+
    # OR manual setup
    pnpm install
    pnpm hooks:install
@@ -189,7 +189,7 @@ The project uses **enterprise-grade pre-commit hooks** that automatically run on
 # What runs on every commit:
 🔒 GitLeaks - Credential scanning
 🎨 ESLint + Prettier - Auto-fixing
-🔷 TypeScript - Type checking  
+🔷 TypeScript - Type checking
 📝 Conventional Commits - Message validation
 📏 File Hygiene - Size/format checks
 🛡️ Security Audit - Dependency scanning

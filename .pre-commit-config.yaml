@@ -64,7 +64,6 @@ repos:
   # ============================================================================
   # CODE QUALITY LAYER
   # ============================================================================
-
   # Local hooks for optimal performance with existing tooling
   - repo: local
     hooks:
