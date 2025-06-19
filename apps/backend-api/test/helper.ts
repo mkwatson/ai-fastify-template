@@ -1,8 +1,9 @@
 // This file contains code that we reuse between our tests.
-import * as path from "node:path";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-const helper = require("fastify-cli/helper.js");
+import * as path from 'node:path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const helper = require('fastify-cli/helper.js');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,7 +12,7 @@ export type TestContext = {
   after: (fn: () => void | Promise<void>) => void;
 };
 
-const AppPath = path.join(__dirname, "..", "build", "app.js");
+const AppPath = path.join(__dirname, '..', 'build', 'app.js');
 
 // Fill in this config with all the configurations
 // needed for testing the application

@@ -5,12 +5,14 @@
 **Tech Stack**: Fastify + TypeScript + Zod + TurboRepo monorepo with comprehensive quality guardrails
 
 **Key Directories**:
+
 - `apps/backend-api/` - Main Fastify API server
-- `packages/` - Shared libraries and utilities  
+- `packages/` - Shared libraries and utilities
 - `docs/` - Documentation
 - `scripts/` - Build and validation utilities
 
 **Essential Commands**:
+
 ```bash
 pnpm install           # Install dependencies
 pnpm dev               # Start development servers
@@ -24,17 +26,20 @@ pnpm test              # Run all tests
 ## Development Environment
 
 **Required Tools**:
+
 - Node.js >= 18.0.0
 - pnpm >= 8.0.0
 - Git >= 2.0.0
 
 **Setup Verification**:
+
 ```bash
 node --version && pnpm --version && git --version
 pnpm install && pnpm ai:quick
 ```
 
 **Development Workflow**:
+
 ```bash
 # Start new feature
 git checkout main && git pull origin main
@@ -56,12 +61,14 @@ pnpm ai:compliance     # Full quality pipeline
 ## Architecture Principles
 
 ### Monorepo Structure Rules
+
 - **Apps → Packages**: ✅ Apps can depend on packages
-- **Packages → Packages**: ✅ Packages can depend on other packages  
+- **Packages → Packages**: ✅ Packages can depend on other packages
 - **Apps → Apps**: ❌ Apps cannot depend on other apps
 - **Packages → Apps**: ❌ Packages cannot depend on apps
 
 ### TypeScript Strict Mode Requirements
+
 - **No `any` types**: Use specific types or `unknown` with type guards
 - **Explicit return types**: For all public functions and methods
 - **Strict null checks**: Handle `null` and `undefined` explicitly
@@ -86,6 +93,7 @@ function createUser(data: any): any {
 ```
 
 ### Zod Validation Patterns
+
 - **All inputs validated**: Request bodies, query params, environment variables
 - **Type inference**: Use `z.infer<typeof Schema>` for TypeScript types
 - **Runtime safety**: Validate at API boundaries and external data sources
@@ -101,18 +109,23 @@ const CreateUserSchema = z.object({
 type CreateUserRequest = z.infer<typeof CreateUserSchema>;
 
 // ✅ Good: Route with validation
-fastify.post('/users', {
-  schema: {
-    body: CreateUserSchema,
-    response: { 201: UserResponseSchema }
+fastify.post(
+  '/users',
+  {
+    schema: {
+      body: CreateUserSchema,
+      response: { 201: UserResponseSchema },
+    },
+  },
+  async (request, reply) => {
+    const userData = CreateUserSchema.parse(request.body);
+    // Safe to use userData with full type safety
   }
-}, async (request, reply) => {
-  const userData = CreateUserSchema.parse(request.body);
-  // Safe to use userData with full type safety
-});
+);
 ```
 
 ### Fastify Architectural Patterns
+
 - **Thin routes**: Keep HTTP concerns separate from business logic
 - **Plugin architecture**: Use Fastify plugins for modular functionality
 - **Service layer**: Business logic in dedicated service classes
@@ -120,12 +133,16 @@ fastify.post('/users', {
 
 ```typescript
 // ✅ Good: Thin route with service delegation
-fastify.post('/users', {
-  schema: { body: CreateUserSchema }
-}, async (request, reply) => {
-  const user = await fastify.userService.createUser(request.body);
-  return reply.code(201).send(user);
-});
+fastify.post(
+  '/users',
+  {
+    schema: { body: CreateUserSchema },
+  },
+  async (request, reply) => {
+    const user = await fastify.userService.createUser(request.body);
+    return reply.code(201).send(user);
+  }
+);
 
 // ✅ Good: Service with clear responsibilities
 export class UserService {
@@ -144,6 +161,7 @@ export class UserService {
 ## Code Quality Standards
 
 ### Input Validation Requirements
+
 - **No direct `process.env` access**: Use validated environment schemas
 - **Request validation**: All routes with request bodies must use Zod schemas
 - **External data validation**: Validate all data from external APIs/databases
@@ -164,6 +182,7 @@ const port = process.env.PORT; // Unsafe!
 ```
 
 ### Error Handling Standards
+
 - **Fastify error patterns**: Use `fastify.httpErrors` for HTTP errors
 - **Structured errors**: Consistent error response format
 - **No generic Error throwing**: Use specific error types
@@ -188,6 +207,7 @@ throw new Error('Something went wrong'); // Too generic!
 ```
 
 ### Security Requirements
+
 - **Input sanitization**: All user inputs validated and sanitized
 - **No secrets in code**: Use environment variables for all sensitive data
 - **Parameterized queries**: No string concatenation for database queries
@@ -196,24 +216,57 @@ throw new Error('Something went wrong'); // Too generic!
 ## Testing & Validation Standards
 
 ### Quality Pipeline Commands
+
 ```bash
 # Layer 1: Fast feedback (<5 sec)
 pnpm ai:quick          # lint + type-check
 
-# Layer 2: Standard validation (<30 sec)  
+# Layer 2: Standard validation (<30 sec)
 pnpm ai:check          # ai:quick + security
 
 # Layer 3: Full validation
 pnpm ai:compliance     # ai:check + tests + build
 
 # Individual checks
-pnpm lint              # ESLint + Prettier formatting and linting
+pnpm lint              # ESLint + Prettier with comprehensive AI-safety rules
 pnpm type-check        # TypeScript compilation
 pnpm test              # Unit and integration tests
 pnpm build             # Production build verification
 ```
 
+### Enhanced Linting Rules (ESLint + Prettier)
+
+Our ESLint configuration includes comprehensive rules specifically designed for AI coding agents:
+
+**Import Organization & Dependencies:**
+- Import grouping and alphabetization
+- Circular dependency detection (`import/no-cycle`)
+- Duplicate import prevention (`import/no-duplicates`)
+
+**Async/Await Best Practices:**
+- Promise executor validation
+- Proper async/await usage patterns
+- Promise handling enforcement
+
+**Performance & Security:**
+- Object spread over `Object.assign`
+- Prevention of unsafe regex patterns
+- Detection of potential object injection vulnerabilities
+
+**Test Quality (Vitest Integration):**
+- Test structure validation (`vitest/expect-expect`)
+- Prevention of disabled/focused tests in CI
+- Consistent test naming patterns
+
+**Custom AI Architectural Rules:**
+- No direct `process.env` access
+- Required Zod validation for request bodies
+- Fastify error handling patterns
+- Service dependency injection enforcement
+- Plugin wrapper requirements
+
 ### Testing Requirements
+
 - **Unit tests**: For all business logic and services
 - **Integration tests**: For all API routes and external integrations
 - **Test coverage**: Maintain >90% line coverage
@@ -247,6 +300,7 @@ describe('UserService', () => {
 ```
 
 ### Mutation Testing (When Available)
+
 - **Mutation score**: Target >90% mutation test coverage
 - **Logic validation**: Ensure tests actually validate business logic
 - **Edge case coverage**: Tests should catch subtle bugs
@@ -254,6 +308,7 @@ describe('UserService', () => {
 ## Common Patterns & Examples
 
 ### Route Structure Template
+
 ```typescript
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
@@ -266,28 +321,33 @@ const ResponseSchema = z.object({
   // Define response schema
 });
 
-const routes: FastifyPluginAsync = async (fastify) => {
-  fastify.post('/endpoint', {
-    schema: {
-      body: RequestSchema,
-      response: { 201: ResponseSchema }
+const routes: FastifyPluginAsync = async fastify => {
+  fastify.post(
+    '/endpoint',
+    {
+      schema: {
+        body: RequestSchema,
+        response: { 201: ResponseSchema },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const data = RequestSchema.parse(request.body);
+        const result = await fastify.service.operation(data);
+        return reply.code(201).send(result);
+      } catch (error) {
+        fastify.log.error({ error }, 'Operation failed');
+        throw error; // Let Fastify handle error response
+      }
     }
-  }, async (request, reply) => {
-    try {
-      const data = RequestSchema.parse(request.body);
-      const result = await fastify.service.operation(data);
-      return reply.code(201).send(result);
-    } catch (error) {
-      fastify.log.error({ error }, 'Operation failed');
-      throw error; // Let Fastify handle error response
-    }
-  });
+  );
 };
 
 export default routes;
 ```
 
 ### Service Layer Template
+
 ```typescript
 export interface ServiceInterface {
   operation(data: InputType): Promise<OutputType>;
@@ -301,7 +361,7 @@ export class ServiceImplementation implements ServiceInterface {
 
   async operation(data: InputType): Promise<OutputType> {
     this.logger.info({ data: sanitizedData }, 'Starting operation');
-    
+
     try {
       const result = await this.db.collection.operation(data);
       this.logger.info({ resultId: result.id }, 'Operation completed');
@@ -315,6 +375,7 @@ export class ServiceImplementation implements ServiceInterface {
 ```
 
 ### Plugin Registration Template
+
 ```typescript
 import fp from 'fastify-plugin';
 
@@ -324,29 +385,34 @@ declare module 'fastify' {
   }
 }
 
-export default fp(async (fastify) => {
-  const service = new ServiceImplementation(
-    fastify.db,
-    fastify.log
-  );
+export default fp(
+  async fastify => {
+    const service = new ServiceImplementation(fastify.db, fastify.log);
 
-  fastify.decorate('serviceName', service);
-}, {
-  name: 'service-name',
-  dependencies: ['database'], // List plugin dependencies
-});
+    fastify.decorate('serviceName', service);
+  },
+  {
+    name: 'service-name',
+    dependencies: ['database'], // List plugin dependencies
+  }
+);
 ```
 
 ### Environment Configuration Template
+
 ```typescript
 import { z } from 'zod';
 
 const EnvSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.string().regex(/^\d+$/).transform(Number).default('3000'),
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(32),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
+    .default('info'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -364,6 +430,7 @@ export function validateEnv(): Env {
 ## Project Management Integration
 
 ### Linear MCP Integration
+
 - **Issue management**: Use `mcp__linear__create_issue` and `mcp__linear__update_issue`
 - **Branch naming**: Create branches that reference Linear issue IDs
 - **Progress tracking**: Update Linear issues as development progresses
@@ -380,6 +447,7 @@ git checkout -b feature/LIN-123-user-authentication
 ```
 
 ### GitHub CLI Integration
+
 - **PR creation**: Use `gh pr create` with proper templates
 - **Issue management**: Use `gh issue list` and `gh issue create`
 - **Repository operations**: Use `gh` commands for GitHub operations
@@ -391,6 +459,7 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 ```
 
 ### Commit and PR Standards
+
 - **Commit format**: Follow Conventional Commits: `type(scope): description`
 - **PR titles**: Include Linear issue reference
 - **PR descriptions**: Use template with Summary, Testing, and issue links
@@ -399,17 +468,20 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 ## Quality Pipeline Integration
 
 ### ESLint + Prettier (Formatting & Comprehensive Linting)
+
 - **Automatic formatting**: 2-space indentation, consistent style via Prettier
 - **TypeScript enforcement**: No `any` types, explicit return types, strict mode
 - **Security patterns**: Comprehensive security rule enforcement
 - **Custom architectural rules**: Environment access, Fastify patterns, input validation
 
 ### TypeScript (Type Safety)
+
 - **Strict mode**: All strict TypeScript options enabled
 - **No implicit any**: All types must be explicit
 - **Return type enforcement**: Public functions must declare return types
 
 ### Architectural Pattern Enforcement (via ESLint)
+
 - **Environment access**: Must use validated environment schemas (no direct process.env)
 - **Route validation**: All request.body usage requires Zod schemas
 - **Error handling**: Routes must use Fastify error patterns (no generic Error throws)
@@ -417,6 +489,7 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 - **Plugin patterns**: Fastify plugins must use fastify-plugin wrapper
 
 ### Security & Dependencies
+
 - **Security audits**: Regular `pnpm audit` checks for vulnerabilities
 - **Dependency validation**: Ensure no unused or outdated dependencies
 - **Bundle analysis**: Monitor bundle size and dependency health
@@ -424,6 +497,7 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 ## AI Agent Workflow
 
 ### Development Process
+
 1. **Start with Linear issue**: Create or reference existing Linear issue
 2. **Create feature branch**: Use `git checkout -b feature/LIN-XXX-description`
 3. **Quick validation**: Run `pnpm ai:quick` frequently during development
@@ -432,6 +506,7 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 6. **Use tools**: Leverage Linear MCP and GitHub CLI for project management
 
 ### Code Review Checklist
+
 - [ ] All quality checks pass (`pnpm ai:compliance`)
 - [ ] Tests added for new functionality
 - [ ] Documentation updated (if needed)
@@ -441,6 +516,7 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 - [ ] Input validation uses Zod schemas
 
 ### Common AI Pitfalls to Avoid
+
 - **Skipping validation**: Always include Zod schemas for inputs
 - **Generic errors**: Use specific error types and Fastify patterns
 - **Direct env access**: Use validated environment configuration
@@ -450,6 +526,7 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 ## Troubleshooting & Debugging
 
 ### Quality Check Failures
+
 ```bash
 # If ai:quick fails
 pnpm lint:fix          # Auto-fix formatting issues
@@ -464,12 +541,14 @@ pnpm build             # Check build issues
 ```
 
 ### Common Issues
+
 - **TypeScript errors**: Check for missing types, incorrect imports
 - **Validation failures**: Ensure Zod schemas match TypeScript interfaces
 - **Test failures**: Verify mocks and test data setup
 - **Build errors**: Check for circular dependencies and import issues
 
 ### Getting Help
+
 1. **Check pipeline output**: Look at specific error messages
 2. **Reference existing patterns**: Find similar implementations in codebase
 3. **Run individual checks**: Isolate the failing component
@@ -478,14 +557,16 @@ pnpm build             # Check build issues
 ## Success Metrics
 
 **Code Quality Indicators**:
+
 - ✅ All TypeScript strict mode checks pass
-- ✅ All Zod validations in place  
+- ✅ All Zod validations in place
 - ✅ No circular dependencies
 - ✅ >90% test coverage
 - ✅ Proper error handling with status codes
 - ✅ Clean separation of concerns
 
 **Development Velocity Indicators**:
+
 - ✅ `pnpm ai:quick` completes in <5 seconds
 - ✅ `pnpm ai:check` completes in <30 seconds
 - ✅ First-time PR success rate >90%

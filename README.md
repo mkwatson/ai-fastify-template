@@ -15,7 +15,7 @@ This template provides a production-ready foundation for building **LLM-powered 
 Modern AI coding assistants are powerful but can introduce subtle bugs, architectural violations, or security issues. This template provides:
 
 - **Immediate feedback loops** for AI agents through fail-fast pipelines
-- **Constraint-driven development** that guides AI toward correct patterns  
+- **Constraint-driven development** that guides AI toward correct patterns
 - **Comprehensive quality gates** that catch issues before they reach production
 - **Clear architectural boundaries** that prevent spaghetti code
 
@@ -79,19 +79,20 @@ ai-fastify-template/
 
 ## Technology Stack
 
-| Category | Tool | Status | Rationale |
-|----------|------|--------|-----------|
-| **Fast streaming API** | Fastify + fastify-sse | ✅ Active | Essential for real-time AI responses |
-| **Linting + Formatting** | ESLint + Prettier | ✅ Active | Industry standard with custom architectural rules |
-| **Early type safety** | TypeScript (strict) | ✅ Active | Catches AI-generated type errors immediately |
-| **Schema validation** | Zod (bodies & env) | 🔄 Planned | Runtime validation prevents silent failures |
-| **Guard against spaghetti** | dependency-cruiser | 🔄 Planned | Enforces clean architecture boundaries |
-| **High-trust tests** | Vitest | ✅ Active | Fast, modern testing framework |
-| **Task caching** | pnpm workspaces + TurboRepo | ✅ Active | Fast feedback for AI iteration cycles |
+| Category                    | Tool                        | Status     | Rationale                                         |
+| --------------------------- | --------------------------- | ---------- | ------------------------------------------------- |
+| **Fast streaming API**      | Fastify + fastify-sse       | ✅ Active  | Essential for real-time AI responses              |
+| **Linting + Formatting**    | ESLint + Prettier           | ✅ Active  | Industry standard with custom architectural rules |
+| **Early type safety**       | TypeScript (strict)         | ✅ Active  | Catches AI-generated type errors immediately      |
+| **Schema validation**       | Zod (bodies & env)          | 🔄 Planned | Runtime validation prevents silent failures       |
+| **Guard against spaghetti** | dependency-cruiser          | 🔄 Planned | Enforces clean architecture boundaries            |
+| **High-trust tests**        | Vitest                      | ✅ Active  | Fast, modern testing framework                    |
+| **Task caching**            | pnpm workspaces + TurboRepo | ✅ Active  | Fast feedback for AI iteration cycles             |
 
 ## Available Scripts
 
 ### Core Development
+
 ```bash
 # Development workflow
 pnpm dev              # Start all apps in development mode
@@ -105,6 +106,7 @@ pnpm type-check       # TypeScript compilation check
 ```
 
 ### Coming with Quality Tools (MAR-15+)
+
 ```bash
 # Advanced Quality Gates
 pnpm lint             # Code formatting and linting (ESLint + Prettier)
@@ -115,26 +117,31 @@ pnpm mutation         # Run mutation tests (if implemented)
 ## Workspace Structure
 
 ### Apps Directory (`apps/`)
+
 **Status: ✅ Active - Backend API implemented**
 
 Contains deployable applications:
+
 - **`backend-api/`** - Production-ready Fastify server with TypeScript
 - Each app has its own `package.json`
 - Apps can depend on packages but not other apps
 - Apps should be thin, delegating logic to packages
 
 ### Packages Directory (`packages/`)
+
 **Status: Empty - Shared packages planned for future development**
 
 Will contain shared libraries:
+
 - Reusable code across apps
 - Can depend on other packages
 - Should have clear, focused responsibilities
 
 ### Workspace Configuration
+
 ```yaml
 # pnpm-workspace.yaml
-packages: ["apps/*","packages/*"]
+packages: ['apps/*', 'packages/*']
 ```
 
 ## Development Workflow
@@ -147,7 +154,7 @@ mkdir apps/my-app
 cd apps/my-app
 pnpm init
 
-# Create new package  
+# Create new package
 mkdir packages/my-package
 cd packages/my-package
 pnpm init
@@ -169,18 +176,21 @@ pnpm install
 ## Architecture Principles
 
 ### AI-First Design
+
 - **Constraint-driven development** guides AI toward correct patterns
 - **Immediate feedback loops** through fail-fast pipelines
 - **Clear architectural boundaries** prevent violations
 - **Comprehensive validation** catches AI-generated errors
 
 ### Quality Gates (Planned)
+
 - **Strict TypeScript** - No `any` types, comprehensive checking
 - **Runtime Validation** - Zod schemas for all inputs
 - **Import Graph Validation** - Prevents circular dependencies
 - **Comprehensive Testing** - Unit, integration, and end-to-end
 
 ### Security First (Planned)
+
 - Environment variable validation
 - Input sanitization and validation
 - Secure defaults for all configurations
@@ -191,17 +201,20 @@ pnpm install
 This template is in **active development**. Current state:
 
 ✅ **Foundation Complete**
+
 - Monorepo structure with pnpm + TurboRepo
 - Comprehensive documentation
 - AI-first development guidelines
 
 ✅ **Backend API Complete (MAR-11)**
+
 - Production-ready Fastify server with TypeScript
 - Strict TypeScript configuration with enterprise standards
 - Comprehensive test setup with Vitest
 - Development and production scripts
 
 📋 **Next Steps**
+
 - Quality tooling (dependency-cruiser, mutation testing)
 - Zod validation patterns
 - SSE streaming capabilities
@@ -213,6 +226,7 @@ This template is in **active development**. Current state:
 ### Common Issues
 
 **No packages to build/test**
+
 ```bash
 # Expected - no apps/packages exist yet
 pnpm build  # Will show "0 packages"
@@ -220,6 +234,7 @@ pnpm test   # Will show "0 packages"
 ```
 
 **Getting Started**
+
 - Follow the plan.md for step-by-step implementation
 - Start with MAR-11 (Backend API) for first working application
 - Refer to docs/ for detailed guidelines
@@ -240,7 +255,7 @@ We maintain comprehensive, consistent coding guidelines across our three primary
 ### File Structure
 
 - **[`AGENTS.md`](./AGENTS.md)** – Authoritative source for all coding guidelines
-- **[`CLAUDE.md`](./CLAUDE.md)** – Imports `AGENTS.md` for Claude Code integration  
+- **[`CLAUDE.md`](./CLAUDE.md)** – Imports `AGENTS.md` for Claude Code integration
 - **[`.cursor/rules/default.mdc`](./.cursor/rules/default.mdc)** – References `AGENTS.md` for Cursor IDE
 
 ### Why This Structure?
@@ -253,13 +268,14 @@ We maintain comprehensive, consistent coding guidelines across our three primary
 ### Quality Integration
 
 Guidelines integrate with our quality pipeline:
+
 ```bash
 pnpm ai:quick      # Quick validation (lint + types + patterns)
 pnpm ai:check      # Standard validation (includes security)
 pnpm ai:compliance # Full compliance validation
 ```
 
-*Always edit AGENTS.md for shared guidelines. Tool-specific files should remain minimal imports/references.*
+_Always edit AGENTS.md for shared guidelines. Tool-specific files should remain minimal imports/references._
 
 ### Getting Help
 
@@ -277,4 +293,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Ready to build AI-powered applications?** This template provides the foundation you need. Follow the implementation plan in `plan.md` to add your first backend API. 
+**Ready to build AI-powered applications?** This template provides the foundation you need. Follow the implementation plan in `plan.md` to add your first backend API.

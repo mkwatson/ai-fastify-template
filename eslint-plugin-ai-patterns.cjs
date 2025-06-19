@@ -1,7 +1,7 @@
 /* eslint-env node */
 /**
  * ESLint Plugin for AI Fastify Template Architectural Patterns
- * 
+ *
  * Custom rules to enforce project-specific architectural constraints
  * that ensure code quality and maintainability for AI development.
  */
@@ -13,12 +13,14 @@ module.exports = {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Disallow direct process.env access outside of environment validation files',
+          description:
+            'Disallow direct process.env access outside of environment validation files',
           category: 'Best Practices',
           recommended: true,
         },
         messages: {
-          noDirectEnv: 'Direct process.env access found - use validated env schema instead',
+          noDirectEnv:
+            'Direct process.env access found - use validated env schema instead',
         },
         schema: [],
       },
@@ -31,7 +33,7 @@ module.exports = {
               node.object.property.name === 'env'
             ) {
               const filename = context.getFilename();
-              
+
               // Allow in env validation files and tests
               if (
                 filename.includes('env.ts') ||
@@ -42,7 +44,7 @@ module.exports = {
               ) {
                 return;
               }
-              
+
               context.report({
                 node,
                 messageId: 'noDirectEnv',
@@ -63,7 +65,8 @@ module.exports = {
           recommended: true,
         },
         messages: {
-          genericError: 'Generic Error throwing in routes - use Fastify error handling patterns (fastify.httpErrors)',
+          genericError:
+            'Generic Error throwing in routes - use Fastify error handling patterns (fastify.httpErrors)',
         },
         schema: [],
       },
@@ -71,7 +74,7 @@ module.exports = {
         return {
           ThrowStatement(node) {
             const filename = context.getFilename();
-            
+
             if (
               filename.includes('/routes/') &&
               node.argument.type === 'NewExpression' &&
@@ -92,12 +95,14 @@ module.exports = {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require Zod schema validation for routes using request.body',
+          description:
+            'Require Zod schema validation for routes using request.body',
           category: 'Best Practices',
           recommended: true,
         },
         messages: {
-          missingValidation: 'Route uses request.body without Zod schema validation',
+          missingValidation:
+            'Route uses request.body without Zod schema validation',
         },
         schema: [],
       },
@@ -105,14 +110,14 @@ module.exports = {
         return {
           Program(node) {
             const filename = context.getFilename();
-            
+
             if (!filename.includes('/routes/')) {
               return;
             }
-            
+
             const sourceCode = context.getSourceCode();
             const text = sourceCode.getText();
-            
+
             if (
               text.includes('request.body') &&
               !text.includes('schema:') &&
@@ -133,12 +138,14 @@ module.exports = {
       meta: {
         type: 'suggestion',
         docs: {
-          description: 'Enforce dependency injection via constructor in service classes',
+          description:
+            'Enforce dependency injection via constructor in service classes',
           category: 'Best Practices',
           recommended: true,
         },
         messages: {
-          missingDI: 'Service class should use dependency injection via constructor',
+          missingDI:
+            'Service class should use dependency injection via constructor',
         },
         schema: [],
       },
@@ -146,14 +153,14 @@ module.exports = {
         return {
           Program(node) {
             const filename = context.getFilename();
-            
+
             if (!filename.includes('/services/')) {
               return;
             }
-            
+
             const sourceCode = context.getSourceCode();
             const text = sourceCode.getText();
-            
+
             if (
               text.includes('new ') &&
               text.includes('class ') &&
@@ -187,14 +194,14 @@ module.exports = {
         return {
           Program(node) {
             const filename = context.getFilename();
-            
+
             if (!filename.includes('/plugins/')) {
               return;
             }
-            
+
             const sourceCode = context.getSourceCode();
             const text = sourceCode.getText();
-            
+
             if (
               text.includes('export default') &&
               !text.includes('fastify-plugin')

@@ -18,16 +18,19 @@ This document describes the architectural decisions, patterns, and principles th
 ### Core Principles
 
 1. **AI-First Development**
+
    - Constraint-driven design that guides AI agents toward correct patterns
    - Immediate feedback loops through fail-fast pipelines
    - Clear architectural boundaries that prevent violations
 
 2. **Quality by Design**
+
    - Comprehensive validation at every layer
    - Fail-fast approach to catch issues early
    - Automated quality gates that prevent regressions
 
 3. **Developer Experience**
+
    - Zero-config setup for common use cases
    - Clear, predictable patterns
    - Excellent tooling integration
@@ -121,6 +124,7 @@ Infrastructure:
 ### Package Boundaries
 
 Each package should have:
+
 - **Single responsibility**: One clear purpose
 - **Clear interface**: Well-defined public API
 - **Minimal dependencies**: Only essential external deps
@@ -130,30 +134,31 @@ Each package should have:
 
 ### Core Stack Rationale
 
-| Technology | Purpose | Why Chosen |
-|------------|---------|------------|
-| **Fastify** | Web framework | High performance, TypeScript-first, extensive plugins |
-| **TypeScript** | Language | Type safety, excellent tooling, catches errors early |
-| **pnpm** | Package manager | Fast, efficient, excellent monorepo support |
-| **TurboRepo** | Build system | Intelligent caching, parallel execution |
+| Technology            | Purpose            | Why Chosen                                                 |
+| --------------------- | ------------------ | ---------------------------------------------------------- |
+| **Fastify**           | Web framework      | High performance, TypeScript-first, extensive plugins      |
+| **TypeScript**        | Language           | Type safety, excellent tooling, catches errors early       |
+| **pnpm**              | Package manager    | Fast, efficient, excellent monorepo support                |
+| **TurboRepo**         | Build system       | Intelligent caching, parallel execution                    |
 | **ESLint + Prettier** | Linting/Formatting | Industry standard, extensive plugins, custom rules support |
-| **Zod** | Validation | Runtime type validation, excellent TS integration |
-| **Vitest** | Testing | Fast, modern, great TypeScript support |
+| **Zod**               | Validation         | Runtime type validation, excellent TS integration          |
+| **Vitest**            | Testing            | Fast, modern, great TypeScript support                     |
 
 ### Quality Tools
 
-| Tool | Purpose | Integration |
-|------|---------|-------------|
+| Tool                   | Purpose                 | Integration                             |
+| ---------------------- | ----------------------- | --------------------------------------- |
 | **dependency-cruiser** | Architecture validation | Prevents circular deps, enforces layers |
-| **Stryker** | Mutation testing | Ensures tests validate actual logic |
-| **Fern** | SDK generation | Auto-generates client SDKs from OpenAPI |
-| **Renovate** | Dependency updates | Automated, safe dependency management |
+| **Stryker**            | Mutation testing        | Ensures tests validate actual logic     |
+| **Fern**               | SDK generation          | Auto-generates client SDKs from OpenAPI |
+| **Renovate**           | Dependency updates      | Automated, safe dependency management   |
 
 ### Tooling Decision: ESLint + Prettier over Biome
 
 **What we tried**: Initially used Biome for unified formatting + linting to reduce tool complexity.
 
 **Why we reverted**:
+
 1. **Limited extensibility** - Couldn't enforce custom architectural patterns (env validation, Fastify error handling, etc.)
 2. **Forced custom scripts** - Had to write `validate-ai-patterns.cjs` to fill gaps, defeating the "fewer tools" goal
 3. **Ecosystem maturity** - ESLint's plugin ecosystem is vastly more mature for TypeScript + Fastify patterns
@@ -323,4 +328,4 @@ const EnvSchema = z.object({
 
 ---
 
-This architecture provides a solid foundation for building scalable, maintainable, and secure applications while optimizing for AI-assisted development workflows. 
+This architecture provides a solid foundation for building scalable, maintainable, and secure applications while optimizing for AI-assisted development workflows.

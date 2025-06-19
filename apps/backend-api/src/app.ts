@@ -1,10 +1,11 @@
-import { join } from "node:path";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import AutoLoad from "@fastify/autoload";
-import type { AutoloadPluginOptions } from "@fastify/autoload";
-import type { FastifyPluginAsync, FastifyServerOptions } from "fastify";
-import envPlugin from "./plugins/env.js";
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import AutoLoad from '@fastify/autoload';
+import type { AutoloadPluginOptions } from '@fastify/autoload';
+import type { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
+
+import envPlugin from './plugins/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,7 +18,7 @@ const options: AppOptions = {};
 
 const app: FastifyPluginAsync<AppOptions> = async (
   fastify,
-  opts,
+  opts
 ): Promise<void> => {
   // Register env plugin first
   await fastify.register(envPlugin);
@@ -30,7 +31,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // those should be support plugins that are reused
   // through your application
   void fastify.register(AutoLoad, {
-    dir: join(__dirname, "plugins"),
+    dir: join(__dirname, 'plugins'),
     ignorePattern: /.*env\.(ts|js)$/,
     options: opts,
   });
@@ -38,7 +39,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // This loads all plugins defined in routes
   // define your routes in one of these
   void fastify.register(AutoLoad, {
-    dir: join(__dirname, "routes"),
+    dir: join(__dirname, 'routes'),
     options: opts,
   });
 };

@@ -1,15 +1,16 @@
-import { afterAll, describe, expect, it } from "vitest";
-import { build } from "../helper.js";
+import { afterAll, describe, expect, it } from 'vitest';
 
-describe("Example route", () => {
-  it("should return example message", async () => {
+import { build } from '../helper.js';
+
+describe('Example route', () => {
+  it('should return example message', async () => {
     const app = await build({ after: afterAll });
 
     const res = await app.inject({
-      url: "/example",
+      url: '/example',
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.payload).toBe("this is an example");
+    expect(res.payload).toBe('this is an example');
   });
 });

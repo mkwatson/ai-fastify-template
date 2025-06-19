@@ -19,20 +19,20 @@ Built for **LLM-powered applications** that require secure backend infrastructur
 
 ## Tool Selection Rationale
 
-*Produce the smallest Fastify + TypeScript monorepo that maximizes AI agent success:*
+_Produce the smallest Fastify + TypeScript monorepo that maximizes AI agent success:_
 
-| Requirement | Tool(s) | Why This Choice |
-|-------------|---------|-----------------|
-| **Fast streaming API** | Fastify · fastify-sse | Essential for real-time AI responses |
-| **Linting + Formatting** | ESLint + Prettier | Industry standard with custom architectural rules |
-| **Early type safety** | TypeScript (`strict`) | Catches AI-generated type errors immediately |
-| **Schema validation** | Zod (bodies & env) | Runtime validation prevents silent failures |
-| **Guard against spaghetti** | dependency-cruiser | Enforces clean architecture boundaries |
-| **High-trust tests** | Vitest + Stryker | Mutation testing catches subtle AI logic errors |
-| **Generated SDK & docs** | Fern | Auto-sync client/server contracts |
-| **Task caching** | pnpm workspaces + TurboRepo | Fast feedback for AI iteration cycles |
-| **Automated updates** | Renovate | Keeps dependencies current without manual work |
-| **CI→CD** | GitHub Actions → Vercel | Simple, reliable deployment pipeline |
+| Requirement                 | Tool(s)                     | Why This Choice                                   |
+| --------------------------- | --------------------------- | ------------------------------------------------- |
+| **Fast streaming API**      | Fastify · fastify-sse       | Essential for real-time AI responses              |
+| **Linting + Formatting**    | ESLint + Prettier           | Industry standard with custom architectural rules |
+| **Early type safety**       | TypeScript (`strict`)       | Catches AI-generated type errors immediately      |
+| **Schema validation**       | Zod (bodies & env)          | Runtime validation prevents silent failures       |
+| **Guard against spaghetti** | dependency-cruiser          | Enforces clean architecture boundaries            |
+| **High-trust tests**        | Vitest + Stryker            | Mutation testing catches subtle AI logic errors   |
+| **Generated SDK & docs**    | Fern                        | Auto-sync client/server contracts                 |
+| **Task caching**            | pnpm workspaces + TurboRepo | Fast feedback for AI iteration cycles             |
+| **Automated updates**       | Renovate                    | Keeps dependencies current without manual work    |
+| **CI→CD**                   | GitHub Actions → Vercel     | Simple, reliable deployment pipeline              |
 
 Everything downstream (logging, deploy) fits these choices with zero overlap.
 
@@ -43,46 +43,49 @@ Each step below follows this **AI coding agent workflow** using Linear API, GitH
 ### **Per-Ticket Process (AI Agent)**
 
 1. **Get Ticket & Create Branch**
+
    ```bash
    # AI agent gets ticket details via Linear API
    # mcp_Linear_get_issue(id="ticket-id")
-   # mcp_Linear_get_issue_git_branch_name(id="ticket-id") 
-   
+   # mcp_Linear_get_issue_git_branch_name(id="ticket-id")
+
    # CRITICAL: Always start from latest main
    git checkout main
    git pull origin main
-   
+
    # Create and push branch from updated main
    git checkout -b mar-10-bootstrap-monorepo
    git push -u origin mar-10-bootstrap-monorepo
-   
+
    # Update Linear status via API
    # mcp_Linear_update_issue(id="ticket-id", stateId="in-progress-state-id")
    ```
 
 2. **Execute Work & Commit with Magic Words**
+
    ```bash
    # AI agent executes the technical steps
    # Uses run_terminal_cmd() for all commands
    # Uses edit_file() for code changes
-   
+
    # Atomic commits with Linear references
    git add .
    git commit -m "feat: initialize pnpm workspace (refs MAR-10)"
-   
+
    git add turbo.json
    git commit -m "feat: add TurboRepo pipeline (refs MAR-10)"
-   
+
    # Final commit auto-closes ticket on merge
    git commit -m "feat: complete monorepo bootstrap (fixes MAR-10)
 
    All acceptance criteria verified:
-   - ✅ pnpm workspace configured  
+   - ✅ pnpm workspace configured
    - ✅ TurboRepo pipeline added
    - ✅ Verification commands pass"
    ```
 
 3. **Create PR via GitHub API**
+
    ```bash
    # AI agent creates PR programmatically
    # mcp_GitHub_create_pull_request(
@@ -97,12 +100,13 @@ Each step below follows this **AI coding agent workflow** using Linear API, GitH
    ```bash
    # AI agent can check PR status
    # mcp_GitHub_get_pull_request_status()
-   # 
+   #
    # Human reviews and merges (or auto-merge if CI passes)
    # Linear automatically moves ticket to "Done" on merge
    ```
 
 ### **AI Agent Capabilities**
+
 - **Direct API access** to Linear (get tickets, update status, add comments)
 - **GitHub automation** (create branches, PRs, check status)
 - **Terminal execution** (run all build/test commands)
@@ -110,6 +114,7 @@ Each step below follows this **AI coding agent workflow** using Linear API, GitH
 - **Verification** (test commands, check acceptance criteria)
 
 ### **Quality Gates (Automated)**
+
 - AI agent verifies each acceptance criterion before proceeding
 - Continuous testing via `run_terminal_cmd()`
 - Atomic commits with descriptive messages
@@ -117,6 +122,7 @@ Each step below follows this **AI coding agent workflow** using Linear API, GitH
 - Zero human intervention required for routine tasks
 
 ### **Human Oversight Points**
+
 - **Code review** of AI-generated PRs
 - **Merge approval** (can be automated with proper CI)
 - **Strategic decisions** (scope changes, architecture choices)
@@ -252,7 +258,7 @@ git commit -m "chore: add Biome strict preset as sole formatter+lint"
 
 ## 4. AI-Specific Tooling & Guidelines
 
-*This step comes early to establish AI agent guidelines before adding complex logic.*
+_This step comes early to establish AI agent guidelines before adding complex logic._
 
 Create `.cursorrules` file in the root:
 
@@ -304,21 +310,25 @@ Create `docs/ai-guidelines.md`:
 This template uses strict constraints to guide AI agents toward maintainable, secure code:
 
 ### TypeScript Strict Mode
+
 - Catches type errors before runtime
 - Prevents `undefined` and `null` related bugs
 - Makes refactoring safer for AI agents
 
 ### Zod Validation
+
 - Runtime validation prevents silent failures
 - Clear error messages for debugging
 - Type inference reduces boilerplate
 
 ### Dependency Cruiser
+
 - Prevents circular dependencies
 - Enforces layered architecture
 - Catches import violations early
 
 ### Mutation Testing
+
 - Ensures tests actually validate logic
 - Catches subtle bugs AI agents often miss
 - Higher confidence in generated code
@@ -327,12 +337,16 @@ This template uses strict constraints to guide AI agents toward maintainable, se
 
 ### Effective Prompts
 ```
+
 "Add a new route that validates the request body with Zod and follows the existing error handling patterns"
+
 ```
 
 ### Less Effective Prompts
 ```
+
 "Add a route" (too vague, likely to skip validation)
+
 ```
 
 ### When AI Gets Stuck
@@ -383,10 +397,14 @@ import fp from 'fastify-plugin';
 import { z } from 'zod';
 
 const EnvSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.string().regex(/^\d+$/).transform(Number).default('3000'),
   HOST: z.string().default('localhost'),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
+    .default('info'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -397,18 +415,21 @@ declare module 'fastify' {
   }
 }
 
-export default fp(async (fastify) => {
-  try {
-    const config = EnvSchema.parse(process.env);
-    fastify.decorate('config', config);
-    fastify.log.info({ config }, 'Environment configuration loaded');
-  } catch (error) {
-    fastify.log.error({ error }, 'Invalid environment configuration');
-    throw error;
+export default fp(
+  async fastify => {
+    try {
+      const config = EnvSchema.parse(process.env);
+      fastify.decorate('config', config);
+      fastify.log.info({ config }, 'Environment configuration loaded');
+    } catch (error) {
+      fastify.log.error({ error }, 'Invalid environment configuration');
+      throw error;
+    }
+  },
+  {
+    name: 'env-plugin',
   }
-}, {
-  name: 'env-plugin'
-});
+);
 ```
 
 Update `src/app.ts` to use the new env plugin:
@@ -421,7 +442,7 @@ import envPlugin from './plugins/env';
 
 export type AppOptions = {
   // Place your custom options for app below here.
-}
+};
 
 const app: FastifyPluginAsync<AppOptions> = async (
   fastify,
@@ -435,14 +456,14 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    options: opts
+    options: opts,
   });
 
   // This loads all plugins defined in routes
   // define your routes in one of these
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'routes'),
-    options: opts
+    options: opts,
   });
 };
 
@@ -488,50 +509,63 @@ const StreamQuerySchema = z.object({
 const stream: FastifyPluginAsync = async (fastify): Promise<void> => {
   await fastify.register(require('@fastify/sse'));
 
-  fastify.get('/demo', {
-    schema: {
-      querystring: StreamQuerySchema,
-      response: {
-        200: {
-          type: 'string',
-          description: 'Server-sent events stream'
-        }
-      }
-    }
-  }, async (request, reply) => {
-    const { count, interval } = StreamQuerySchema.parse(request.query);
-    
-    reply.sse({ id: '0', data: JSON.stringify({ message: 'Stream started', timestamp: Date.now() }) });
-    
-    let currentCount = 0;
-    const streamInterval = setInterval(() => {
-      currentCount++;
-      const data = {
-        message: `Tick ${currentCount}`,
-        timestamp: Date.now(),
-        progress: currentCount / count
-      };
-      
-      reply.sse({ 
-        id: currentCount.toString(), 
-        data: JSON.stringify(data) 
-      });
-      
-      if (currentCount >= count) {
-        clearInterval(streamInterval);
-        reply.sse({ 
-          id: 'end', 
-          data: JSON.stringify({ message: 'Stream completed', timestamp: Date.now() }) 
-        });
-        reply.sseEnd();
-      }
-    }, interval);
+  fastify.get(
+    '/demo',
+    {
+      schema: {
+        querystring: StreamQuerySchema,
+        response: {
+          200: {
+            type: 'string',
+            description: 'Server-sent events stream',
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { count, interval } = StreamQuerySchema.parse(request.query);
 
-    // Cleanup on client disconnect
-    request.raw.on('close', () => {
-      clearInterval(streamInterval);
-  });
-  });
+      reply.sse({
+        id: '0',
+        data: JSON.stringify({
+          message: 'Stream started',
+          timestamp: Date.now(),
+        }),
+      });
+
+      let currentCount = 0;
+      const streamInterval = setInterval(() => {
+        currentCount++;
+        const data = {
+          message: `Tick ${currentCount}`,
+          timestamp: Date.now(),
+          progress: currentCount / count,
+        };
+
+        reply.sse({
+          id: currentCount.toString(),
+          data: JSON.stringify(data),
+        });
+
+        if (currentCount >= count) {
+          clearInterval(streamInterval);
+          reply.sse({
+            id: 'end',
+            data: JSON.stringify({
+              message: 'Stream completed',
+              timestamp: Date.now(),
+            }),
+          });
+          reply.sseEnd();
+        }
+      }, interval);
+
+      // Cleanup on client disconnect
+      request.raw.on('close', () => {
+        clearInterval(streamInterval);
+      });
+    }
+  );
 };
 
 export default stream;
@@ -581,24 +615,26 @@ export default defineConfig({
         'dist/',
         '**/*.d.ts',
         '**/*.config.*',
-        '**/coverage/**'
-      ]
-    }
-  }
+        '**/coverage/**',
+      ],
+    },
+  },
 });
 ```
 
 Create `apps/backend-api/src/utils/example.ts`:
 
 ```typescript
-export function calculateTotal(items: Array<{ price: number; quantity: number }>): number {
-  return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+export function calculateTotal(
+  items: Array<{ price: number; quantity: number }>
+): number {
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
 }
 
 export function formatCurrency(amount: number, currency = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency
+    currency,
   }).format(amount);
 }
 ```
@@ -621,7 +657,7 @@ describe('calculateTotal', () => {
   it('should calculate total for multiple items', () => {
     const items = [
       { price: 10, quantity: 2 },
-      { price: 5, quantity: 3 }
+      { price: 5, quantity: 3 },
     ];
     expect(calculateTotal(items)).toBe(35);
   });
@@ -659,7 +695,7 @@ describe('Stream routes', () => {
   it('should return 200 for stream demo endpoint', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/stream/demo?count=1&interval=100'
+      url: '/stream/demo?count=1&interval=100',
     });
 
     expect(response.statusCode).toBe(200);
@@ -669,7 +705,7 @@ describe('Stream routes', () => {
   it('should validate query parameters', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/stream/demo?count=invalid'
+      url: '/stream/demo?count=invalid',
     });
 
     expect(response.statusCode).toBe(400);
@@ -686,7 +722,7 @@ import App from '../src/app';
 
 export async function build(): Promise<FastifyInstance> {
   const app = Fastify({
-    logger: false // Disable logging in tests
+    logger: false, // Disable logging in tests
   });
 
   await app.register(fp(App));
@@ -764,6 +800,7 @@ npx depcruise --init
 Edit rules to forbid cycles & enforce routes→services→domain.
 
 Add script:
+
 ```
 "graph": "depcruise --validate ."
 ```
@@ -802,6 +839,7 @@ git commit -m "feat: integrate Fern to generate TS SDK + docs from OpenAPI"
 11. Turbo Tasks + Root Scripts
 
 Update turbo.json:
+
 ```
 {
   "tasks": {
@@ -826,12 +864,7 @@ git commit -m "chore: define fail-fast Turbo pipeline"
 
 ## 12. GitHub Actions CI + (optional) Vercel / npm Tokens
 
-Create `.github/workflows/ci.yml` with steps:
-	1.	Checkout
-	2.	pnpm install
-	3.	pnpm ci (runs lint→type→graph→test→mutation)
-	4.	fern-action (only on main if NPM_TOKEN set)
-	5.	Vercel deploy (only on main if VERCEL_TOKEN set)
+Create `.github/workflows/ci.yml` with steps: 1. Checkout 2. pnpm install 3. pnpm ci (runs lint→type→graph→test→mutation) 4. fern-action (only on main if NPM_TOKEN set) 5. Vercel deploy (only on main if VERCEL_TOKEN set)
 
 Push a branch, open PR—CI should be green.
 
@@ -855,9 +888,10 @@ git commit -m "chore: enable Renovate for dependency PRs"
 ```
 
 ## 14. Docs, License, Template Metadata
-	•	README.md (the story + quick start)
-	•	LICENSE (MIT)
-	•	.github/ISSUE_TEMPLATE.md optional
+
+    •	README.md (the story + quick start)
+    •	LICENSE (MIT)
+    •	.github/ISSUE_TEMPLATE.md optional
 
 Commit
 
@@ -866,10 +900,9 @@ git add README.md LICENSE
 git commit -m "docs: initial README and MIT license"
 ```
 
-## ✔️  Finished
+## ✔️ Finished
 
 Clone fresh, pnpm install, pnpm ci → everything passes without extra config.
 Add secrets only when you want auto-publishing to npm or deploying to Vercel.
 
 You now have a zero-conf, AI-guard-railed streaming API template ready for real features—or for the next experiment in agent-driven development.
-
