@@ -1,8 +1,0 @@
-node_modules/
-dist/
-build/
-.turbo/
-coverage/
-*.d.ts
-.eslintrc.js
-eslint-plugin-ai-patterns.js
