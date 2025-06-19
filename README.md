@@ -28,7 +28,8 @@ Built for **LLM-powered applications** that require secure backend infrastructur
 ### Prerequisites
 
 - **Node.js** >= 18.0.0
-- **pnpm** >= 8.0.0
+- **pnpm** >= 8.0.0  
+- **Python** >= 3.8 (for pre-commit hooks)
 
 ### Installation
 
@@ -37,8 +38,12 @@ Built for **LLM-powered applications** that require secure backend infrastructur
 git clone https://github.com/mkwatson/ai-fastify-template.git
 cd ai-fastify-template
 
-# Install dependencies
-pnpm install
+# Quick setup (recommended)
+pnpm setup:dev        # Installs dependencies + pre-commit hooks
+
+# OR manual setup
+pnpm install           # Install dependencies only
+pnpm hooks:install     # Install pre-commit hooks separately
 
 # Verify setup
 pnpm build --dry-run
@@ -58,6 +63,61 @@ pnpm type-check       # TypeScript compilation check
 # Quality assurance
 pnpm lint             # Code formatting and linting (ESLint + Prettier)
 pnpm clean            # Clean build artifacts
+```
+
+## 🛡️ Quality Gates
+
+This template includes **enterprise-grade quality gates** that run automatically to catch issues before they reach production:
+
+### Pre-commit Hooks
+
+**Automatic quality checks on every commit:**
+
+- 🔒 **GitLeaks** - Prevents credential leaks and secrets
+- 🎨 **ESLint + Prettier** - Auto-fixes formatting and linting issues
+- 🔷 **TypeScript** - Validates type safety
+- 📝 **Conventional Commits** - Enforces commit message standards
+- 📏 **File Hygiene** - Checks file sizes, trailing whitespace, YAML/JSON syntax
+- 🛡️ **Security Audit** - Scans dependencies for vulnerabilities
+
+### Quality Scripts
+
+```bash
+# Pre-commit hook management
+pnpm hooks:install      # Install git hooks (run once)
+pnpm hooks:run          # Run all hooks manually
+pnpm hooks:update       # Update hook versions
+
+# Development quality
+pnpm ai:quick           # Fast quality check (lint + type-check)
+pnpm ai:compliance      # Full compliance check (all quality gates)
+pnpm validate:commit    # Complete validation (hooks + compliance)
+
+# Emergency bypass (use sparingly!)
+git commit --no-verify  # Skip hooks for critical fixes
+```
+
+### Commit Message Format
+
+This project enforces **conventional commits** for clear change tracking:
+
+```bash
+# Valid commit types:
+feat(scope): add new feature
+fix(scope): bug fix
+docs(scope): documentation updates
+style(scope): formatting changes
+refactor(scope): code restructuring
+perf(scope): performance improvements
+test(scope): test updates
+build(scope): build system changes
+ci(scope): CI/CD changes
+chore(scope): maintenance tasks
+
+# Examples:
+git commit -m "feat(api): add user authentication endpoint"
+git commit -m "fix(hooks): resolve conventional commit validation"
+git commit -m "docs(readme): update installation instructions"
 ```
 
 ## Project Structure
@@ -94,7 +154,7 @@ ai-fastify-template/
 ### Core Development
 
 ```bash
-# Development workflow
+# Development workflow  
 pnpm dev              # Start all apps in development mode
 pnpm build            # Build all packages
 pnpm clean            # Clean build artifacts
@@ -103,13 +163,29 @@ pnpm clean            # Clean build artifacts
 pnpm test             # Run all test suites
 pnpm test:watch       # Run tests in watch mode
 pnpm type-check       # TypeScript compilation check
+pnpm lint             # Code formatting and linting (ESLint + Prettier)
 ```
 
-### Coming with Quality Tools (MAR-15+)
+### Pre-commit Hooks & Quality Gates
+
+```bash
+# Setup and management
+pnpm setup:dev        # Complete development setup (dependencies + hooks)
+pnpm hooks:install    # Install pre-commit hooks
+pnpm hooks:uninstall  # Remove pre-commit hooks
+pnpm hooks:update     # Update hook versions
+pnpm hooks:run        # Run all hooks manually
+
+# Quality validation
+pnpm ai:quick         # Fast quality check (lint + type-check)
+pnpm ai:compliance    # Full compliance check (all quality gates)  
+pnpm validate:commit  # Complete validation (hooks + compliance)
+```
+
+### Advanced Quality Tools (Planned)
 
 ```bash
 # Advanced Quality Gates
-pnpm lint             # Code formatting and linting (ESLint + Prettier)
 pnpm graph            # Validate import dependencies
 pnpm mutation         # Run mutation tests (if implemented)
 ```

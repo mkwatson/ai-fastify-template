@@ -23,6 +23,7 @@ Ensure you have the required tools installed:
 node --version    # >= 18.0.0
 pnpm --version    # >= 8.0.0
 git --version     # >= 2.0.0
+python3 --version # >= 3.8.0 (for pre-commit hooks)
 ```
 
 ### Initial Setup
@@ -32,7 +33,13 @@ git --version     # >= 2.0.0
    ```bash
    git clone https://github.com/mkwatson/ai-fastify-template.git
    cd ai-fastify-template
+   
+   # Quick setup (recommended)
+   pnpm setup:dev
+   
+   # OR manual setup
    pnpm install
+   pnpm hooks:install
    ```
 
 2. **Verify installation**
@@ -126,10 +133,16 @@ pnpm dev
    pnpm build
    ```
 
-3. **Commit changes**
+3. **Commit changes** (with quality gates)
    ```bash
    git add .
    git commit -m "feat(scope): description of changes"
+   # Pre-commit hooks will automatically run and validate:
+   # - GitLeaks credential scanning
+   # - ESLint + Prettier auto-fixing
+   # - TypeScript type checking
+   # - Conventional commit message validation
+   # - File hygiene checks
    ```
 
 ## Quality Assurance
@@ -165,6 +178,97 @@ pnpm mutation       # Mutation testing (if implemented)
 - **Testing**: >90% coverage, comprehensive test suites
 - **Architecture**: Clean dependencies, no cycles
 - **Performance**: Optimized builds, efficient caching
+
+## Pre-commit Hooks
+
+### Overview
+
+The project uses **enterprise-grade pre-commit hooks** that automatically run on every commit to ensure code quality and security:
+
+```bash
+# What runs on every commit:
+🔒 GitLeaks - Credential scanning
+🎨 ESLint + Prettier - Auto-fixing
+🔷 TypeScript - Type checking  
+📝 Conventional Commits - Message validation
+📏 File Hygiene - Size/format checks
+🛡️ Security Audit - Dependency scanning
+```
+
+### Hook Management
+
+```bash
+# Install hooks (one-time setup)
+pnpm hooks:install
+
+# Run hooks manually (without committing)
+pnpm hooks:run
+
+# Update hooks to latest versions
+pnpm hooks:update
+
+# Uninstall hooks (if needed)
+pnpm hooks:uninstall
+
+# Run specific hook
+pre-commit run gitleaks --all-files
+```
+
+### Commit Message Format
+
+We enforce **conventional commits** for clear change tracking:
+
+```bash
+# Format: type(scope): description
+feat(api): add user authentication endpoint
+fix(hooks): resolve validation issue
+docs(readme): update installation guide
+test(api): add endpoint validation tests
+perf(db): optimize query performance
+```
+
+**Valid types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+### Emergency Bypass
+
+**Use sparingly** and only for critical production fixes:
+
+```bash
+# Skip all hooks
+git commit --no-verify -m "hotfix: critical production issue"
+
+# Skip specific hooks
+SKIP=gitleaks git commit -m "work in progress"
+
+# Warning: Always fix the underlying issues afterward!
+```
+
+### Hook Performance
+
+Hooks are optimized for fast feedback:
+
+- **Typical execution time**: 5-15 seconds
+- **Only processes staged files** (not entire codebase)
+- **Parallel execution** where possible
+- **Cached results** for unchanged files
+
+### Troubleshooting Hooks
+
+```bash
+# Hook installation issues
+pip3 install pre-commit  # Install framework
+pnpm hooks:install       # Install git hooks
+
+# Hook execution issues
+pre-commit run --verbose  # See detailed output
+pre-commit clean          # Clear hook cache
+
+# Python/pre-commit not found
+brew install pre-commit   # macOS
+pipx install pre-commit   # Isolated install
+```
+
+For comprehensive troubleshooting, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
 ## Turbo Pipeline
 
