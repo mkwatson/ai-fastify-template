@@ -87,36 +87,16 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-    # ============================================================================
-  # COMMIT MESSAGE VALIDATION
-  # ============================================================================
-
-  # Conventional commit validation - TEMPORARILY DISABLED
-  # Issue: v4.0.0 has a bug parsing arguments (treats 'ci' as filename)
-  # TODO: Create follow-up ticket to resolve conventional commit validation
-  # - repo: https://github.com/compilerla/conventional-pre-commit
-  #   rev: v4.0.0
-  #   hooks:
-  #     - id: conventional-pre-commit
-  #       name: 📝 Conventional Commit Messages
-  #       description: Enforce conventional commit format
-  #       stages: [commit-msg]
-  #       args:
-  #         [
-  #           '--verbose',
-  #           '--scope',
-  #           'api,backend,frontend,docs,config,test,ci,scripts',
-  #           'feat',
-  #           'fix',
-  #           'refactor',
-  #           'perf',
-  #           'style',
-  #           'test',
-  #           'docs',
-  #           'build',
-  #           'chore',
-  #           'ci',
-  #         ]
+      # Conventional commit validation - WORKING SOLUTION
+      # Issue: Both conventional-pre-commit and commitizen pre-commit hooks have bugs
+      # Solution: Use local hook with commitizen check command (most reliable)
+      - id: commitizen-check
+        name: 📝 Conventional Commit Messages (Local)
+        description: Enforce conventional commit format using cz check
+        entry: cz check --commit-msg-file
+        language: system
+        stages: [commit-msg]
+        pass_filenames: true
 
   # ============================================================================
   # SECURITY & DEPENDENCY LAYER
