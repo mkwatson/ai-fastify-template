@@ -65,25 +65,43 @@ describe('Environment Plugin', () => {
     it('should reject invalid NODE_ENV values', async () => {
       process.env.NODE_ENV = 'invalid';
 
-      await expect(app.register(envPlugin)).rejects.toThrow(
-        'NODE_ENV must be one of: development, production, test'
-      );
+      try {
+        await app.register(envPlugin);
+        throw new Error('Expected registration to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toContain(
+          'NODE_ENV must be one of: development, production, test'
+        );
+      }
     });
 
     it('should reject invalid PORT values', async () => {
       process.env.PORT = 'not-a-number';
 
-      await expect(app.register(envPlugin)).rejects.toThrow(
-        'PORT must contain only numeric characters'
-      );
+      try {
+        await app.register(envPlugin);
+        throw new Error('Expected registration to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toContain(
+          'PORT must contain only numeric characters'
+        );
+      }
     });
 
     it('should reject invalid LOG_LEVEL values', async () => {
       process.env.LOG_LEVEL = 'invalid-level';
 
-      await expect(app.register(envPlugin)).rejects.toThrow(
-        'LOG_LEVEL must be one of: fatal, error, warn, info, debug, trace'
-      );
+      try {
+        await app.register(envPlugin);
+        throw new Error('Expected registration to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toContain(
+          'LOG_LEVEL must be one of: fatal, error, warn, info, debug, trace'
+        );
+      }
     });
 
     it('should reject PORT with non-numeric characters', async () => {

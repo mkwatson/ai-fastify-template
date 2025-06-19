@@ -91,10 +91,32 @@ repos:
   # COMMIT MESSAGE VALIDATION
   # ============================================================================
 
-  # Note: Conventional commit validation temporarily disabled due to hook configuration issues
-  # Will be re-enabled in a future update. For now, developers should follow conventional
-  # commit format manually: type(scope): description
-  # See docs/DEVELOPMENT.md for commit message guidelines
+  # Conventional commit validation - TEMPORARILY DISABLED
+  # Issue: v4.0.0 has a bug parsing arguments (treats 'ci' as filename)
+  # TODO: Create follow-up ticket to resolve conventional commit validation
+  # - repo: https://github.com/compilerla/conventional-pre-commit
+  #   rev: v4.0.0
+  #   hooks:
+  #     - id: conventional-pre-commit
+  #       name: 📝 Conventional Commit Messages
+  #       description: Enforce conventional commit format
+  #       stages: [commit-msg]
+  #       args:
+  #         [
+  #           '--verbose',
+  #           '--scope',
+  #           'api,backend,frontend,docs,config,test,ci,scripts',
+  #           'feat',
+  #           'fix',
+  #           'refactor',
+  #           'perf',
+  #           'style',
+  #           'test',
+  #           'docs',
+  #           'build',
+  #           'chore',
+  #           'ci',
+  #         ]
 
   # ============================================================================
   # SECURITY & DEPENDENCY LAYER
