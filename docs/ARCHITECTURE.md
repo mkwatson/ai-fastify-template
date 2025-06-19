@@ -67,7 +67,7 @@ This document describes the architectural decisions, patterns, and principles th
 ├─────────────────────────────────────────────────────────────┤
 │  Infrastructure Layer                                       │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
-│  │   TurboRepo │ │    pnpm     │ │   Biome     │           │
+│  │   TurboRepo │ │    pnpm     │ │ESLint+Pretty│           │
 │  │  (Caching)  │ │(Workspaces) │ │(Lint/Format)│           │
 │  └─────────────┘ └─────────────┘ └─────────────┘           │
 └─────────────────────────────────────────────────────────────┘
@@ -136,7 +136,7 @@ Each package should have:
 | **TypeScript** | Language | Type safety, excellent tooling, catches errors early |
 | **pnpm** | Package manager | Fast, efficient, excellent monorepo support |
 | **TurboRepo** | Build system | Intelligent caching, parallel execution |
-| **Biome** | Linting/Formatting | Single tool, fast, fewer conflicts than ESLint+Prettier |
+| **ESLint + Prettier** | Linting/Formatting | Industry standard, extensive plugins, custom rules support |
 | **Zod** | Validation | Runtime type validation, excellent TS integration |
 | **Vitest** | Testing | Fast, modern, great TypeScript support |
 
@@ -148,6 +148,19 @@ Each package should have:
 | **Stryker** | Mutation testing | Ensures tests validate actual logic |
 | **Fern** | SDK generation | Auto-generates client SDKs from OpenAPI |
 | **Renovate** | Dependency updates | Automated, safe dependency management |
+
+### Tooling Decision: ESLint + Prettier over Biome
+
+**What we tried**: Initially used Biome for unified formatting + linting to reduce tool complexity.
+
+**Why we reverted**:
+1. **Limited extensibility** - Couldn't enforce custom architectural patterns (env validation, Fastify error handling, etc.)
+2. **Forced custom scripts** - Had to write `validate-ai-patterns.cjs` to fill gaps, defeating the "fewer tools" goal
+3. **Ecosystem maturity** - ESLint's plugin ecosystem is vastly more mature for TypeScript + Fastify patterns
+4. **IDE integration** - Better editor support and real-time feedback with ESLint
+5. **Team familiarity** - Industry standard tooling reduces onboarding friction
+
+**Result**: ESLint + Prettier + custom rules = enterprise-grade enforcement without custom scripts. Better developer experience, more maintainable, industry standard.
 
 ## Quality Gates
 

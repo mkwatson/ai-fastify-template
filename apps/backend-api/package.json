@@ -20,7 +20,7 @@
     "dev": "fastify start -l info src/server.ts -w",
     "build": "tsc",
     "start": "node build/server.js",
-    "lint": "biome check .",
+    "lint": "eslint . && prettier --check .",
     "test": "pnpm build && vitest run",
     "test:watch": "vitest",
     "test:coverage": "pnpm build && vitest run --coverage",

@@ -201,15 +201,14 @@ throw new Error('Something went wrong'); // Too generic!
 pnpm ai:quick          # lint + type-check
 
 # Layer 2: Standard validation (<30 sec)  
-pnpm ai:check          # ai:quick + patterns + security
+pnpm ai:check          # ai:quick + security
 
 # Layer 3: Full validation
 pnpm ai:compliance     # ai:check + tests + build
 
 # Individual checks
-pnpm lint              # Biome formatting and linting
+pnpm lint              # ESLint + Prettier formatting and linting
 pnpm type-check        # TypeScript compilation
-pnpm ai:patterns       # Custom pattern validation
 pnpm test              # Unit and integration tests
 pnpm build             # Production build verification
 ```
@@ -399,21 +398,23 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 
 ## Quality Pipeline Integration
 
-### Biome (Formatting & Basic Linting)
-- **Automatic formatting**: 2-space indentation, consistent style
-- **No-any enforcement**: Configured to error on `any` types
-- **Import organization**: Automatic import sorting and cleanup
+### ESLint + Prettier (Formatting & Comprehensive Linting)
+- **Automatic formatting**: 2-space indentation, consistent style via Prettier
+- **TypeScript enforcement**: No `any` types, explicit return types, strict mode
+- **Security patterns**: Comprehensive security rule enforcement
+- **Custom architectural rules**: Environment access, Fastify patterns, input validation
 
 ### TypeScript (Type Safety)
 - **Strict mode**: All strict TypeScript options enabled
 - **No implicit any**: All types must be explicit
 - **Return type enforcement**: Public functions must declare return types
 
-### Custom Pattern Validation
-- **Environment access**: Must use validated environment schemas
+### Architectural Pattern Enforcement (via ESLint)
+- **Environment access**: Must use validated environment schemas (no direct process.env)
 - **Route validation**: All request.body usage requires Zod schemas
-- **Error handling**: Routes must use Fastify error patterns
-- **Service patterns**: Business logic must be in service layer
+- **Error handling**: Routes must use Fastify error patterns (no generic Error throws)
+- **Service patterns**: Business logic must be in service layer with dependency injection
+- **Plugin patterns**: Fastify plugins must use fastify-plugin wrapper
 
 ### Security & Dependencies
 - **Security audits**: Regular `pnpm audit` checks for vulnerabilities
@@ -454,8 +455,8 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 pnpm lint:fix          # Auto-fix formatting issues
 pnpm type-check        # Check TypeScript errors
 
-# If ai:check fails  
-pnpm ai:patterns       # Check custom pattern violations
+# If ai:check fails (less common now)
+pnpm lint              # Check ESLint rule violations
 
 # If ai:compliance fails
 pnpm test              # Run failing tests

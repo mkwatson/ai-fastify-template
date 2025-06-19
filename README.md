@@ -56,7 +56,7 @@ pnpm test             # Run all test suites
 pnpm type-check       # TypeScript compilation check
 
 # Quality assurance
-pnpm lint             # Code formatting and linting (Biome - coming soon)
+pnpm lint             # Code formatting and linting (ESLint + Prettier)
 pnpm clean            # Clean build artifacts
 ```
 
@@ -82,7 +82,7 @@ ai-fastify-template/
 | Category | Tool | Status | Rationale |
 |----------|------|--------|-----------|
 | **Fast streaming API** | Fastify + fastify-sse | ✅ Active | Essential for real-time AI responses |
-| **Single-binary format + lint** | Biome | 🔄 Planned | Faster than ESLint+Prettier, fewer conflicts |
+| **Linting + Formatting** | ESLint + Prettier | ✅ Active | Industry standard with custom architectural rules |
 | **Early type safety** | TypeScript (strict) | ✅ Active | Catches AI-generated type errors immediately |
 | **Schema validation** | Zod (bodies & env) | 🔄 Planned | Runtime validation prevents silent failures |
 | **Guard against spaghetti** | dependency-cruiser | 🔄 Planned | Enforces clean architecture boundaries |
@@ -107,7 +107,7 @@ pnpm type-check       # TypeScript compilation check
 ### Coming with Quality Tools (MAR-15+)
 ```bash
 # Advanced Quality Gates
-pnpm lint             # Code formatting and linting (Biome)
+pnpm lint             # Code formatting and linting (ESLint + Prettier)
 pnpm graph            # Validate import dependencies
 pnpm mutation         # Run mutation tests (if implemented)
 ```
@@ -202,7 +202,7 @@ This template is in **active development**. Current state:
 - Development and production scripts
 
 📋 **Next Steps**
-- Quality tooling (Biome, dependency-cruiser)
+- Quality tooling (dependency-cruiser, mutation testing)
 - Zod validation patterns
 - SSE streaming capabilities
 - Testing framework (Vitest)

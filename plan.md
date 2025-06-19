@@ -24,7 +24,7 @@ Built for **LLM-powered applications** that require secure backend infrastructur
 | Requirement | Tool(s) | Why This Choice |
 |-------------|---------|-----------------|
 | **Fast streaming API** | Fastify · fastify-sse | Essential for real-time AI responses |
-| **Single-binary format + lint** | Biome | Faster than ESLint+Prettier, fewer conflicts |
+| **Linting + Formatting** | ESLint + Prettier | Industry standard with custom architectural rules |
 | **Early type safety** | TypeScript (`strict`) | Catches AI-generated type errors immediately |
 | **Schema validation** | Zod (bodies & env) | Runtime validation prevents silent failures |
 | **Guard against spaghetti** | dependency-cruiser | Enforces clean architecture boundaries |
@@ -213,49 +213,26 @@ git add .
 git commit -m "feat(api): initial Fastify TS server (strict mode, Pino logs)"
 ```
 
-## 3. Add Biome (format + lint)
+## 3. Add ESLint + Prettier (format + lint)
 
-Install Biome as the single source of truth for code formatting and linting:
+**Note**: Originally planned to use Biome, but migrated to ESLint + Prettier for better architectural rule enforcement and ecosystem maturity.
+
+Install ESLint and Prettier with TypeScript support:
 
 ```bash
-pnpm add -Dw @biomejs/biome
+pnpm add -Dw eslint prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-plugin-security
 ```
 
-Create `biome.json` in the root:
-
-```json
-{
-  "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
-  "extends": ["@biomejs/strict"],
-  "files": {
-    "include": ["**/*.ts", "**/*.js", "**/*.json"],
-    "ignore": ["node_modules", "build", "dist", ".turbo"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noExplicitAny": "error"
-      }
-    }
-  }
-}
-```
+ESLint configuration is in `.eslintrc.js` with custom architectural rules and Prettier configuration is in `.prettierrc`.
 
 Add scripts to root `package.json`:
 
 ```json
 {
   "scripts": {
-    "lint": "biome check .",
-    "lint:fix": "biome check . --apply",
-    "format": "biome format . --write"
+    "lint": "eslint . && prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "format": "prettier --write ."
   }
 }
 ```
