@@ -326,29 +326,136 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 - **Test helpers**: Use shared test helpers for consistent app setup
 - **Zod validation testing**: Test input validation and error cases
 
+### 🚨 CRITICAL: AI Agent Testing Guidelines
+
+**The goal is not coverage, it's confidence.** Tests that don't fail when logic is broken are worse than no tests.
+
+#### Core Testing Principles
+
+1. **Test Behavior, Not Implementation**
+   - Focus on WHAT the code does, not HOW
+   - Tests should survive refactoring
+   - Mock only external dependencies
+
+2. **Edge Cases Are MANDATORY**
+   - Every function MUST test: null, undefined, empty, boundary values
+   - Use property-based testing for comprehensive coverage
+   - Test error conditions and recovery paths
+
+3. **Integration Tests Must Test Workflows**
+   - Not just "returns 200"
+   - Full create-read-update-delete cycles
+   - Error recovery scenarios
+   - Side effects validation
+
+#### AI Testing Anti-Patterns to Avoid
+
 ```typescript
-// ✅ Good: Unit test structure
+// ❌ BAD: Coverage theater - achieves 100% coverage but tests nothing
+it('should work', () => {
+  const result = calculateTax(100);
+  expect(result).toBeDefined();
+  expect(typeof result).toBe('number');
+});
+
+// ✅ GOOD: Logic validation
+it('should calculate 10% tax on standard items', () => {
+  const result = calculateTax(100, 'standard');
+  expect(result).toBe(10);
+});
+
+it('should calculate 0% tax on exempt items', () => {
+  const result = calculateTax(100, 'exempt');
+  expect(result).toBe(0);
+});
+
+it('should throw error for negative amounts', () => {
+  expect(() => calculateTax(-100, 'standard')).toThrow('Amount must be positive');
+});
+
+// ❌ BAD: Testing framework instead of business logic
+it('should return 200', async () => {
+  const response = await app.inject({ method: 'GET', url: '/users' });
+  expect(response.statusCode).toBe(200);
+});
+
+// ✅ GOOD: Testing complete workflow
+it('should create and retrieve user', async () => {
+  // Create user
+  const createResponse = await app.inject({
+    method: 'POST',
+    url: '/users',
+    payload: { email: 'test@example.com', name: 'Test User' }
+  });
+  
+  expect(createResponse.statusCode).toBe(201);
+  const { id } = JSON.parse(createResponse.payload);
+  
+  // Retrieve created user
+  const getResponse = await app.inject({
+    method: 'GET',
+    url: `/users/${id}`
+  });
+  
+  expect(getResponse.statusCode).toBe(200);
+  const user = JSON.parse(getResponse.payload);
+  expect(user).toMatchObject({
+    id,
+    email: 'test@example.com',
+    name: 'Test User'
+  });
+});
+```
+
+#### Test Quality Checklist
+
+Before approving any AI-generated test, verify:
+
+- [ ] **Does the test fail when the business logic is broken?**
+- [ ] **Would this test catch common production bugs?**
+- [ ] **Can the implementation be refactored without changing tests?**
+- [ ] **Are all edge cases covered?**
+- [ ] **Do integration tests verify complete workflows?**
+
+#### Test Structure Examples
+
+```typescript
+// ✅ Good: Unit test with edge cases
 import { describe, it, expect } from 'vitest';
 import { calculateTotal, type Item } from '../../src/utils/calculations.js';
 
 describe('calculateTotal', () => {
+  // Happy path
   it('should calculate total for multiple items', () => {
-    // Arrange
     const items: Item[] = [
       { price: 10, quantity: 2 },
       { price: 5.99, quantity: 3 },
     ];
+    expect(calculateTotal(items)).toBe(37.97);
+  });
 
-    // Act
-    const result = calculateTotal(items);
+  // REQUIRED edge cases
+  it('should return 0 for empty array', () => {
+    expect(calculateTotal([])).toBe(0);
+  });
 
-    // Assert
-    expect(result).toBe(37.97);
+  it('should handle single item', () => {
+    expect(calculateTotal([{ price: 10, quantity: 1 }])).toBe(10);
   });
 
   it('should throw error for negative price', () => {
     const items = [{ price: -10, quantity: 2 }];
     expect(() => calculateTotal(items)).toThrow('Price must be non-negative');
+  });
+
+  it('should throw error for negative quantity', () => {
+    const items = [{ price: 10, quantity: -2 }];
+    expect(() => calculateTotal(items)).toThrow('Quantity must be non-negative');
+  });
+
+  it('should handle decimal precision', () => {
+    const items = [{ price: 0.1, quantity: 3 }];
+    expect(calculateTotal(items)).toBeCloseTo(0.3, 2);
   });
 });
 
@@ -357,7 +464,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { type FastifyInstance } from 'fastify';
 import { build } from '../helper.js';
 
-describe('User routes', () => {
+describe('User routes - Complete Workflow', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
@@ -368,27 +475,104 @@ describe('User routes', () => {
     await app.close();
   });
 
-  it('should create user with valid data', async () => {
-    const response = await app.inject({
+  it('should handle complete user lifecycle', async () => {
+    // Create user
+    const createResponse = await app.inject({
       method: 'POST',
       url: '/users',
       payload: { email: 'test@example.com', name: 'Test User' },
     });
 
-    expect(response.statusCode).toBe(201);
-    expect(JSON.parse(response.payload)).toMatchObject({
+    expect(createResponse.statusCode).toBe(201);
+    const createdUser = JSON.parse(createResponse.payload);
+    expect(createdUser).toMatchObject({
+      id: expect.any(String),
       email: 'test@example.com',
       name: 'Test User',
+    });
+
+    // Update user
+    const updateResponse = await app.inject({
+      method: 'PUT',
+      url: `/users/${createdUser.id}`,
+      payload: { name: 'Updated Name' },
+    });
+
+    expect(updateResponse.statusCode).toBe(200);
+    const updatedUser = JSON.parse(updateResponse.payload);
+    expect(updatedUser.name).toBe('Updated Name');
+
+    // Delete user
+    const deleteResponse = await app.inject({
+      method: 'DELETE',
+      url: `/users/${createdUser.id}`,
+    });
+
+    expect(deleteResponse.statusCode).toBe(204);
+
+    // Verify deletion
+    const getResponse = await app.inject({
+      method: 'GET',
+      url: `/users/${createdUser.id}`,
+    });
+
+    expect(getResponse.statusCode).toBe(404);
+  });
+
+  it('should validate input and return structured errors', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: { 
+        email: 'invalid-email', 
+        name: 'a' // Too short
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    const error = JSON.parse(response.payload);
+    expect(error).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      validation: expect.arrayContaining([
+        expect.objectContaining({ field: 'email' }),
+        expect.objectContaining({ field: 'name' }),
+      ]),
     });
   });
 });
 ```
 
-### Mutation Testing (When Available)
+### Mutation Testing (Stryker)
 
-- **Mutation score**: Target >90% mutation test coverage
-- **Logic validation**: Ensure tests actually validate business logic
-- **Edge case coverage**: Tests should catch subtle bugs
+- **Mutation score**: Minimum 90% - enforced in CI
+- **Purpose**: Ensure tests actually validate business logic
+- **Configuration**: `stryker.config.mjs` with break threshold at 90%
+- **Run**: `pnpm test:mutation`
+
+#### Why Mutation Testing Matters
+
+```typescript
+// Original function
+function calculateDiscount(price: number, discount: number): number {
+  return price - (price * discount);
+}
+
+// Mutation: Changed * to +
+function calculateDiscount(price: number, discount: number): number {
+  return price - (price + discount); // BUG introduced by mutator
+}
+
+// ❌ Weak test (passes with mutation)
+it('should apply discount', () => {
+  expect(calculateDiscount(100, 0.1)).toBeLessThan(100);
+});
+
+// ✅ Strong test (fails with mutation)
+it('should calculate 10% discount correctly', () => {
+  expect(calculateDiscount(100, 0.1)).toBe(90);
+});
+```
 
 ## Common Patterns & Examples
 
