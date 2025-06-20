@@ -114,6 +114,21 @@ repos:
         pass_filenames: false
         stages: [manual] # Only run when explicitly requested
 
+  # ============================================================================
+  # COMMIT MESSAGE VALIDATION - WORKING SOLUTION
+  # ============================================================================
+
+  # Using Commitlint - mature tool purpose-built for commit message linting
+  # Part of the Conventional Changelog project ecosystem
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.22.0
+    hooks:
+      - id: commitlint
+        name: 📝 Conventional Commit Messages (Commitlint)
+        description: Enforce conventional commit format using Commitlint
+        stages: [commit-msg]
+        additional_dependencies: ['@commitlint/config-conventional']
+
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
@@ -139,31 +154,3 @@ exclude: |
 
 # Minimum supported pre-commit version
 minimum_pre_commit_version: 3.0.0
-
-# ============================================================================
-# COMMIT MESSAGE VALIDATION - TEMPORARILY DISABLED
-# ============================================================================
-
-# ISSUE: Multiple upstream bugs prevent reliable commit message validation:
-# - conventional-pre-commit v3.4.0/v4.0.0: Args parsing treats types as filenames
-# - commitizen pre-commit hook: Doesn't run in commit-msg stage (shows "no files to check")
-#
-# MANUAL ALTERNATIVES until upstream fixes:
-# 1. Use commitizen interactively: `npx cz commit` (recommended)
-# 2. Manual validation: `npx cz check --commit-msg-file .git/COMMIT_EDITMSG`
-# 3. Use `git commit` with conventional format manually
-#
-# TODO: Re-enable when upstream bugs are resolved
-# GitHub Issues:
-# - https://github.com/compilerla/conventional-pre-commit/issues/129
-# - commitizen pre-commit integration issues
-
-# - repo: local
-#   hooks:
-#     - id: commitizen-check
-#       name: 📝 Conventional Commit Messages
-#       description: Enforce conventional commit format
-#       entry: npx
-#       args: [cz, check, --commit-msg-file]
-#       language: system
-#       stages: [commit-msg]
