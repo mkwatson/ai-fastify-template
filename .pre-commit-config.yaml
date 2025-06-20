@@ -1,0 +1,156 @@
+# Pre-commit hooks for enterprise-grade quality gates
+# See https://pre-commit.com for more information
+# To install hooks: pre-commit install && pre-commit install --hook-type commit-msg
+# To run manually: pre-commit run --all-files
+
+fail_fast: true # Stop on first failure for faster feedback
+
+default_stages: [pre-commit]
+
+repos:
+  # ============================================================================
+  # SECURITY LAYER (Fail Fast)
+  # ============================================================================
+
+  # GitLeaks - Prevent credential leaks
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.27.2
+    hooks:
+      - id: gitleaks
+        name: 🔒 GitLeaks - Credential Scanning
+        description: Scan for secrets and credentials
+        stages: [pre-commit]
+
+  # ============================================================================
+  # FILE HYGIENE LAYER
+  # ============================================================================
+
+  # Built-in pre-commit hooks for basic file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        name: 📏 Check Large Files
+        description: Prevent accidentally adding large files
+        args: ['--maxkb=1000'] # 1MB limit
+
+      - id: check-merge-conflict
+        name: ⚔️ Check Merge Conflicts
+        description: Check for merge conflict markers
+
+      - id: end-of-file-fixer
+        name: 📄 Fix End of File
+        description: Ensure files end with newline
+        exclude: '\.lock$|\.yaml$|\.yml$'
+
+      - id: trailing-whitespace
+        name: ✂️ Trim Trailing Whitespace
+        description: Remove trailing whitespace
+        exclude: '\.lock$'
+
+      - id: check-yaml
+        name: 📋 Validate YAML
+        description: Check YAML syntax
+
+      - id: check-json
+        name: 📋 Validate JSON
+        description: Check JSON syntax
+        exclude: 'tsconfig\.json$' # TypeScript allows comments
+
+      - id: check-toml
+        name: 📋 Validate TOML
+        description: Check TOML syntax
+
+  # ============================================================================
+  # CODE QUALITY LAYER
+  # ============================================================================
+  # Local hooks for optimal performance with existing tooling
+  - repo: local
+    hooks:
+      # ESLint + Prettier integration
+      - id: eslint-prettier-fix
+        name: 🎨 ESLint + Prettier (Auto-fix)
+        description: Lint and format TypeScript/JavaScript files
+        entry: pnpm lint:fix
+        language: system
+        files: '\.(ts|js|mts|cts)$'
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # TypeScript type checking (fast mode)
+      - id: typescript-check
+        name: 🔷 TypeScript Check
+        description: Validate TypeScript types
+        entry: pnpm type-check
+        language: system
+        files: '\.(ts|mts|cts)$'
+        pass_filenames: false
+        stages: [pre-commit]
+
+  # ============================================================================
+  # COMMIT MESSAGE VALIDATION
+  # ============================================================================
+
+  # Enterprise-grade commit message validation using Commitlint
+  # Part of the Conventional Changelog project ecosystem
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.22.0
+    hooks:
+      - id: commitlint
+        name: 📝 Conventional Commit Messages
+        description: Enforce conventional commit format using Commitlint
+        stages: [commit-msg]
+        additional_dependencies: ['@commitlint/config-conventional']
+
+  # ============================================================================
+  # SECURITY & DEPENDENCY LAYER
+  # ============================================================================
+
+  # Additional security checks
+  - repo: local
+    hooks:
+      # Dependency security audit (when available)
+      - id: security-audit
+        name: 🛡️ Security Audit
+        description: Check for known vulnerabilities
+        entry: pnpm ai:security
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+        # Only run if audit-ci.json exists and npm audit is available
+        files: 'package\.json$|pnpm-lock\.yaml$'
+
+      # Check for TODO/FIXME/HACK comments in production code
+      - id: check-todos
+        name: 📝 Check TODOs
+        description: Flag TODO/FIXME/HACK comments for review
+        entry: 'grep -rn "TODO\|FIXME\|HACK\|XXX" --include="*.ts" --include="*.js" apps/ packages/ || true'
+        language: system
+        pass_filenames: false
+        stages: [manual] # Only run when explicitly requested
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+# Global excludes - files to never process
+exclude: |
+  (?x)^(
+    node_modules/.*|
+    \.git/.*|
+    \.turbo/.*|
+    \.next/.*|
+    \.nuxt/.*|
+    dist/.*|
+    build/.*|
+    \.vscode/.*|
+    \.idea/.*|
+    coverage/.*|
+    \.nyc_output/.*|
+    .*\.lock$|
+    .*\.log$|
+    .*\.cache.*
+  )$
+
+# Minimum supported pre-commit version
+minimum_pre_commit_version: 3.0.0
