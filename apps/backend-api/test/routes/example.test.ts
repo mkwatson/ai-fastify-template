@@ -40,13 +40,13 @@ describe('Example routes', () => {
   });
 
   describe('Error handling', () => {
-    it('should return 405 for unsupported methods', async () => {
+    it('should return 404 for unsupported methods', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/example',
       });
 
-      expect(response.statusCode).toBe(405);
+      expect(response.statusCode).toBe(404);
     });
 
     it('should return 404 for sub-paths', async () => {

@@ -4,7 +4,7 @@ import {
   isValidEmail,
   isValidUrl,
   isValidPhoneNumber,
-  validatePasswordStrength
+  validatePasswordStrength,
 } from '../../src/utils/validators.js';
 
 describe('isValidEmail', () => {
@@ -85,25 +85,33 @@ describe('validatePasswordStrength', () => {
   it('should reject password without uppercase', () => {
     const result = validatePasswordStrength('nouppercasehere1!');
     expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one uppercase letter');
+    expect(result.errors).toContain(
+      'Password must contain at least one uppercase letter'
+    );
   });
 
   it('should reject password without lowercase', () => {
     const result = validatePasswordStrength('NOLOWERCASEHERE1!');
     expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one lowercase letter');
+    expect(result.errors).toContain(
+      'Password must contain at least one lowercase letter'
+    );
   });
 
   it('should reject password without numbers', () => {
     const result = validatePasswordStrength('NoNumbersHere!');
     expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one number');
+    expect(result.errors).toContain(
+      'Password must contain at least one number'
+    );
   });
 
   it('should reject password without special characters', () => {
     const result = validatePasswordStrength('NoSpecialChars123');
     expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Password must contain at least one special character');
+    expect(result.errors).toContain(
+      'Password must contain at least one special character'
+    );
   });
 
   it('should return multiple errors for weak password', () => {
@@ -111,8 +119,14 @@ describe('validatePasswordStrength', () => {
     expect(result.isValid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(1);
     expect(result.errors).toContain('Password must be at least 8 characters');
-    expect(result.errors).toContain('Password must contain at least one uppercase letter');
-    expect(result.errors).toContain('Password must contain at least one number');
-    expect(result.errors).toContain('Password must contain at least one special character');
+    expect(result.errors).toContain(
+      'Password must contain at least one uppercase letter'
+    );
+    expect(result.errors).toContain(
+      'Password must contain at least one number'
+    );
+    expect(result.errors).toContain(
+      'Password must contain at least one special character'
+    );
   });
 });

@@ -1,10 +1,20 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  esbuild: {
+    target: 'node18',
+  },
   test: {
     globals: true,
     environment: 'node',
     include: ['apps/**/test/**/*.test.ts'],
+    // Use tsx for TypeScript runtime support
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     exclude: [
       'node_modules/',
       'build/',

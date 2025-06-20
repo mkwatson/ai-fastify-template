@@ -62,11 +62,17 @@ export function formatFileSize(bytes: number): string {
 
   // Use specific unit strings to avoid object injection
   switch (unitIndex) {
-    case 0: return `${size.toFixed(1)} B`;
-    case 1: return `${size.toFixed(1)} KB`;
-    case 2: return `${size.toFixed(1)} MB`;
-    case 3: return `${size.toFixed(1)} GB`;
-    case 4: return `${size.toFixed(1)} TB`;
-    default: return `${size.toFixed(1)} B`;
+    case 0:
+      return `${size.toFixed(1)} B`;
+    case 1:
+      return `${size.toFixed(1)} KB`;
+    case 2:
+      return `${size.toFixed(1)} MB`;
+    case 3:
+      return `${size.toFixed(1)} GB`;
+    case 4:
+      return `${size.toFixed(1)} TB`;
+    default:
+      return `${size.toFixed(1)} B`;
   }
 }

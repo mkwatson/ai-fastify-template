@@ -31,10 +31,12 @@ export function isValidUrl(url: string): boolean {
 /**
  * Phone number validation (simple US format)
  */
-export const PhoneSchema = z.string().regex(
-  /^\+?1?[-.\s]?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/,
-  'Invalid phone number format'
-);
+export const PhoneSchema = z
+  .string()
+  .regex(
+    /^\+?1?[-.\s]?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/,
+    'Invalid phone number format'
+  );
 
 export function isValidPhoneNumber(phone: string): boolean {
   try {
@@ -48,12 +50,16 @@ export function isValidPhoneNumber(phone: string): boolean {
 /**
  * Password strength validation
  */
-export const PasswordSchema = z.string()
+export const PasswordSchema = z
+  .string()
   .min(8, 'Password must be at least 8 characters')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[0-9]/, 'Password must contain at least one number')
-  .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
+  .regex(
+    /[^A-Za-z0-9]/,
+    'Password must contain at least one special character'
+  );
 
 export function validatePasswordStrength(password: string): {
   isValid: boolean;

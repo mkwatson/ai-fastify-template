@@ -4,7 +4,7 @@ import {
   formatCurrency,
   formatPercentage,
   formatFileSize,
-  type Currency
+  type Currency,
 } from '../../src/utils/formatters.js';
 
 describe('formatCurrency', () => {
@@ -23,7 +23,7 @@ describe('formatCurrency', () => {
   });
 
   it('should handle negative amounts', () => {
-    expect(formatCurrency(-100.50)).toBe('-$100.50');
+    expect(formatCurrency(-100.5)).toBe('-$100.50');
   });
 
   it('should handle very large numbers', () => {
@@ -46,7 +46,9 @@ describe('formatCurrency', () => {
   });
 
   it('should throw error for non-finite amounts', () => {
-    expect(() => formatCurrency(Infinity)).toThrow('Amount must be a finite number');
+    expect(() => formatCurrency(Infinity)).toThrow(
+      'Amount must be a finite number'
+    );
     expect(() => formatCurrency(NaN)).toThrow('Amount must be a finite number');
   });
 
@@ -79,13 +81,21 @@ describe('formatPercentage', () => {
   });
 
   it('should throw error for non-finite values', () => {
-    expect(() => formatPercentage(Infinity)).toThrow('Value must be a finite number');
-    expect(() => formatPercentage(NaN)).toThrow('Value must be a finite number');
+    expect(() => formatPercentage(Infinity)).toThrow(
+      'Value must be a finite number'
+    );
+    expect(() => formatPercentage(NaN)).toThrow(
+      'Value must be a finite number'
+    );
   });
 
   it('should throw error for invalid decimal places', () => {
-    expect(() => formatPercentage(0.5, -1)).toThrow('Decimals must be between 0 and 10');
-    expect(() => formatPercentage(0.5, 11)).toThrow('Decimals must be between 0 and 10');
+    expect(() => formatPercentage(0.5, -1)).toThrow(
+      'Decimals must be between 0 and 10'
+    );
+    expect(() => formatPercentage(0.5, 11)).toThrow(
+      'Decimals must be between 0 and 10'
+    );
   });
 });
 
@@ -120,10 +130,14 @@ describe('formatFileSize', () => {
   });
 
   it('should throw error for negative bytes', () => {
-    expect(() => formatFileSize(-100)).toThrow('Bytes must be a non-negative integer');
+    expect(() => formatFileSize(-100)).toThrow(
+      'Bytes must be a non-negative integer'
+    );
   });
 
   it('should throw error for non-integer bytes', () => {
-    expect(() => formatFileSize(100.5)).toThrow('Bytes must be a non-negative integer');
+    expect(() => formatFileSize(100.5)).toThrow(
+      'Bytes must be a non-negative integer'
+    );
   });
 });

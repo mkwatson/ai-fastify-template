@@ -13,7 +13,9 @@ const defaultConfig: Partial<AppOptions> = {
  * Build a Fastify app instance for testing
  * This replaces the fastify-cli helper for better Vitest integration
  */
-export async function build(config: Partial<AppOptions> = {}): Promise<FastifyInstance> {
+export async function build(
+  config: Partial<AppOptions> = {}
+): Promise<FastifyInstance> {
   const app = Fastify({
     ...defaultConfig,
     ...config,

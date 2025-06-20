@@ -7,6 +7,9 @@ import fp from 'fastify-plugin';
  *
  * @see https://github.com/fastify/fastify-sensible
  */
-export default fp<FastifySensibleOptions>(async fastify => {
-  fastify.register(sensible);
-});
+export default fp<FastifySensibleOptions>(
+  // eslint-disable-next-line require-await
+  async fastify => {
+    fastify.register(sensible);
+  }
+);

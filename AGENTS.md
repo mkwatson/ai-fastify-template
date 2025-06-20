@@ -214,6 +214,36 @@ throw new Error('Something went wrong'); // Too generic!
 - **Parameterized queries**: No string concatenation for database queries
 - **Secure headers**: Use Fastify security plugins
 
+### Enterprise Security Guardrails
+
+The project implements comprehensive security scanning and validation at multiple layers:
+
+**Pre-commit Security Hooks:**
+
+- **GitLeaks credential scanning**: Prevents accidental commit of secrets, API keys, tokens
+- **File hygiene validation**: Blocks large files (>1MB), detects merge conflicts
+- **Configuration validation**: YAML/JSON syntax verification prevents config corruption
+- **Dependency auditing**: Automatic vulnerability scanning with `audit-ci`
+
+**ESLint Security Rules:**
+
+- **Object injection protection**: `security/detect-object-injection`
+- **Regex safety**: `security/detect-unsafe-regex` and `security/detect-non-literal-regexp`
+- **Custom architectural patterns**: Enforces secure coding practices specific to this project
+
+**Runtime Security:**
+
+- **Environment validation**: All environment variables validated with Zod schemas
+- **Input validation**: Request body validation mandatory via custom ESLint rules
+- **Error handling**: Fastify-specific error patterns enforced by linting rules
+
+```bash
+# Security validation commands
+pnpm ai:security          # Run dependency audit
+npx gitleaks detect       # Scan for credentials (automatic in pre-commit)
+pnpm lint                 # Security linting rules
+```
+
 ## Testing & Validation Standards
 
 ### Quality Pipeline Commands
@@ -241,17 +271,31 @@ pnpm build             # Production build verification
 
 Our ESLint configuration includes comprehensive rules specifically designed for AI coding agents:
 
+**Advanced TypeScript Rules (Type-Aware):**
+
+- Nullish coalescing enforcement (`@typescript-eslint/prefer-nullish-coalescing`)
+- Optional chaining patterns (`@typescript-eslint/prefer-optional-chain`)
+- Unnecessary condition detection (`@typescript-eslint/no-unnecessary-condition`)
+- Floating promise prevention (`@typescript-eslint/no-floating-promises`)
+- Readonly property enforcement (`@typescript-eslint/prefer-readonly`)
+
 **Import Organization & Dependencies:**
 
 - Import grouping and alphabetization
 - Circular dependency detection (`import/no-cycle`)
 - Duplicate import prevention (`import/no-duplicates`)
 
+**Node.js Best Practices (eslint-plugin-n):**
+
+- Deprecated API detection (`n/no-deprecated-api`)
+- Extraneous import prevention (`n/no-extraneous-import`)
+- Global preference enforcement (`n/prefer-global/process`, `n/prefer-global/console`)
+
 **Async/Await Best Practices:**
 
 - Promise executor validation
 - Proper async/await usage patterns
-- Promise handling enforcement
+- Promise handling enforcement (`promise/always-return`, `promise/catch-or-return`)
 
 **Performance & Security:**
 

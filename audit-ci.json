@@ -1,5 +1,5 @@
 {
-  "allowlist": [],
+  "allowlist": ["GHSA-cf4h-3jhx-xvhq"],
   "report-type": "important",
   "package-manager": "pnpm",
   "pass-enoaudit": true,

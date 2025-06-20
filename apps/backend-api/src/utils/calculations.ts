@@ -18,7 +18,7 @@ export function calculateTotal(items: Item[]): number {
   const validatedItems = ItemsArraySchema.parse(items);
 
   return validatedItems.reduce((total, item) => {
-    return total + (item.price * item.quantity);
+    return total + item.price * item.quantity;
   }, 0);
 }
 
@@ -37,7 +37,10 @@ export function calculateTotalWithTax(items: Item[], taxRate: number): number {
 /**
  * Calculate discount amount
  */
-export function calculateDiscount(amount: number, discountPercentage: number): number {
+export function calculateDiscount(
+  amount: number,
+  discountPercentage: number
+): number {
   if (discountPercentage < 0 || discountPercentage > 100) {
     throw new Error('Discount percentage must be between 0 and 100');
   }

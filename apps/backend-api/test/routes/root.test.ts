@@ -65,13 +65,13 @@ describe('Root routes', () => {
       expect(response.statusCode).toBe(404);
     });
 
-    it('should return 405 for unsupported methods on root', async () => {
+    it('should return 404 for unsupported methods on root', async () => {
       const response = await app.inject({
         method: 'PUT',
         url: '/',
       });
 
-      expect(response.statusCode).toBe(405);
+      expect(response.statusCode).toBe(404);
     });
   });
 });

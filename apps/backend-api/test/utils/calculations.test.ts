@@ -4,7 +4,7 @@ import {
   calculateTotal,
   calculateTotalWithTax,
   calculateDiscount,
-  type Item
+  type Item,
 } from '../../src/utils/calculations.js';
 
 describe('calculateTotal', () => {
@@ -13,7 +13,7 @@ describe('calculateTotal', () => {
   });
 
   it('should calculate total for single item', () => {
-    const items: Item[] = [{ price: 10.50, quantity: 2 }];
+    const items: Item[] = [{ price: 10.5, quantity: 2 }];
     expect(calculateTotal(items)).toBe(21);
   });
 
@@ -21,7 +21,7 @@ describe('calculateTotal', () => {
     const items: Item[] = [
       { price: 10, quantity: 2 },
       { price: 5.99, quantity: 3 },
-      { price: 15.50, quantity: 1 },
+      { price: 15.5, quantity: 1 },
     ];
     expect(calculateTotal(items)).toBe(53.47);
   });
@@ -49,7 +49,9 @@ describe('calculateTotal', () => {
 
   it('should throw error for negative quantity', () => {
     const items = [{ price: 10, quantity: -2 }];
-    expect(() => calculateTotal(items)).toThrow('Quantity must be a non-negative integer');
+    expect(() => calculateTotal(items)).toThrow(
+      'Quantity must be a non-negative integer'
+    );
   });
 
   it('should throw error for non-integer quantity', () => {
@@ -74,11 +76,15 @@ describe('calculateTotalWithTax', () => {
   });
 
   it('should throw error for negative tax rate', () => {
-    expect(() => calculateTotalWithTax(items, -0.1)).toThrow('Tax rate must be between 0 and 1');
+    expect(() => calculateTotalWithTax(items, -0.1)).toThrow(
+      'Tax rate must be between 0 and 1'
+    );
   });
 
   it('should throw error for tax rate over 100%', () => {
-    expect(() => calculateTotalWithTax(items, 1.5)).toThrow('Tax rate must be between 0 and 1');
+    expect(() => calculateTotalWithTax(items, 1.5)).toThrow(
+      'Tax rate must be between 0 and 1'
+    );
   });
 });
 
@@ -97,10 +103,14 @@ describe('calculateDiscount', () => {
   });
 
   it('should throw error for negative discount percentage', () => {
-    expect(() => calculateDiscount(100, -10)).toThrow('Discount percentage must be between 0 and 100');
+    expect(() => calculateDiscount(100, -10)).toThrow(
+      'Discount percentage must be between 0 and 100'
+    );
   });
 
   it('should throw error for discount percentage over 100', () => {
-    expect(() => calculateDiscount(100, 150)).toThrow('Discount percentage must be between 0 and 100');
+    expect(() => calculateDiscount(100, 150)).toThrow(
+      'Discount percentage must be between 0 and 100'
+    );
   });
 });
