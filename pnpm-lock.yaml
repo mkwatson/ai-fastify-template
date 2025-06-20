@@ -77,9 +77,15 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.5.3
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.3
       turbo:
         specifier: ^2.5.4
         version: 2.5.4
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.3(@types/node@22.15.31)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
 
   apps/backend-api:
     dependencies:

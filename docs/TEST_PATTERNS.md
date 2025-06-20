@@ -63,12 +63,10 @@ export class UserBuilder {
 
 // Usage in tests
 it('should promote user to admin', async () => {
-  const user = new UserBuilder()
-    .withRole('user')
-    .build();
-  
+  const user = new UserBuilder().withRole('user').build();
+
   const promotedUser = await userService.promoteToAdmin(user.id);
-  
+
   expect(promotedUser.role).toBe('admin');
 });
 ```
@@ -105,9 +103,7 @@ export class OrderMother {
 
   static highValue(): Order {
     return new OrderBuilder()
-      .withItems([
-        { productId: 'luxury-1', quantity: 1, price: 1000 },
-      ])
+      .withItems([{ productId: 'luxury-1', quantity: 1, price: 1000 }])
       .withPriority('high')
       .build();
   }
@@ -141,14 +137,14 @@ describe('Async Error Handling', () => {
 
   it('should handle timeout errors', async () => {
     vi.useFakeTimers();
-    
+
     const promise = fetchWithTimeout('https://slow-api.com', 1000);
-    
+
     // Fast-forward time
     vi.advanceTimersByTime(1001);
-    
+
     await expect(promise).rejects.toThrow('Request timeout');
-    
+
     vi.useRealTimers();
   });
 });
@@ -158,18 +154,18 @@ describe('Async Error Handling', () => {
 
 ```typescript
 describe('Event Emitter Error Handling', () => {
-  it('should handle errors in event listeners', (done) => {
+  it('should handle errors in event listeners', done => {
     const emitter = new EventEmitter();
-    
-    emitter.on('error', (error) => {
+
+    emitter.on('error', error => {
       expect(error.message).toBe('Processing failed');
       done();
     });
-    
+
     emitter.on('data', () => {
       throw new Error('Processing failed');
     });
-    
+
     emitter.emit('data', { id: 1 });
   });
 });
@@ -194,10 +190,11 @@ describe('UserService', () => {
 
   it('should validate email before saving', async () => {
     const invalidUser = { email: 'not-an-email', name: 'Test' };
-    
-    await expect(userService.create(invalidUser))
-      .rejects.toThrow('Invalid email format');
-    
+
+    await expect(userService.create(invalidUser)).rejects.toThrow(
+      'Invalid email format'
+    );
+
     // Verify database was never called
     expect(mockDb.users.create).not.toHaveBeenCalled();
   });
@@ -210,13 +207,13 @@ describe('UserService', () => {
 describe('EmailService', () => {
   it('should log email sending', async () => {
     const logSpy = vi.spyOn(logger, 'info');
-    
+
     await emailService.send({
       to: 'user@example.com',
       subject: 'Welcome',
       body: 'Welcome to our service!',
     });
-    
+
     expect(logSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         event: 'email_sent',
@@ -241,7 +238,7 @@ describe('Discount Calculator Properties', () => {
     fc.assert(
       fc.property(
         fc.float({ min: 0, max: 10000 }), // price
-        fc.float({ min: 0, max: 1 }),     // discount percentage
+        fc.float({ min: 0, max: 1 }), // discount percentage
         (price, discountPercent) => {
           const discount = calculateDiscount(price, discountPercent);
           expect(discount).toBeLessThanOrEqual(price);
@@ -253,14 +250,11 @@ describe('Discount Calculator Properties', () => {
 
   it('should be idempotent', () => {
     fc.assert(
-      fc.property(
-        fc.float({ min: 0, max: 10000 }),
-        (price) => {
-          const once = applyRounding(price);
-          const twice = applyRounding(once);
-          expect(twice).toBe(once);
-        }
-      )
+      fc.property(fc.float({ min: 0, max: 10000 }), price => {
+        const once = applyRounding(price);
+        const twice = applyRounding(once);
+        expect(twice).toBe(once);
+      })
     );
   });
 });
@@ -279,7 +273,7 @@ describe('Shopping Cart Model', () => {
           fc.constant(new UpdateQuantityCommand()),
           fc.constant(new ClearCartCommand()),
         ]),
-        (commands) => {
+        commands => {
           const cart = new ShoppingCart();
           const model = new CartModel();
 
@@ -383,7 +377,7 @@ describe('User API Consumer', () => {
         },
       });
 
-    await provider.executeTest(async (mockServer) => {
+    await provider.executeTest(async mockServer => {
       const user = await fetchUser(mockServer.url, '123');
       expect(user.email).toBe('user@example.com');
     });
@@ -497,7 +491,7 @@ describe('Authentication', () => {
       url: '/auth/login',
       payload: { email: 'test@example.com', password: 'password123' },
     });
-    
+
     authToken = JSON.parse(response.payload).token;
   });
 

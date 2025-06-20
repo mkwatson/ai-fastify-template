@@ -333,11 +333,13 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 #### Core Testing Principles
 
 1. **Test Behavior, Not Implementation**
+
    - Focus on WHAT the code does, not HOW
    - Tests should survive refactoring
    - Mock only external dependencies
 
 2. **Edge Cases Are MANDATORY**
+
    - Every function MUST test: null, undefined, empty, boundary values
    - Use property-based testing for comprehensive coverage
    - Test error conditions and recovery paths
@@ -370,7 +372,9 @@ it('should calculate 0% tax on exempt items', () => {
 });
 
 it('should throw error for negative amounts', () => {
-  expect(() => calculateTax(-100, 'standard')).toThrow('Amount must be positive');
+  expect(() => calculateTax(-100, 'standard')).toThrow(
+    'Amount must be positive'
+  );
 });
 
 // ❌ BAD: Testing framework instead of business logic
@@ -385,24 +389,24 @@ it('should create and retrieve user', async () => {
   const createResponse = await app.inject({
     method: 'POST',
     url: '/users',
-    payload: { email: 'test@example.com', name: 'Test User' }
+    payload: { email: 'test@example.com', name: 'Test User' },
   });
-  
+
   expect(createResponse.statusCode).toBe(201);
   const { id } = JSON.parse(createResponse.payload);
-  
+
   // Retrieve created user
   const getResponse = await app.inject({
     method: 'GET',
-    url: `/users/${id}`
+    url: `/users/${id}`,
   });
-  
+
   expect(getResponse.statusCode).toBe(200);
   const user = JSON.parse(getResponse.payload);
   expect(user).toMatchObject({
     id,
     email: 'test@example.com',
-    name: 'Test User'
+    name: 'Test User',
   });
 });
 ```
@@ -450,7 +454,9 @@ describe('calculateTotal', () => {
 
   it('should throw error for negative quantity', () => {
     const items = [{ price: 10, quantity: -2 }];
-    expect(() => calculateTotal(items)).toThrow('Quantity must be non-negative');
+    expect(() => calculateTotal(items)).toThrow(
+      'Quantity must be non-negative'
+    );
   });
 
   it('should handle decimal precision', () => {
@@ -523,9 +529,9 @@ describe('User routes - Complete Workflow', () => {
     const response = await app.inject({
       method: 'POST',
       url: '/users',
-      payload: { 
-        email: 'invalid-email', 
-        name: 'a' // Too short
+      payload: {
+        email: 'invalid-email',
+        name: 'a', // Too short
       },
     });
 
@@ -555,7 +561,7 @@ describe('User routes - Complete Workflow', () => {
 ```typescript
 // Original function
 function calculateDiscount(price: number, discount: number): number {
-  return price - (price * discount);
+  return price - price * discount;
 }
 
 // Mutation: Changed * to +

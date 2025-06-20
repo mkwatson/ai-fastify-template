@@ -128,7 +128,7 @@ describe('Property-based tests', () => {
               quantity: fc.integer({ min: 0, max: 100 }),
             })
           ),
-          (items) => {
+          items => {
             const total = calculateTotal(items);
             expect(total).toBeGreaterThanOrEqual(0);
           }
@@ -146,7 +146,7 @@ describe('Property-based tests', () => {
             }),
             { minLength: 2 }
           ),
-          (items) => {
+          items => {
             const total1 = calculateTotal(items);
             const shuffled = [...items].reverse(); // Simple shuffle
             const total2 = calculateTotal(shuffled);
@@ -166,9 +166,12 @@ describe('Property-based tests', () => {
             }),
             { maxLength: 5 }
           ),
-          (items) => {
+          items => {
             const total = calculateTotal(items);
-            const manual = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const manual = items.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0
+            );
             expect(total).toBeCloseTo(manual, 10);
           }
         )
@@ -198,11 +201,14 @@ describe('Property-based tests', () => {
           fc.float({ min: 0, max: 50, noNaN: true }),
           fc.float({ min: 0, max: 50, noNaN: true }),
           (price, discount1, discount2) => {
-            const [lower, higher] = discount1 <= discount2 ? [discount1, discount2] : [discount2, discount1];
-            
+            const [lower, higher] =
+              discount1 <= discount2
+                ? [discount1, discount2]
+                : [discount2, discount1];
+
             const discountAmount1 = calculateDiscount(price, lower);
             const discountAmount2 = calculateDiscount(price, higher);
-            
+
             expect(discountAmount1).toBeLessThanOrEqual(discountAmount2);
           }
         )
@@ -239,7 +245,7 @@ describe('Property-based tests', () => {
               quantity: fc.integer({ min: 0, max: 10 }),
             })
           ),
-          (items) => {
+          items => {
             const baseTotal = calculateTotal(items);
             const totalWithTax = calculateTotalWithTax(items, 0);
             expect(totalWithTax).toBeCloseTo(baseTotal, 10);

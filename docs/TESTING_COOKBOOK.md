@@ -48,13 +48,13 @@ describe('Async Operations', () => {
 describe('Concurrent Operations', () => {
   it('should handle multiple requests in parallel', async () => {
     const userIds = ['1', '2', '3', '4', '5'];
-    
+
     // Start all requests at once
     const promises = userIds.map(id => fetchUser(id));
-    
+
     // Wait for all to complete
     const users = await Promise.all(promises);
-    
+
     expect(users).toHaveLength(5);
     expect(users.every(user => user !== null)).toBe(true);
   });
@@ -62,10 +62,10 @@ describe('Concurrent Operations', () => {
   it('should handle race conditions', async () => {
     const operation1 = updateCounter('counter-1');
     const operation2 = updateCounter('counter-1');
-    
+
     // Both operations try to update the same counter
     const [result1, result2] = await Promise.all([operation1, operation2]);
-    
+
     // One should succeed, one should fail with conflict
     const success = [result1, result2].filter(r => r.success).length;
     expect(success).toBe(1);
@@ -81,7 +81,7 @@ describe('Concurrent Operations', () => {
 describe('SSE Endpoints', () => {
   it('should stream events', async () => {
     const events: any[] = [];
-    
+
     const response = await app.inject({
       method: 'GET',
       url: '/stream/notifications',
@@ -113,26 +113,28 @@ describe('SSE Endpoints', () => {
 describe('SSE with Timing', () => {
   it('should handle client disconnect gracefully', async () => {
     vi.useFakeTimers();
-    
+
     let connectionClosed = false;
-    
+
     const responsePromise = app.inject({
       method: 'GET',
       url: '/stream/live-data',
       simulate: {
         close: true,
-        onClose: () => { connectionClosed = true; },
+        onClose: () => {
+          connectionClosed = true;
+        },
       },
     });
 
     // Advance time to trigger some events
     vi.advanceTimersByTime(5000);
-    
+
     // Simulate client disconnect
     responsePromise.connection?.destroy();
-    
+
     await vi.runAllTimersAsync();
-    
+
     expect(connectionClosed).toBe(true);
     vi.useRealTimers();
   });
@@ -157,14 +159,14 @@ describe('Time-based Operations', () => {
 
   it('should expire cache after TTL', () => {
     const cache = new TTLCache({ ttl: 60000 }); // 1 minute
-    
+
     cache.set('key', 'value');
     expect(cache.get('key')).toBe('value');
-    
+
     // Advance time by 30 seconds
     vi.advanceTimersByTime(30000);
     expect(cache.get('key')).toBe('value'); // Still valid
-    
+
     // Advance time by another 31 seconds
     vi.advanceTimersByTime(31000);
     expect(cache.get('key')).toBeUndefined(); // Expired
@@ -179,18 +181,18 @@ describe('Time-based Operations', () => {
     });
 
     const promise = retryWithBackoff(operation, { maxAttempts: 3 });
-    
+
     // First attempt - immediate
     expect(attempts).toBe(1);
-    
+
     // Second attempt - after 1 second
     await vi.advanceTimersByTimeAsync(1000);
     expect(attempts).toBe(2);
-    
+
     // Third attempt - after 2 seconds
     await vi.advanceTimersByTimeAsync(2000);
     expect(attempts).toBe(3);
-    
+
     const result = await promise;
     expect(result).toBe('success');
   });
@@ -204,14 +206,14 @@ describe('Scheduled Jobs', () => {
   it('should run cleanup job at midnight', () => {
     const mockDate = new Date('2024-01-01T23:59:58.000Z');
     vi.setSystemTime(mockDate);
-    
+
     const cleanupSpy = vi.spyOn(jobRunner, 'runCleanup');
-    
+
     startScheduler();
-    
+
     // Advance to midnight
     vi.advanceTimersByTime(2000);
-    
+
     expect(cleanupSpy).toHaveBeenCalledTimes(1);
     expect(cleanupSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -306,7 +308,7 @@ describe('File System Operations', () => {
     // Verify output file
     const output = await fs.readFile('/data/output.json', 'utf-8');
     const data = JSON.parse(output);
-    
+
     expect(data).toMatchObject({
       original: 42,
       processed: 84,
@@ -344,7 +346,7 @@ describe('External API Integration', () => {
 
   it('should fetch user from external API', async () => {
     const user = await userService.fetchExternalUser('123');
-    
+
     expect(user).toMatchObject({
       id: '123',
       name: 'John Doe',
@@ -359,8 +361,9 @@ describe('External API Integration', () => {
       })
     );
 
-    await expect(userService.fetchExternalUser('123'))
-      .rejects.toThrow('Failed to fetch user');
+    await expect(userService.fetchExternalUser('123')).rejects.toThrow(
+      'Failed to fetch user'
+    );
   });
 });
 ```
@@ -370,9 +373,9 @@ describe('External API Integration', () => {
 ```typescript
 describe('API Rate Limiting', () => {
   it('should respect rate limits', async () => {
-    const requests = Array(10).fill(null).map((_, i) => 
-      makeApiRequest(`/resource/${i}`)
-    );
+    const requests = Array(10)
+      .fill(null)
+      .map((_, i) => makeApiRequest(`/resource/${i}`));
 
     const startTime = Date.now();
     const results = await Promise.allSettled(requests);
@@ -397,9 +400,9 @@ describe('API Rate Limiting', () => {
 describe('Database Transactions', () => {
   it('should rollback on error', async () => {
     const orderId = crypto.randomUUID();
-    
+
     try {
-      await db.transaction(async (trx) => {
+      await db.transaction(async trx => {
         // Create order
         await trx('orders').insert({
           id: orderId,
@@ -430,27 +433,27 @@ describe('Database Migrations', () => {
   it('should migrate schema correctly', async () => {
     // Start with empty database
     await db.migrate.rollback();
-    
+
     // Run migrations up to specific version
     await db.migrate.up();
-    
+
     // Verify schema
     const tables = await db.raw(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public'
     `);
-    
+
     expect(tables.rows.map(r => r.table_name)).toContain('users');
     expect(tables.rows.map(r => r.table_name)).toContain('orders');
-    
+
     // Verify indexes
     const indexes = await db.raw(`
       SELECT indexname 
       FROM pg_indexes 
       WHERE tablename = 'users'
     `);
-    
+
     expect(indexes.rows.map(r => r.indexname)).toContain('users_email_unique');
   });
 });
@@ -464,7 +467,7 @@ describe('Database Migrations', () => {
 describe('Error Handling', () => {
   it('should handle and log unexpected errors', async () => {
     const logSpy = vi.spyOn(logger, 'error');
-    
+
     // Force an error
     vi.spyOn(database, 'query').mockRejectedValueOnce(
       new Error('Connection lost')
@@ -513,8 +516,10 @@ describe('Circuit Breaker', () => {
     }
 
     // Circuit should now be open
-    await expect(service.fetchData()).rejects.toThrow('Circuit breaker is OPEN');
-    
+    await expect(service.fetchData()).rejects.toThrow(
+      'Circuit breaker is OPEN'
+    );
+
     // Should not make actual HTTP call
     expect(httpClient.get).toHaveBeenCalledTimes(3);
   });
@@ -581,7 +586,7 @@ describe('OAuth Flow', () => {
     expect(initResponse.statusCode).toBe(302);
     const redirectUrl = new URL(initResponse.headers.location);
     expect(redirectUrl.hostname).toBe('github.com');
-    
+
     const state = redirectUrl.searchParams.get('state');
     expect(state).toBeTruthy();
 
@@ -593,7 +598,7 @@ describe('OAuth Flow', () => {
 
     expect(callbackResponse.statusCode).toBe(302);
     expect(callbackResponse.headers.location).toBe('/dashboard');
-    
+
     // Verify session cookie
     const cookies = callbackResponse.cookies;
     expect(cookies).toContainEqual(
@@ -629,15 +634,15 @@ describe('Rate Limiting', () => {
     }
 
     const responses = await Promise.all(requests);
-    
+
     // First 5 should succeed (assuming 5 req/min limit)
     const successful = responses.filter(r => r.statusCode === 200);
     expect(successful).toHaveLength(5);
-    
+
     // Rest should be rate limited
     const rateLimited = responses.filter(r => r.statusCode === 429);
     expect(rateLimited).toHaveLength(5);
-    
+
     // Check rate limit headers
     const limitedResponse = rateLimited[0];
     expect(limitedResponse.headers).toMatchObject({
@@ -660,11 +665,11 @@ describe('WebSocket Communication', () => {
   let ws: WebSocket;
   let messages: any[] = [];
 
-  beforeEach((done) => {
+  beforeEach(done => {
     ws = new WebSocket('ws://localhost:3000/ws');
-    
+
     ws.on('open', done);
-    ws.on('message', (data) => {
+    ws.on('message', data => {
       messages.push(JSON.parse(data.toString()));
     });
   });
@@ -674,33 +679,37 @@ describe('WebSocket Communication', () => {
     messages = [];
   });
 
-  it('should receive real-time updates', (done) => {
+  it('should receive real-time updates', done => {
     // Subscribe to updates
-    ws.send(JSON.stringify({
-      type: 'subscribe',
-      channel: 'orders',
-    }));
+    ws.send(
+      JSON.stringify({
+        type: 'subscribe',
+        channel: 'orders',
+      })
+    );
 
     // Trigger an update through API
-    app.inject({
-      method: 'POST',
-      url: '/orders',
-      payload: { item: 'Widget', quantity: 5 },
-    }).then(() => {
-      // Wait for WebSocket message
-      setTimeout(() => {
-        expect(messages).toContainEqual(
-          expect.objectContaining({
-            type: 'order_created',
-            data: expect.objectContaining({
-              item: 'Widget',
-              quantity: 5,
-            }),
-          })
-        );
-        done();
-      }, 100);
-    });
+    app
+      .inject({
+        method: 'POST',
+        url: '/orders',
+        payload: { item: 'Widget', quantity: 5 },
+      })
+      .then(() => {
+        // Wait for WebSocket message
+        setTimeout(() => {
+          expect(messages).toContainEqual(
+            expect.objectContaining({
+              type: 'order_created',
+              data: expect.objectContaining({
+                item: 'Widget',
+                quantity: 5,
+              }),
+            })
+          );
+          done();
+        }, 100);
+      });
   });
 });
 ```

@@ -78,7 +78,9 @@
     "jsonlint": "^1.6.3",
     "lint-staged": "^16.1.2",
     "prettier": "^3.4.2",
-    "turbo": "^2.5.4"
+    "tsx": "^4.20.3",
+    "turbo": "^2.5.4",
+    "vitest": "^3.2.3"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
