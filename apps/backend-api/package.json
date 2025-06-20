@@ -59,6 +59,8 @@
     "concurrently": "^9.0.0",
     "fastify-cli": "^7.4.0",
     "fastify-tsconfig": "^3.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "pino-pretty": "^13.0.0",
     "ts-node": "^10.4.0",
     "typescript": "~5.8.2",

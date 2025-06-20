@@ -27,10 +27,7 @@
     "test:watch": "turbo test:watch",
     "test:coverage": "turbo test:coverage",
     "type-check": "turbo type-check",
-    "hooks:install": "pre-commit install && pre-commit install --hook-type commit-msg",
-    "hooks:run": "pre-commit run --all-files",
-    "hooks:update": "pre-commit autoupdate",
-    "setup:dev": "pnpm install && pnpm hooks:install && echo '🎉 Development environment setup complete!'"
+    "setup:dev": "pnpm install && echo '🎉 Development environment setup complete!'"
   },
   "keywords": [
     "fastify",
@@ -70,8 +67,18 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-vitest": "^0.5.4",
-    "pre-commit": "^1.2.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "prettier": "^3.4.2",
     "turbo": "^2.5.4"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

@@ -59,26 +59,25 @@ git --version     # >= 2.0.0
    # Cursor: AI rules are already configured
    ```
 
-4. **Install pre-commit hooks** (Quality Gates)
+4. **Initialize git hooks** (Quality Gates)
 
    ```bash
-   # Install pre-commit hooks for quality gates
+   # Initialize husky git hooks
    pnpm setup:dev
 
    # Or manually:
-   pnpm hooks:install
+   npx husky init
 
-   # Verify hooks are working
-   pnpm hooks:run
+   # Test hooks are working
+   git add . && git commit -m "test: verify hooks work" --dry-run
    ```
 
-   The pre-commit hooks provide enterprise-grade quality gates:
-   - 🔒 **GitLeaks** - Prevents credential leaks
-   - 🎨 **ESLint + Prettier** - Auto-fixes formatting issues
-   - 🔷 **TypeScript** - Validates type safety
-   - 📏 **File Hygiene** - Checks file sizes, trailing whitespace
-   - 🛡️ **Security Audit** - Scans dependencies for vulnerabilities
+   The git hooks provide automated quality gates:
+
+   - 🎨 **ESLint + Prettier** - Auto-fixes formatting issues on staged files
    - 📝 **Conventional Commits** - Enforces commit message format
+   - 🔄 **Auto-staging** - Modified files are automatically re-staged after fixes
+   - ⚡ **Fast execution** - Only processes staged files, not entire codebase
 
 ## Daily Development
 
@@ -166,6 +165,7 @@ This project enforces conventional commit messages using Commitlint. All commits
 ```
 
 **Allowed Types:**
+
 - `feat` - New features
 - `fix` - Bug fixes
 - `docs` - Documentation changes
@@ -178,6 +178,7 @@ This project enforces conventional commit messages using Commitlint. All commits
 - `build` - Build system changes
 
 **Allowed Scopes:**
+
 - `api` - Backend API changes
 - `backend` - Backend-specific changes
 - `frontend` - Frontend-specific changes
@@ -192,6 +193,7 @@ This project enforces conventional commit messages using Commitlint. All commits
 **Examples:**
 
 ✅ **Valid Commits:**
+
 ```bash
 feat(api): add user authentication endpoint
 fix(backend): resolve database connection timeout
@@ -201,6 +203,7 @@ ci(hooks): implement pre-commit validation
 ```
 
 ❌ **Invalid Commits:**
+
 ```bash
 # Missing scope
 git commit -m "feat: add new feature"
@@ -252,47 +255,47 @@ pnpm mutation       # Mutation testing (if implemented)
 - **Architecture**: Clean dependencies, no cycles
 - **Performance**: Optimized builds, efficient caching
 
-### Pre-commit Hooks Troubleshooting
+### Git Hooks Troubleshooting
 
 **Common Issues:**
 
 1. **Hooks not running**
+
    ```bash
-   # Re-install hooks
-   pnpm hooks:install
+   # Re-initialize husky
+   npx husky init
 
    # Check hook installation
    ls -la .git/hooks/
+   cat .git/hooks/pre-commit
    ```
 
-2. **GitLeaks false positives**
+2. **Formatting/linting issues during commit**
+
    ```bash
-   # Skip GitLeaks for specific commit (use sparingly)
-   SKIP=gitleaks git commit -m "your message"
+   # Run lint-staged manually to see what's happening
+   npx lint-staged
+
+   # Run individual tools manually
+   pnpm lint:fix
    ```
 
-3. **TypeScript errors**
-   ```bash
-   # Run type check manually
-   pnpm type-check
+3. **Commit message format errors**
 
-   # Fix issues then retry commit
-   ```
-
-4. **Commit message format errors**
    ```bash
    # Check your commit message format
    # Must be: type(scope): description
    # Example: feat(api): add new endpoint
    ```
 
-5. **Performance issues**
-   ```bash
-   # Update hooks to latest versions
-   pnpm hooks:update
+4. **Hook execution fails**
 
-   # Run hooks manually to test
-   pnpm hooks:run
+   ```bash
+   # Skip hooks for emergency commits (use sparingly)
+   git commit --no-verify -m "emergency: message"
+
+   # Debug hook execution
+   git commit -m "test" --dry-run
    ```
 
 ## Turbo Pipeline

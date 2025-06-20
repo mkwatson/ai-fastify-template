@@ -53,6 +53,7 @@ pnpm dev               # Start development servers
 # Before committing
 pnpm ai:check          # Comprehensive validation
 git add . && git commit -m "feat(scope): description"
+# Note: Husky + lint-staged automatically runs ESLint and Prettier on staged files
 
 # Before PR
 pnpm ai:compliance     # Full quality pipeline
@@ -241,26 +242,31 @@ pnpm build             # Production build verification
 Our ESLint configuration includes comprehensive rules specifically designed for AI coding agents:
 
 **Import Organization & Dependencies:**
+
 - Import grouping and alphabetization
 - Circular dependency detection (`import/no-cycle`)
 - Duplicate import prevention (`import/no-duplicates`)
 
 **Async/Await Best Practices:**
+
 - Promise executor validation
 - Proper async/await usage patterns
 - Promise handling enforcement
 
 **Performance & Security:**
+
 - Object spread over `Object.assign`
 - Prevention of unsafe regex patterns
 - Detection of potential object injection vulnerabilities
 
 **Test Quality (Vitest Integration):**
+
 - Test structure validation (`vitest/expect-expect`)
 - Prevention of disabled/focused tests in CI
 - Consistent test naming patterns
 
 **Custom AI Architectural Rules:**
+
 - No direct `process.env` access
 - Required Zod validation for request bodies
 - Fastify error handling patterns
@@ -270,7 +276,7 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 ### Testing Requirements (Vitest Framework)
 
 - **Unit tests**: For all business logic and utility functions
-- **Integration tests**: For all API routes and plugin functionality  
+- **Integration tests**: For all API routes and plugin functionality
 - **Test coverage**: Maintain >80% line coverage (configured in vitest.config.ts)
 - **Test structure**: Arrange-Act-Assert pattern with descriptive names
 - **Test helpers**: Use shared test helpers for consistent app setup
@@ -302,7 +308,7 @@ describe('calculateTotal', () => {
   });
 });
 
-// ✅ Good: Integration test structure  
+// ✅ Good: Integration test structure
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { type FastifyInstance } from 'fastify';
 import { build } from '../helper.js';
@@ -522,6 +528,13 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 - **Error handling**: Routes must use Fastify error patterns (no generic Error throws)
 - **Service patterns**: Business logic must be in service layer with dependency injection
 - **Plugin patterns**: Fastify plugins must use fastify-plugin wrapper
+
+### Git Hooks (Husky + lint-staged)
+
+- **Pre-commit automation**: Husky + lint-staged automatically processes staged files
+- **ESLint + Prettier**: Auto-fixes formatting and linting issues before commit
+- **Zero staging issues**: Modified files are automatically re-staged after fixes
+- **Industry standard**: Uses widely-adopted tools without custom scripts
 
 ### Security & Dependencies
 
