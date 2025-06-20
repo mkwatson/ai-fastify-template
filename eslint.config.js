@@ -4,7 +4,7 @@ import tsParser from '@typescript-eslint/parser';
 import security from 'eslint-plugin-security';
 import importPlugin from 'eslint-plugin-import';
 import promisePlugin from 'eslint-plugin-promise';
-// import nodePlugin from 'eslint-plugin-node'; // Incompatible with ESLint v9
+import nodePlugin from 'eslint-plugin-n'; // Modern Node.js plugin compatible with ESLint v9
 import vitestPlugin from 'eslint-plugin-vitest';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -60,16 +60,17 @@ export default [
     },
   },
 
-  // TypeScript source files
+  // TypeScript source files (excluding tests and config files)
   {
-    files: ['**/*.ts'],
+    files: ['apps/*/src/**/*.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        // Remove project for simpler setup - disables type-aware rules but avoids tsconfig issues
-        // project: ["./apps/*/tsconfig.json", "./packages/*/tsconfig.json"],
+        // Enable type-aware rules with specific project configuration
+        project: ['./apps/*/tsconfig.json', './apps/*/test/tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         process: 'readonly',
@@ -88,6 +89,7 @@ export default [
       'ai-patterns': aiPatterns,
       import: importPlugin,
       promise: promisePlugin,
+      n: nodePlugin,
     },
     rules: {
       // TypeScript strict mode enforcement (non-type-aware rules only)
@@ -98,7 +100,16 @@ export default [
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       'no-unused-vars': 'off', // Let TypeScript handle this
-      // Note: prefer-nullish-coalescing and prefer-optional-chain require type info, disabled for simplicity
+
+      // Advanced TypeScript rules (now enabled with type-aware parsing)
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/prefer-readonly': 'error',
+      '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
 
       // Security patterns
       'security/detect-object-injection': 'error',
@@ -152,9 +163,14 @@ export default [
       'no-new-object': 'error',
       'no-array-constructor': 'error',
 
-      // Node.js best practices (manual rules since eslint-plugin-node incompatible with ESLint v9)
-      'no-process-exit': 'error',
-      'no-path-concat': 'off', // Custom rule would be needed
+      // Node.js best practices (using eslint-plugin-n)
+      'n/no-deprecated-api': 'error',
+      'n/no-extraneous-import': 'error',
+      'n/no-missing-import': 'off', // TypeScript handles this better
+      'n/no-unpublished-import': 'off', // Allow dev dependencies in source
+      'n/no-process-exit': 'off', // Allow process.exit in server startup
+      'n/prefer-global/process': 'error',
+      'n/prefer-global/console': 'error',
 
       // General code quality
       'no-console': 'off', // Allow console in server code
@@ -177,6 +193,7 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
+        // Disable type-aware rules for test files to avoid project configuration complexity
       },
       globals: {
         describe: 'readonly',
@@ -212,6 +229,39 @@ export default [
       '@typescript-eslint/no-unused-vars': 'off',
       'no-console': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
+      'import/no-unresolved': 'off',
+    },
+  },
+  // Configuration files (vitest.config.ts, etc.)
+  {
+    files: ['**/vitest.config.ts', '**/vite.config.ts', '**/*.config.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        // Disable type-aware rules for config files to avoid project dependency issues
+      },
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        require: 'readonly',
+        NodeJS: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        Buffer: 'readonly',
+        global: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: {
+      // Basic TypeScript rules only for config files
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
       'import/no-unresolved': 'off',
     },
   },

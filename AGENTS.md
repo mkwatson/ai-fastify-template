@@ -53,6 +53,7 @@ pnpm dev               # Start development servers
 # Before committing
 pnpm ai:check          # Comprehensive validation
 git add . && git commit -m "feat(scope): description"
+# Note: Husky + lint-staged automatically runs ESLint and Prettier on staged files
 
 # Before PR
 pnpm ai:compliance     # Full quality pipeline
@@ -213,6 +214,36 @@ throw new Error('Something went wrong'); // Too generic!
 - **Parameterized queries**: No string concatenation for database queries
 - **Secure headers**: Use Fastify security plugins
 
+### Enterprise Security Guardrails
+
+The project implements comprehensive security scanning and validation at multiple layers:
+
+**Pre-commit Security Hooks:**
+
+- **GitLeaks credential scanning**: Prevents accidental commit of secrets, API keys, tokens
+- **File hygiene validation**: Blocks large files (>1MB), detects merge conflicts
+- **Configuration validation**: YAML/JSON syntax verification prevents config corruption
+- **Dependency auditing**: Automatic vulnerability scanning with `audit-ci`
+
+**ESLint Security Rules:**
+
+- **Object injection protection**: `security/detect-object-injection`
+- **Regex safety**: `security/detect-unsafe-regex` and `security/detect-non-literal-regexp`
+- **Custom architectural patterns**: Enforces secure coding practices specific to this project
+
+**Runtime Security:**
+
+- **Environment validation**: All environment variables validated with Zod schemas
+- **Input validation**: Request body validation mandatory via custom ESLint rules
+- **Error handling**: Fastify-specific error patterns enforced by linting rules
+
+```bash
+# Security validation commands
+pnpm ai:security          # Run dependency audit
+npx gitleaks detect       # Scan for credentials (automatic in pre-commit)
+pnpm lint                 # Security linting rules
+```
+
 ## Testing & Validation Standards
 
 ### Quality Pipeline Commands
@@ -230,7 +261,9 @@ pnpm ai:compliance     # ai:check + tests + build
 # Individual checks
 pnpm lint              # ESLint + Prettier with comprehensive AI-safety rules
 pnpm type-check        # TypeScript compilation
-pnpm test              # Unit and integration tests
+pnpm test              # Unit and integration tests (Vitest)
+pnpm test:watch        # Run tests in watch mode
+pnpm test:coverage     # Run tests with coverage report
 pnpm build             # Production build verification
 ```
 
@@ -238,62 +271,114 @@ pnpm build             # Production build verification
 
 Our ESLint configuration includes comprehensive rules specifically designed for AI coding agents:
 
+**Advanced TypeScript Rules (Type-Aware):**
+
+- Nullish coalescing enforcement (`@typescript-eslint/prefer-nullish-coalescing`)
+- Optional chaining patterns (`@typescript-eslint/prefer-optional-chain`)
+- Unnecessary condition detection (`@typescript-eslint/no-unnecessary-condition`)
+- Floating promise prevention (`@typescript-eslint/no-floating-promises`)
+- Readonly property enforcement (`@typescript-eslint/prefer-readonly`)
+
 **Import Organization & Dependencies:**
+
 - Import grouping and alphabetization
 - Circular dependency detection (`import/no-cycle`)
 - Duplicate import prevention (`import/no-duplicates`)
 
+**Node.js Best Practices (eslint-plugin-n):**
+
+- Deprecated API detection (`n/no-deprecated-api`)
+- Extraneous import prevention (`n/no-extraneous-import`)
+- Global preference enforcement (`n/prefer-global/process`, `n/prefer-global/console`)
+
 **Async/Await Best Practices:**
+
 - Promise executor validation
 - Proper async/await usage patterns
-- Promise handling enforcement
+- Promise handling enforcement (`promise/always-return`, `promise/catch-or-return`)
 
 **Performance & Security:**
+
 - Object spread over `Object.assign`
 - Prevention of unsafe regex patterns
 - Detection of potential object injection vulnerabilities
 
 **Test Quality (Vitest Integration):**
+
 - Test structure validation (`vitest/expect-expect`)
 - Prevention of disabled/focused tests in CI
 - Consistent test naming patterns
 
 **Custom AI Architectural Rules:**
+
 - No direct `process.env` access
 - Required Zod validation for request bodies
 - Fastify error handling patterns
 - Service dependency injection enforcement
 - Plugin wrapper requirements
 
-### Testing Requirements
+### Testing Requirements (Vitest Framework)
 
-- **Unit tests**: For all business logic and services
-- **Integration tests**: For all API routes and external integrations
-- **Test coverage**: Maintain >90% line coverage
+- **Unit tests**: For all business logic and utility functions
+- **Integration tests**: For all API routes and plugin functionality
+- **Test coverage**: Maintain >80% line coverage (configured in vitest.config.ts)
 - **Test structure**: Arrange-Act-Assert pattern with descriptive names
+- **Test helpers**: Use shared test helpers for consistent app setup
+- **Zod validation testing**: Test input validation and error cases
 
 ```typescript
-// ✅ Good: Comprehensive test structure
-describe('UserService', () => {
-  describe('createUser', () => {
-    it('should create user with valid data', async () => {
-      // Arrange
-      const userData = { email: 'test@example.com', name: 'Test User' };
-      const mockDb = createMockDatabase();
-      const service = new UserService(mockDb, mockLogger);
+// ✅ Good: Unit test structure
+import { describe, it, expect } from 'vitest';
+import { calculateTotal, type Item } from '../../src/utils/calculations.js';
 
-      // Act
-      const result = await service.createUser(userData);
+describe('calculateTotal', () => {
+  it('should calculate total for multiple items', () => {
+    // Arrange
+    const items: Item[] = [
+      { price: 10, quantity: 2 },
+      { price: 5.99, quantity: 3 },
+    ];
 
-      // Assert
-      expect(result).toMatchObject(userData);
-      expect(mockDb.users.create).toHaveBeenCalledWith(
-        expect.objectContaining(userData)
-      );
+    // Act
+    const result = calculateTotal(items);
+
+    // Assert
+    expect(result).toBe(37.97);
+  });
+
+  it('should throw error for negative price', () => {
+    const items = [{ price: -10, quantity: 2 }];
+    expect(() => calculateTotal(items)).toThrow('Price must be non-negative');
+  });
+});
+
+// ✅ Good: Integration test structure
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { type FastifyInstance } from 'fastify';
+import { build } from '../helper.js';
+
+describe('User routes', () => {
+  let app: FastifyInstance;
+
+  beforeAll(async () => {
+    app = await build();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('should create user with valid data', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: { email: 'test@example.com', name: 'Test User' },
     });
 
-    it('should throw error for duplicate email', async () => {
-      // Test error cases
+    expect(response.statusCode).toBe(201);
+    expect(JSON.parse(response.payload)).toMatchObject({
+      email: 'test@example.com',
+      name: 'Test User',
     });
   });
 });
@@ -487,6 +572,13 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 - **Error handling**: Routes must use Fastify error patterns (no generic Error throws)
 - **Service patterns**: Business logic must be in service layer with dependency injection
 - **Plugin patterns**: Fastify plugins must use fastify-plugin wrapper
+
+### Git Hooks (Husky + lint-staged)
+
+- **Pre-commit automation**: Husky + lint-staged automatically processes staged files
+- **ESLint + Prettier**: Auto-fixes formatting and linting issues before commit
+- **Zero staging issues**: Modified files are automatically re-staged after fixes
+- **Industry standard**: Uses widely-adopted tools without custom scripts
 
 ### Security & Dependencies
 

@@ -84,9 +84,9 @@ ai-fastify-template/
 | **Fast streaming API**      | Fastify + fastify-sse       | ✅ Active  | Essential for real-time AI responses              |
 | **Linting + Formatting**    | ESLint + Prettier           | ✅ Active  | Industry standard with custom architectural rules |
 | **Early type safety**       | TypeScript (strict)         | ✅ Active  | Catches AI-generated type errors immediately      |
-| **Schema validation**       | Zod (bodies & env)          | 🔄 Planned | Runtime validation prevents silent failures       |
+| **Schema validation**       | Zod (bodies & env)          | ✅ Active  | Runtime validation prevents silent failures       |
 | **Guard against spaghetti** | dependency-cruiser          | 🔄 Planned | Enforces clean architecture boundaries            |
-| **High-trust tests**        | Vitest                      | ✅ Active  | Fast, modern testing framework                    |
+| **High-trust tests**        | Vitest + Coverage           | ✅ Active  | Comprehensive testing with unit & integration     |
 | **Task caching**            | pnpm workspaces + TurboRepo | ✅ Active  | Fast feedback for AI iteration cycles             |
 
 ## Available Scripts
@@ -102,6 +102,7 @@ pnpm clean            # Clean build artifacts
 # Quality assurance
 pnpm test             # Run all test suites
 pnpm test:watch       # Run tests in watch mode
+pnpm test:coverage    # Run tests with coverage report
 pnpm type-check       # TypeScript compilation check
 ```
 

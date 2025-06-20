@@ -22,6 +22,9 @@
       "cache": false,
       "persistent": true
     },
+    "test:coverage": {
+      "outputs": ["coverage/**"]
+    },
     "type-check": {
       "outputs": []
     }
