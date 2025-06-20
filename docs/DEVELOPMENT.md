@@ -59,6 +59,27 @@ git --version     # >= 2.0.0
    # Cursor: AI rules are already configured
    ```
 
+4. **Install pre-commit hooks** (Quality Gates)
+
+   ```bash
+   # Install pre-commit hooks for quality gates
+   pnpm setup:dev
+
+   # Or manually:
+   pnpm hooks:install
+
+   # Verify hooks are working
+   pnpm hooks:run
+   ```
+
+   The pre-commit hooks provide enterprise-grade quality gates:
+   - 🔒 **GitLeaks** - Prevents credential leaks
+   - 🎨 **ESLint + Prettier** - Auto-fixes formatting issues
+   - 🔷 **TypeScript** - Validates type safety
+   - 📏 **File Hygiene** - Checks file sizes, trailing whitespace
+   - 🛡️ **Security Audit** - Scans dependencies for vulnerabilities
+   - 📝 **Conventional Commits** - Enforces commit message format
+
 ## Daily Development
 
 ### Starting Development
@@ -132,6 +153,71 @@ pnpm dev
    git commit -m "feat(scope): description of changes"
    ```
 
+### Conventional Commit Format
+
+This project enforces conventional commit messages using Commitlint. All commits must follow this format:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Allowed Types:**
+- `feat` - New features
+- `fix` - Bug fixes
+- `docs` - Documentation changes
+- `style` - Code style changes (formatting, etc.)
+- `refactor` - Code refactoring
+- `test` - Adding or updating tests
+- `chore` - Maintenance tasks
+- `ci` - CI/CD changes
+- `perf` - Performance improvements
+- `build` - Build system changes
+
+**Allowed Scopes:**
+- `api` - Backend API changes
+- `backend` - Backend-specific changes
+- `frontend` - Frontend-specific changes
+- `docs` - Documentation changes
+- `config` - Configuration changes
+- `test` - Test-related changes
+- `ci` - CI/CD pipeline changes
+- `scripts` - Build/utility scripts
+- `deps` - Dependency updates
+- `security` - Security-related changes
+
+**Examples:**
+
+✅ **Valid Commits:**
+```bash
+feat(api): add user authentication endpoint
+fix(backend): resolve database connection timeout
+docs(readme): update installation instructions
+chore(deps): upgrade fastify to v4.28.0
+ci(hooks): implement pre-commit validation
+```
+
+❌ **Invalid Commits:**
+```bash
+# Missing scope
+git commit -m "feat: add new feature"
+
+# Invalid scope
+git commit -m "feat(invalid-scope): add feature"
+
+# Uppercase/incorrect case
+git commit -m "Feat(api): Add new feature"
+
+# Missing colon
+git commit -m "feat(api) add new feature"
+
+# Too long (>100 characters)
+git commit -m "feat(api): this is a very long commit message that exceeds the maximum allowed length and will be rejected"
+```
+
 ## Quality Assurance
 
 ### Quality Checks
@@ -165,6 +251,49 @@ pnpm mutation       # Mutation testing (if implemented)
 - **Testing**: >90% coverage, comprehensive test suites
 - **Architecture**: Clean dependencies, no cycles
 - **Performance**: Optimized builds, efficient caching
+
+### Pre-commit Hooks Troubleshooting
+
+**Common Issues:**
+
+1. **Hooks not running**
+   ```bash
+   # Re-install hooks
+   pnpm hooks:install
+
+   # Check hook installation
+   ls -la .git/hooks/
+   ```
+
+2. **GitLeaks false positives**
+   ```bash
+   # Skip GitLeaks for specific commit (use sparingly)
+   SKIP=gitleaks git commit -m "your message"
+   ```
+
+3. **TypeScript errors**
+   ```bash
+   # Run type check manually
+   pnpm type-check
+
+   # Fix issues then retry commit
+   ```
+
+4. **Commit message format errors**
+   ```bash
+   # Check your commit message format
+   # Must be: type(scope): description
+   # Example: feat(api): add new endpoint
+   ```
+
+5. **Performance issues**
+   ```bash
+   # Update hooks to latest versions
+   pnpm hooks:update
+
+   # Run hooks manually to test
+   pnpm hooks:run
+   ```
 
 ## Turbo Pipeline
 
