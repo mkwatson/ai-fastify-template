@@ -1,41 +1,66 @@
 // This file contains code that we reuse between our tests.
-import * as path from 'node:path';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import Fastify, { type FastifyInstance } from 'fastify';
+import fp from 'fastify-plugin';
 
-const helper = require('fastify-cli/helper.js');
+import App, { type AppOptions } from '../src/app.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-export type TestContext = {
-  after: (fn: () => void | Promise<void>) => void;
+// Default test configuration
+const defaultConfig: Partial<AppOptions> = {
+  logger: false, // Disable logging in tests for cleaner output
 };
 
-const AppPath = path.join(__dirname, '..', 'build', 'app.js');
+/**
+ * Build a Fastify app instance for testing
+ * This replaces the fastify-cli helper for better Vitest integration
+ */
+export async function build(config: Partial<AppOptions> = {}): Promise<FastifyInstance> {
+  const app = Fastify({
+    ...defaultConfig,
+    ...config,
+  });
 
-// Fill in this config with all the configurations
-// needed for testing the application
-function config() {
-  return {
-    skipOverride: true, // Register our application with fastify-plugin
-  };
-}
+  // Register our application
+  await app.register(fp(App));
 
-// Automatically build and tear down our instance
-async function build(t: TestContext) {
-  // you can set all the options supported by the fastify CLI command
-  const argv = [AppPath];
-
-  // fastify-plugin ensures that all decorators
-  // are exposed for testing purposes, this is
-  // different from the production setup
-  const app = await helper.build(argv, config());
-
-  // Tear down our app after we are done
-  t.after(() => app.close());
+  // Ensure the app is ready before returning
+  await app.ready();
 
   return app;
 }
 
-export { config, build };
+/**
+ * Create a test app instance with automatic cleanup
+ * Use this in test suites that need lifecycle management
+ */
+export async function createTestApp(config: Partial<AppOptions> = {}): Promise<{
+  app: FastifyInstance;
+  cleanup: () => Promise<void>;
+}> {
+  const app = await build(config);
+
+  const cleanup = async () => {
+    await app.close();
+  };
+
+  return { app, cleanup };
+}
+
+/**
+ * Helper for testing route responses
+ */
+export async function injectRequest(
+  app: FastifyInstance,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+  url: string,
+  payload?: unknown
+) {
+  return app.inject({
+    method,
+    url,
+    payload,
+  });
+}
+
+// Legacy exports for backwards compatibility with existing tests
+export { build as default };
+export const config = () => defaultConfig;
