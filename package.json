@@ -25,6 +25,7 @@
     "clean": "turbo clean",
     "test": "turbo test",
     "test:watch": "turbo test:watch",
+    "test:coverage": "turbo test:coverage",
     "type-check": "turbo type-check",
     "hooks:install": "pre-commit install && pre-commit install --hook-type commit-msg",
     "hooks:run": "pre-commit run --all-files",

@@ -230,7 +230,9 @@ pnpm ai:compliance     # ai:check + tests + build
 # Individual checks
 pnpm lint              # ESLint + Prettier with comprehensive AI-safety rules
 pnpm type-check        # TypeScript compilation
-pnpm test              # Unit and integration tests
+pnpm test              # Unit and integration tests (Vitest)
+pnpm test:watch        # Run tests in watch mode
+pnpm test:coverage     # Run tests with coverage report
 pnpm build             # Production build verification
 ```
 
@@ -265,35 +267,68 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 - Service dependency injection enforcement
 - Plugin wrapper requirements
 
-### Testing Requirements
+### Testing Requirements (Vitest Framework)
 
-- **Unit tests**: For all business logic and services
-- **Integration tests**: For all API routes and external integrations
-- **Test coverage**: Maintain >90% line coverage
+- **Unit tests**: For all business logic and utility functions
+- **Integration tests**: For all API routes and plugin functionality  
+- **Test coverage**: Maintain >80% line coverage (configured in vitest.config.ts)
 - **Test structure**: Arrange-Act-Assert pattern with descriptive names
+- **Test helpers**: Use shared test helpers for consistent app setup
+- **Zod validation testing**: Test input validation and error cases
 
 ```typescript
-// ✅ Good: Comprehensive test structure
-describe('UserService', () => {
-  describe('createUser', () => {
-    it('should create user with valid data', async () => {
-      // Arrange
-      const userData = { email: 'test@example.com', name: 'Test User' };
-      const mockDb = createMockDatabase();
-      const service = new UserService(mockDb, mockLogger);
+// ✅ Good: Unit test structure
+import { describe, it, expect } from 'vitest';
+import { calculateTotal, type Item } from '../../src/utils/calculations.js';
 
-      // Act
-      const result = await service.createUser(userData);
+describe('calculateTotal', () => {
+  it('should calculate total for multiple items', () => {
+    // Arrange
+    const items: Item[] = [
+      { price: 10, quantity: 2 },
+      { price: 5.99, quantity: 3 },
+    ];
 
-      // Assert
-      expect(result).toMatchObject(userData);
-      expect(mockDb.users.create).toHaveBeenCalledWith(
-        expect.objectContaining(userData)
-      );
+    // Act
+    const result = calculateTotal(items);
+
+    // Assert
+    expect(result).toBe(37.97);
+  });
+
+  it('should throw error for negative price', () => {
+    const items = [{ price: -10, quantity: 2 }];
+    expect(() => calculateTotal(items)).toThrow('Price must be non-negative');
+  });
+});
+
+// ✅ Good: Integration test structure  
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { type FastifyInstance } from 'fastify';
+import { build } from '../helper.js';
+
+describe('User routes', () => {
+  let app: FastifyInstance;
+
+  beforeAll(async () => {
+    app = await build();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('should create user with valid data', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: { email: 'test@example.com', name: 'Test User' },
     });
 
-    it('should throw error for duplicate email', async () => {
-      // Test error cases
+    expect(response.statusCode).toBe(201);
+    expect(JSON.parse(response.payload)).toMatchObject({
+      email: 'test@example.com',
+      name: 'Test User',
     });
   });
 });
