@@ -54,3 +54,5 @@ Thumbs.db
 # Temporary folders
 tmp/
 temp/
+.stryker-tmp/
+**/.stryker-tmp/

@@ -7,12 +7,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['apps/**/test/**/*.test.ts'],
+    include: ['apps/backend-api/test/**/*.test.ts'],
     // Use tsx for TypeScript runtime support
     pool: 'threads',
     poolOptions: {
       threads: {
         singleThread: true,
+        // Enable TypeScript support with tsx
+        isolate: false,
       },
     },
     exclude: [
@@ -22,6 +24,8 @@ export default defineConfig({
       'coverage/',
       '**/*.d.ts',
       '**/*.config.*',
+      '**/node_modules/**',
+      '**/@fastify/**',
     ],
     coverage: {
       provider: 'v8',

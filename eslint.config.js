@@ -205,6 +205,10 @@ export default [
         afterEach: 'readonly',
         vi: 'readonly',
         vitest: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        global: 'readonly',
       },
     },
     plugins: {
@@ -275,6 +279,9 @@ export default [
       '**/*.d.ts',
       'apps/**/build/**',
       'packages/**/dist/**',
+      '.stryker-tmp/**', // Ignore Stryker temporary files
+      '**/.stryker-tmp/**', // Ignore all Stryker temp dirs
+      'reports/**', // Ignore mutation test reports
     ],
   },
 ];

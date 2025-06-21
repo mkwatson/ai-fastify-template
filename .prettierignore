@@ -5,3 +5,5 @@ build/
 coverage/
 *.min.js
 pnpm-lock.yaml
+.stryker-tmp/
+reports/

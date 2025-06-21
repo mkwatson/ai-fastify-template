@@ -25,6 +25,10 @@
     "test:coverage": {
       "outputs": ["coverage/**"]
     },
+    "test:mutation": {
+      "dependsOn": ["test"],
+      "outputs": ["reports/**", ".stryker-tmp/**"]
+    },
     "type-check": {
       "outputs": []
     }
