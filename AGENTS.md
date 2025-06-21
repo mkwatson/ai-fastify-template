@@ -256,7 +256,7 @@ pnpm ai:quick          # lint + type-check
 pnpm ai:check          # ai:quick + security
 
 # Layer 3: Full validation
-pnpm ai:compliance     # ai:check + tests + build
+pnpm ai:compliance     # ai:check + tests + mutation testing + build
 
 # Individual checks
 pnpm lint              # ESLint + Prettier with comprehensive AI-safety rules
@@ -264,6 +264,7 @@ pnpm type-check        # TypeScript compilation
 pnpm test              # Unit and integration tests (Vitest)
 pnpm test:watch        # Run tests in watch mode
 pnpm test:coverage     # Run tests with coverage report
+pnpm test:mutation     # Mutation testing (Stryker) - 90% threshold
 pnpm build             # Production build verification
 ```
 
@@ -325,6 +326,30 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 - **Test structure**: Arrange-Act-Assert pattern with descriptive names
 - **Test helpers**: Use shared test helpers for consistent app setup
 - **Zod validation testing**: Test input validation and error cases
+
+### Mutation Testing (Stryker) - ENTERPRISE QUALITY GATE
+
+**Purpose**: Ensures tests actually validate business logic, not just achieve coverage metrics.
+
+**Requirements**:
+- **Minimum mutation score**: 90% (enforced in CI/CD)
+- **Strategic exclusions**: Only exclude low-business-value code (bootstrap, error formatting)
+- **Dual test strategy**: Both unit tests (direct imports) and integration tests (full app)
+- **Property-based testing**: Use fast-check for comprehensive edge case coverage
+
+**Configuration**:
+```bash
+pnpm test:mutation    # Run mutation tests
+pnpm ai:compliance    # Includes mutation testing in full pipeline
+```
+
+**Key Patterns**:
+- **Focus on business logic**: Exclude bootstrap files (`server.ts`, `app.ts`)
+- **Document exclusions**: Each exclusion requires clear rationale
+- **Incremental improvement**: Start with 60% threshold, work up to 90%
+- **No fake tests**: Don't write tests just to improve mutation scores
+
+See [docs/MUTATION_TESTING_GUIDE.md](./docs/MUTATION_TESTING_GUIDE.md) for detailed implementation patterns.
 
 ### 🚨 CRITICAL: AI Agent Testing Guidelines
 

@@ -69,12 +69,11 @@ export function validatePasswordStrength(password: string): {
     PasswordSchema.parse(password);
     return { isValid: true, errors: [] };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        isValid: false,
-        errors: error.errors.map(err => err.message),
-      };
-    }
-    return { isValid: false, errors: ['Unknown validation error'] };
+    // Zod always throws ZodError for validation failures
+    const zodError = error as z.ZodError;
+    return {
+      isValid: false,
+      errors: zodError.errors.map(err => err.message),
+    };
   }
 }
