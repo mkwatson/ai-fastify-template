@@ -78,7 +78,7 @@ if ! pnpm ai:security; then
 fi
 
 # 8. File Validation: YAML syntax (JSON handled by ESLint)
-echo "📋 [8/8] File Validation: Validating YAML files..."
+echo "📋 [8/9] File Validation: Validating YAML files..."
 for file in $(git diff --cached --name-only | grep -E '\.(ya?ml)$'); do
   if [ -f "$file" ]; then
     if ! npx js-yaml "$file" >/dev/null 2>&1; then
@@ -87,6 +87,21 @@ for file in $(git diff --cached --name-only | grep -E '\.(ya?ml)$'); do
     fi
   fi
 done
+
+# 9. GitHub Actions Validation: Workflow syntax checking
+echo "🚀 [9/9] GitHub Actions: Validating workflow syntax..."
+workflow_files=$(git diff --cached --name-only | grep -E '^\.github/workflows/.*\.ya?ml$' || true)
+if [ -n "$workflow_files" ]; then
+  if command -v actionlint &> /dev/null; then
+    if ! actionlint $workflow_files; then
+      echo "❌ GitHub Actions workflow validation failed. Please fix workflow syntax."
+      exit 1
+    fi
+    echo "✅ GitHub Actions workflows validated successfully"
+  else
+    echo "⚠️ actionlint not found. Install with 'brew install actionlint' for workflow validation."
+  fi
+fi
 
 # Performance monitoring
 end_time=$(date +%s)

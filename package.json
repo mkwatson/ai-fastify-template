@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
   },
   "scripts": {
     "build": "turbo build",
@@ -28,6 +28,10 @@
     "test:coverage": "turbo test:coverage",
     "test:mutation": "stryker run",
     "type-check": "turbo type-check",
+    "ci:local": "act --rm",
+    "ci:validate": "actionlint .github/workflows/*.yml",
+    "ci:debug": "act --verbose",
+    "ci:doctor": "node scripts/ci-doctor.js",
     "setup:dev": "pnpm install && bash scripts/install-gitleaks.sh && echo '🎉 Development environment setup complete!'",
     "setup:gitleaks": "bash scripts/install-gitleaks.sh",
     "security:scan": "gitleaks detect --source=. --verbose --no-banner --no-git"
