@@ -9,7 +9,23 @@ start_time=$(date +%s)
 
 # 1. Security Layer: Credential scanning with GitLeaks
 echo "🔒 [1/8] Security: Scanning for credentials and secrets..."
-if ! npx gitleaks detect --source=. --verbose --no-banner --no-git; then
+
+# Ensure GitLeaks is installed before scanning
+if ! command -v gitleaks &> /dev/null; then
+  echo "🔧 GitLeaks not found, installing via enterprise script..."
+  if [[ -f "scripts/install-gitleaks.sh" ]]; then
+    if ! bash scripts/install-gitleaks.sh; then
+      echo "❌ Failed to install GitLeaks. Please run 'bash scripts/install-gitleaks.sh' manually."
+      exit 1
+    fi
+  else
+    echo "❌ GitLeaks installation script not found. Please ensure scripts/install-gitleaks.sh exists."
+    exit 1
+  fi
+fi
+
+# Run GitLeaks security scan
+if ! gitleaks detect --source=. --verbose --no-banner --no-git; then
   echo "❌ GitLeaks found potential credentials. Please review and fix."
   exit 1
 fi
