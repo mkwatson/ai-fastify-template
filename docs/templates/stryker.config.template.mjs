@@ -1,52 +1,53 @@
 // @ts-check
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 const config = {
-  _comment: "Enterprise-grade Stryker configuration template for TypeScript/Fastify/Vitest monorepos",
-  
+  _comment:
+    'Enterprise-grade Stryker configuration template for TypeScript/Fastify/Vitest monorepos',
+
   // Package manager configuration
   packageManager: 'pnpm',
-  
+
   // Required plugins for TypeScript + Vitest
   plugins: [
     '@stryker-mutator/vitest-runner',
     '@stryker-mutator/typescript-checker',
   ],
-  
+
   // Test runner configuration
   testRunner: 'vitest',
   testRunnerNodeArgs: ['--import', 'tsx/esm'], // Critical for TypeScript ESM support
   coverageAnalysis: 'perTest', // Optimal performance for most projects
-  
+
   // Mutation targets - customize for your project structure
   mutate: [
-    'apps/backend-api/src/**/*.ts',               // Target all source TypeScript files
+    'apps/backend-api/src/**/*.ts', // Target all source TypeScript files
     '!apps/backend-api/src/**/*.{test,spec}.ts', // Exclude test files
-    '!apps/backend-api/src/**/*.d.ts',           // Exclude type definitions
-    '!apps/backend-api/src/server.ts',           // Exclude bootstrap files
-    '!apps/backend-api/src/app.ts',              // Exclude app configuration
+    '!apps/backend-api/src/**/*.d.ts', // Exclude type definitions
+    '!apps/backend-api/src/server.ts', // Exclude bootstrap files
+    '!apps/backend-api/src/app.ts', // Exclude app configuration
     // Add project-specific exclusions here:
     // '!apps/backend-api/src/plugins/env.ts:84-106', // Example: error formatting exclusion
   ],
-  
+
   // Type checking for better performance
   checkers: ['typescript'],
   tsconfigFile: './apps/backend-api/tsconfig.json',
-  
+
   // Performance optimizations
-  ignoreStatic: true,     // Skip static mutants
-  cleanTempDir: true,     // Clean up after runs
+  ignoreStatic: true, // Skip static mutants
+  cleanTempDir: true, // Clean up after runs
   tempDirName: '.stryker-tmp',
-  
+
   // Enterprise-grade quality thresholds
   thresholds: {
-    high: 90,    // High quality threshold - aim for this
-    low: 80,     // Low quality threshold - minimum coverage  
-    break: 90,   // Build fails below this - enforces quality gates
+    high: 90, // High quality threshold - aim for this
+    low: 80, // Low quality threshold - minimum coverage
+    break: 90, // Build fails below this - enforces quality gates
   },
-  
+
   // Reporting configuration
   reporters: ['html', 'clear-text', 'progress'],
-  
+
   // Optional: Dashboard reporting (requires API key)
   // dashboard: {
   //   project: 'github.com/your-org/your-repo',

@@ -68,7 +68,7 @@ describe('Environment Plugin Direct Tests', () => {
   it('should use default values when env vars not set', async () => {
     const originalEnv = process.env;
     process.env = { ...originalEnv };
-    
+
     // Remove optional env vars to test defaults
     delete process.env.NODE_ENV;
     delete process.env.PORT;

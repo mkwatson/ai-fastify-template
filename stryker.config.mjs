@@ -24,9 +24,9 @@ const config = {
   tsconfigFile: './apps/backend-api/tsconfig.json',
   ignoreStatic: true, // Ignore static mutants for performance
   thresholds: {
-    high: 90,    // High quality threshold - matches MAR-17 requirements
-    low: 80,     // Low quality threshold - matches MAR-17 coverage requirement
-    break: 90,   // Build fails below 90% - enforces MAR-17 mutation score requirement
+    high: 90, // High quality threshold - matches MAR-17 requirements
+    low: 80, // Low quality threshold - matches MAR-17 coverage requirement
+    break: 90, // Build fails below 90% - enforces MAR-17 mutation score requirement
   },
   tempDirName: '.stryker-tmp',
   cleanTempDir: true,

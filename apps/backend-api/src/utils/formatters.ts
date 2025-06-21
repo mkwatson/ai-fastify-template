@@ -61,5 +61,6 @@ export function formatFileSize(bytes: number): string {
   }
 
   // Use the units array to ensure mutations are meaningful
-  return `${size.toFixed(1)} ${units[unitIndex] || 'B'}`;
+  const unit = units.at(unitIndex) ?? 'B';
+  return `${size.toFixed(1)} ${unit}`;
 }

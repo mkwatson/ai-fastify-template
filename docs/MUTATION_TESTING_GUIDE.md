@@ -7,8 +7,9 @@ This guide documents proven patterns for implementing mutation testing with Stry
 ## Why Mutation Testing Matters
 
 Mutation testing is especially critical for AI-generated code because:
+
 - **Catches subtle logic errors** that basic coverage misses
-- **Validates test quality** rather than just test quantity  
+- **Validates test quality** rather than just test quantity
 - **Prevents "coverage theater"** where tests exist but don't validate logic
 - **Ensures business logic robustness** against edge cases
 
@@ -31,6 +32,7 @@ Mutation testing is especially critical for AI-generated code because:
 ```
 
 **Why Both Are Needed:**
+
 - **Unit tests**: Direct imports required for Stryker instrumentation
 - **Integration tests**: Real-world usage patterns and plugin interactions
 - **Combined**: Achieves 95%+ mutation scores with confidence
@@ -49,24 +51,24 @@ export default {
   testRunner: 'vitest',
   testRunnerNodeArgs: ['--import', 'tsx/esm'], // Critical for TypeScript
   coverageAnalysis: 'perTest',
-  
+
   // Smart targeting - focus on business logic
   mutate: [
     'apps/backend-api/src/**/*.ts',
     '!apps/backend-api/src/**/*.{test,spec}.ts',
     '!apps/backend-api/src/**/*.d.ts',
-    '!apps/backend-api/src/server.ts',     // Bootstrap excluded
-    '!apps/backend-api/src/app.ts',        // App setup excluded
+    '!apps/backend-api/src/server.ts', // Bootstrap excluded
+    '!apps/backend-api/src/app.ts', // App setup excluded
     '!apps/backend-api/src/plugins/env.ts:84-106', // Error formatting excluded
   ],
-  
+
   // Enterprise-grade thresholds
   thresholds: {
-    high: 90,    // High quality threshold
-    low: 80,     // Coverage threshold  
-    break: 90,   // Build fails below this
+    high: 90, // High quality threshold
+    low: 80, // Coverage threshold
+    break: 90, // Build fails below this
   },
-  
+
   // Performance optimizations
   ignoreStatic: true,
   tempDirName: '.stryker-tmp',
@@ -77,6 +79,7 @@ export default {
 ### 3. Test Quality Patterns
 
 **✅ Good: Logic Validation**
+
 ```typescript
 // Tests actual business logic
 it('should calculate 10% discount correctly', () => {
@@ -93,6 +96,7 @@ it('should throw error for negative amounts', () => {
 ```
 
 **❌ Bad: Coverage Theater**
+
 ```typescript
 // Tests framework, not logic
 it('should return a number', () => {
@@ -116,29 +120,37 @@ import fc from 'fast-check';
 
 describe('calculateTotal - Property-Based Tests', () => {
   it('should never return negative totals', () => {
-    fc.assert(fc.property(
-      fc.array(fc.record({
-        price: fc.float({ min: 0, max: 1000 }),
-        quantity: fc.integer({ min: 0, max: 100 })
-      })),
-      (items) => {
-        const result = calculateTotal(items);
-        return result >= 0;
-      }
-    ));
+    fc.assert(
+      fc.property(
+        fc.array(
+          fc.record({
+            price: fc.float({ min: 0, max: 1000 }),
+            quantity: fc.integer({ min: 0, max: 100 }),
+          })
+        ),
+        items => {
+          const result = calculateTotal(items);
+          return result >= 0;
+        }
+      )
+    );
   });
 
   it('should be commutative', () => {
-    fc.assert(fc.property(
-      fc.array(fc.record({
-        price: fc.float({ min: 0, max: 100 }),
-        quantity: fc.integer({ min: 0, max: 10 })
-      })),
-      (items) => {
-        const shuffled = [...items].sort(() => Math.random() - 0.5);
-        return calculateTotal(items) === calculateTotal(shuffled);
-      }
-    ));
+    fc.assert(
+      fc.property(
+        fc.array(
+          fc.record({
+            price: fc.float({ min: 0, max: 100 }),
+            quantity: fc.integer({ min: 0, max: 10 }),
+          })
+        ),
+        items => {
+          const shuffled = [...items].sort(() => Math.random() - 0.5);
+          return calculateTotal(items) === calculateTotal(shuffled);
+        }
+      )
+    );
   });
 });
 ```
@@ -154,6 +166,7 @@ describe('calculateTotal - Property-Based Tests', () => {
 
 **Problem:** Monorepo dependencies not resolved
 **Solution:** Install required packages at workspace root:
+
 ```bash
 pnpm add -Dw vitest tsx @stryker-mutator/vitest-runner
 ```
@@ -162,11 +175,12 @@ pnpm add -Dw vitest tsx @stryker-mutator/vitest-runner
 
 **Problem:** Low mutation scores due to weak tests
 **Solution:** Start with lower thresholds, improve systematically:
+
 ```javascript
 // Phase 1: Get it working
 thresholds: { break: 60 }
 
-// Phase 2: Improve tests  
+// Phase 2: Improve tests
 thresholds: { break: 80 }
 
 // Phase 3: Enterprise quality
@@ -178,6 +192,7 @@ thresholds: { break: 90 }
 ### TurboRepo Integration
 
 **File: `turbo.json`**
+
 ```json
 {
   "tasks": {
@@ -193,6 +208,7 @@ thresholds: { break: 90 }
 ### CI/CD Integration
 
 **Package Scripts:**
+
 ```json
 {
   "scripts": {
@@ -207,7 +223,7 @@ thresholds: { break: 90 }
 ### Low Mutation Scores
 
 1. **Check for fake tests** - Remove tests that don't validate logic
-2. **Add edge case tests** - Focus on boundary conditions  
+2. **Add edge case tests** - Focus on boundary conditions
 3. **Use property-based testing** - Generate comprehensive test cases
 4. **Review exclusions** - Only exclude low-value code paths
 
@@ -228,12 +244,14 @@ thresholds: { break: 90 }
 ## Success Metrics
 
 **Target Metrics:**
+
 - Mutation Score: ≥90%
 - Execution Time: <30 seconds
 - Routes Coverage: 100%
 - Utils Coverage: ≥90%
 
 **Quality Indicators:**
+
 - ✅ Tests fail when business logic is broken
 - ✅ Property-based tests catch edge cases
 - ✅ Strategic exclusions are documented
@@ -242,16 +260,19 @@ thresholds: { break: 90 }
 ## Example Implementation Timeline
 
 **Week 1: Foundation**
+
 - Install Stryker and configure basic setup
 - Achieve 60% mutation score with existing tests
 - Identify coverage gaps
 
-**Week 2: Quality Improvement**  
+**Week 2: Quality Improvement**
+
 - Add property-based tests for critical functions
 - Implement dual test strategy (unit + integration)
 - Reach 80% mutation score
 
 **Week 3: Enterprise Polish**
+
 - Strategic exclusions with documentation
 - CI/CD integration and quality gates
 - Achieve 90%+ mutation score
@@ -264,4 +285,4 @@ thresholds: { break: 90 }
 
 ---
 
-*This guide is based on the successful implementation in MAR-17, which achieved 95.45% mutation score.*
+_This guide is based on the successful implementation in MAR-17, which achieved 95.45% mutation score._

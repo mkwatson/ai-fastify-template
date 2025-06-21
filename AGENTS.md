@@ -332,18 +332,21 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 **Purpose**: Ensures tests actually validate business logic, not just achieve coverage metrics.
 
 **Requirements**:
+
 - **Minimum mutation score**: 90% (enforced in CI/CD)
 - **Strategic exclusions**: Only exclude low-business-value code (bootstrap, error formatting)
 - **Dual test strategy**: Both unit tests (direct imports) and integration tests (full app)
 - **Property-based testing**: Use fast-check for comprehensive edge case coverage
 
 **Configuration**:
+
 ```bash
 pnpm test:mutation    # Run mutation tests
 pnpm ai:compliance    # Includes mutation testing in full pipeline
 ```
 
 **Key Patterns**:
+
 - **Focus on business logic**: Exclude bootstrap files (`server.ts`, `app.ts`)
 - **Document exclusions**: Each exclusion requires clear rationale
 - **Incremental improvement**: Start with 60% threshold, work up to 90%

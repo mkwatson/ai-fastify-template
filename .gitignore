@@ -55,3 +55,4 @@ Thumbs.db
 tmp/
 temp/
 .stryker-tmp/
+**/.stryker-tmp/
