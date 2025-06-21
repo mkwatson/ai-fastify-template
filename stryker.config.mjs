@@ -18,7 +18,7 @@ const config = {
     '!apps/backend-api/src/**/*.d.ts',
     '!apps/backend-api/src/server.ts', // Exclude bootstrap file
     '!apps/backend-api/src/app.ts', // Focus on business logic
-    '!apps/backend-api/src/plugins/env.ts:84-106', // Complex error handling - see TECHNICAL_DEBT.md
+    '!apps/backend-api/src/plugins/env.ts:84-106', // Error formatting - low business value for mutation testing
   ],
   checkers: ['typescript'],
   tsconfigFile: './apps/backend-api/tsconfig.json',
