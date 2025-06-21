@@ -275,6 +275,8 @@ export default [
       '**/*.d.ts',
       'apps/**/build/**',
       'packages/**/dist/**',
+      '.stryker-tmp/**', // Ignore Stryker temporary files
+      'reports/**', // Ignore mutation test reports
     ],
   },
 ];
