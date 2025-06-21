@@ -56,3 +56,8 @@ tmp/
 temp/
 .stryker-tmp/
 **/.stryker-tmp/
+
+# Generated reports (build artifacts, not source)
+reports/mutation/mutation.html
+reports/coverage/
+reports/performance/
