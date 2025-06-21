@@ -37,12 +37,28 @@ Built for **LLM-powered applications** that require secure backend infrastructur
 git clone https://github.com/mkwatson/ai-fastify-template.git
 cd ai-fastify-template
 
-# Install dependencies
-pnpm install
+# Setup development environment (includes GitLeaks security scanner)
+pnpm setup:dev
 
 # Verify setup
 pnpm build --dry-run
 ```
+
+#### Manual GitLeaks Installation
+
+If you need to install GitLeaks separately or the automatic installation fails:
+
+```bash
+# Install GitLeaks using the enterprise installation script
+pnpm setup:gitleaks
+
+# Or manually via package manager:
+# macOS: brew install gitleaks
+# Ubuntu/Debian: sudo apt-get install gitleaks
+# RHEL/CentOS: sudo yum install gitleaks
+```
+
+> **Note**: GitLeaks is required for the pre-commit security scanning. The setup script automatically handles installation across different platforms.
 
 ### Development
 
@@ -79,15 +95,17 @@ ai-fastify-template/
 
 ## Technology Stack
 
-| Category                    | Tool                        | Status     | Rationale                                         |
-| --------------------------- | --------------------------- | ---------- | ------------------------------------------------- |
-| **Fast streaming API**      | Fastify + fastify-sse       | ✅ Active  | Essential for real-time AI responses              |
-| **Linting + Formatting**    | ESLint + Prettier           | ✅ Active  | Industry standard with custom architectural rules |
-| **Early type safety**       | TypeScript (strict)         | ✅ Active  | Catches AI-generated type errors immediately      |
-| **Schema validation**       | Zod (bodies & env)          | ✅ Active  | Runtime validation prevents silent failures       |
-| **Guard against spaghetti** | dependency-cruiser          | 🔄 Planned | Enforces clean architecture boundaries            |
-| **High-trust tests**        | Vitest + Coverage           | ✅ Active  | Comprehensive testing with unit & integration     |
-| **Task caching**            | pnpm workspaces + TurboRepo | ✅ Active  | Fast feedback for AI iteration cycles             |
+| Category                    | Tool                        | Status     | Rationale                                            |
+| --------------------------- | --------------------------- | ---------- | ---------------------------------------------------- |
+| **Fast streaming API**      | Fastify + fastify-sse       | ✅ Active  | Essential for real-time AI responses                 |
+| **Linting + Formatting**    | ESLint + Prettier           | ✅ Active  | Industry standard with custom architectural rules    |
+| **Early type safety**       | TypeScript (strict)         | ✅ Active  | Catches AI-generated type errors immediately         |
+| **Schema validation**       | Zod (bodies & env)          | ✅ Active  | Runtime validation prevents silent failures          |
+| **Security scanning**       | GitLeaks + audit-ci         | ✅ Active  | Prevents credential leaks and vulnerability exposure |
+| **Guard against spaghetti** | dependency-cruiser          | 🔄 Planned | Enforces clean architecture boundaries               |
+| **High-trust tests**        | Vitest + Coverage           | ✅ Active  | Comprehensive testing with unit & integration        |
+| **Mutation testing**        | Stryker                     | ✅ Active  | Ensures tests validate business logic (99.04% score) |
+| **Task caching**            | pnpm workspaces + TurboRepo | ✅ Active  | Fast feedback for AI iteration cycles                |
 
 ## Available Scripts
 
@@ -106,13 +124,22 @@ pnpm test:coverage    # Run tests with coverage report
 pnpm type-check       # TypeScript compilation check
 ```
 
-### Coming with Quality Tools (MAR-15+)
+### Security & Quality Tools
 
 ```bash
+# Enterprise-grade quality pipeline
+pnpm ai:quick         # Fast validation (lint + type-check)
+pnpm ai:check         # Standard validation (includes security)
+pnpm ai:compliance    # Full compliance validation
+pnpm ai:security      # Security audit of dependencies
+
+# Security scanning
+pnpm security:scan    # Run GitLeaks credential scanning
+pnpm setup:gitleaks   # Install/update GitLeaks scanner
+
 # Advanced Quality Gates
 pnpm lint             # Code formatting and linting (ESLint + Prettier)
-pnpm graph            # Validate import dependencies
-pnpm mutation         # Run mutation tests (if implemented)
+pnpm test:mutation    # Run mutation tests (99.04% score)
 ```
 
 ## Workspace Structure

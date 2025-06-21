@@ -28,7 +28,9 @@
     "test:coverage": "turbo test:coverage",
     "test:mutation": "stryker run",
     "type-check": "turbo type-check",
-    "setup:dev": "pnpm install && echo '🎉 Development environment setup complete!'"
+    "setup:dev": "pnpm install && bash scripts/install-gitleaks.sh && echo '🎉 Development environment setup complete!'",
+    "setup:gitleaks": "bash scripts/install-gitleaks.sh",
+    "security:scan": "gitleaks detect --source=. --verbose --no-banner --no-git"
   },
   "keywords": [
     "fastify",
