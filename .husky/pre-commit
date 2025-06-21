@@ -32,15 +32,9 @@ fi
 
 # 2. File Hygiene: Check for large files (1MB limit)
 echo "📏 [2/8] File Hygiene: Checking for large files..."
-for file in $(git diff --cached --name-only); do
-  if [ -f "$file" ]; then
-    size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo 0)
-    if [ "$size" -gt 1048576 ]; then
-      echo "❌ File $file is larger than 1MB ($size bytes). Consider using Git LFS."
-      exit 1
-    fi
-  fi
-done
+if ! node scripts/check-file-size.js; then
+  exit 1
+fi
 
 # 3. File Hygiene: Check for merge conflict markers
 echo "⚔️ [3/8] File Hygiene: Checking for merge conflicts..."

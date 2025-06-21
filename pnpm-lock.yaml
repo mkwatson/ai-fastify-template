@@ -77,6 +77,9 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.5.3
+      semver:
+        specifier: ^7.7.2
+        version: 7.7.2
       tsx:
         specifier: ^4.20.3
         version: 4.20.3

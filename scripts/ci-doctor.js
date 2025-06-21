@@ -11,6 +11,7 @@
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
+import semver from 'semver';
 
 const checks = [];
 let hasErrors = false;
@@ -49,7 +50,10 @@ check('Node.js version matches .nvmrc', () => {
     parseInt(expectedVersion.split('.')[0]) || parseInt(expectedVersion);
 
   if (currentMajor < expectedMajor) {
-    throw new Error(`Expected Node ${expectedVersion}+, got ${currentVersion}`);
+    throw new Error(
+      `Node.js ${expectedVersion} or higher is required, but got ${currentVersion}.\n` +
+        `   To fix: Install Node.js ${expectedVersion}+ using nvm, fnm, or from nodejs.org`
+    );
   }
 
   return `${currentVersion} (compatible with ${expectedVersion}+) ✓`;
@@ -61,8 +65,11 @@ check('pnpm version check', () => {
     const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
     const requiredVersion = packageJson.engines.pnpm.replace('>=', '');
 
-    if (parseFloat(version) < parseFloat(requiredVersion)) {
-      throw new Error(`pnpm ${requiredVersion}+ required, got ${version}`);
+    if (!semver.gte(version, requiredVersion)) {
+      throw new Error(
+        `pnpm ${requiredVersion} or higher is required, but got ${version}.\n` +
+          `   To fix: Run 'npm install -g pnpm@${requiredVersion}' or 'corepack enable pnpm'`
+      );
     }
 
     return `${version} ✓`;
@@ -70,18 +77,27 @@ check('pnpm version check', () => {
     if (error_.message.includes('required')) {
       throw error_;
     }
-    throw new Error('pnpm not installed or not accessible');
+    throw new Error(
+      'pnpm is not installed or not accessible.\n' +
+        "   To fix: Run 'npm install -g pnpm' or 'corepack enable pnpm'"
+    );
   }
 });
 
 // Dependency Checks
 check('Dependencies installed', () => {
   if (!existsSync('node_modules')) {
-    throw new Error('node_modules not found - run `pnpm install`');
+    throw new Error(
+      'node_modules directory not found.\n' +
+        "   To fix: Run 'pnpm install' to install dependencies"
+    );
   }
 
   if (!existsSync('pnpm-lock.yaml')) {
-    throw new Error('pnpm-lock.yaml not found');
+    throw new Error(
+      'pnpm-lock.yaml not found.\n' +
+        "   To fix: Run 'pnpm install' to generate lockfile"
+    );
   }
 
   return 'Dependencies present';
@@ -92,7 +108,10 @@ check('GitLeaks installed', () => {
     const version = exec('gitleaks version');
     return `${version} ✓`;
   } catch {
-    throw new Error('GitLeaks not installed - run `pnpm setup:gitleaks`');
+    throw new Error(
+      'GitLeaks is not installed.\n' +
+        "   To fix: Run 'pnpm setup:gitleaks' or 'bash scripts/install-gitleaks.sh'"
+    );
   }
 });
 
@@ -101,7 +120,13 @@ check('act (GitHub Actions local runner) installed', () => {
     const version = exec('act --version');
     return `${version} ✓`;
   } catch {
-    throw new Error('act not installed - run `brew install act`');
+    throw new Error(
+      'act (GitHub Actions local runner) is not installed.\n' +
+        '   To fix:\n' +
+        '   - macOS: brew install act\n' +
+        '   - Linux: curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash\n' +
+        '   - Windows: choco install act-cli'
+    );
   }
 });
 
@@ -110,7 +135,13 @@ check('actionlint (GitHub Actions linter) installed', () => {
     const version = exec('actionlint --version');
     return `${version} ✓`;
   } catch {
-    throw new Error('actionlint not installed - run `brew install actionlint`');
+    throw new Error(
+      'actionlint (GitHub Actions linter) is not installed.\n' +
+        '   To fix:\n' +
+        '   - macOS: brew install actionlint\n' +
+        '   - Linux: go install github.com/rhysd/actionlint/cmd/actionlint@latest\n' +
+        '   - Or download from: https://github.com/rhysd/actionlint/releases'
+    );
   }
 });
 
@@ -167,7 +198,10 @@ check('Mutation testing configuration', () => {
 // Git Hooks
 check('Pre-commit hooks installed', () => {
   if (!existsSync('.husky/_/husky.sh')) {
-    throw new Error('Husky not initialized - run `pnpm setup:dev`');
+    throw new Error(
+      'Husky git hooks are not initialized.\n' +
+        "   To fix: Run 'pnpm setup:dev' to set up development environment"
+    );
   }
   return 'Git hooks active';
 });
