@@ -6,7 +6,7 @@
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": ">=8.15.0"
+    "pnpm": ">=10.0.0"
   },
   "scripts": {
     "build": "turbo build",
