@@ -6,7 +6,6 @@
  */
 
 /* eslint-env node */
-/* eslint-disable no-undef */
 
 import { statSync } from 'fs';
 import { execSync } from 'child_process';

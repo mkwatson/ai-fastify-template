@@ -6,7 +6,6 @@
  */
 
 /* eslint-env node */
-/* eslint-disable no-undef */
 
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
