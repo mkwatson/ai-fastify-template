@@ -24,8 +24,10 @@
     "test": "NODE_OPTIONS='--import tsx/esm' vitest run",
     "test:watch": "NODE_OPTIONS='--import tsx/esm' vitest",
     "test:coverage": "NODE_OPTIONS='--import tsx/esm' vitest run --coverage",
+    "test:mutation": "cd ../.. && stryker run",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build",
+    "graph:validate": "depcruise src --config ../../.dependency-cruiser.js --validate"
   },
   "keywords": [
     "fastify",

@@ -3,6 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
+      "dependsOn": ["^build", "test:mutation"],
       "outputs": ["dist/**", "build/**"]
     },
     "dev": {
@@ -16,6 +17,7 @@
       "cache": false
     },
     "test": {
+      "dependsOn": ["graph:validate"],
       "outputs": ["coverage/**"]
     },
     "test:watch": {
@@ -23,13 +25,20 @@
       "persistent": true
     },
     "test:coverage": {
+      "dependsOn": ["graph:validate"],
       "outputs": ["coverage/**"]
     },
     "test:mutation": {
       "dependsOn": ["test"],
-      "outputs": ["reports/**", ".stryker-tmp/**"]
+      "outputs": ["reports/**", ".stryker-tmp/**"],
+      "cache": false
     },
     "type-check": {
+      "dependsOn": ["lint"],
+      "outputs": []
+    },
+    "graph:validate": {
+      "dependsOn": ["type-check"],
       "outputs": []
     }
   }
