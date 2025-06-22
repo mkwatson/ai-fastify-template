@@ -301,6 +301,7 @@ export default [
       '**/*.d.ts',
       'apps/**/build/**',
       'packages/**/dist/**',
+      'packages/**/build/**',
       '.stryker-tmp/**', // Ignore Stryker temporary files
       '**/.stryker-tmp/**', // Ignore all Stryker temp dirs
       'reports/**', // Ignore mutation test reports

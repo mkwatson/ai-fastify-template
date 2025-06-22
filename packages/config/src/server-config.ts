@@ -2,7 +2,7 @@
  * Server configuration utilities for Fastify applications
  */
 
-export const DEFAULT_PORT = 3000;
+export const DEFAULT_PORT = 3000; // Standard HTTP port
 export const DEFAULT_HOST = 'localhost';
 
 /**

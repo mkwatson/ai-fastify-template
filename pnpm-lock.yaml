@@ -95,6 +95,9 @@ importers:
 
   apps/backend-api:
     dependencies:
+      '@ai-fastify-template/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@fastify/autoload':
         specifier: ^6.0.0
         version: 6.3.1
@@ -144,6 +147,24 @@ importers:
       ts-node:
         specifier: ^10.4.0
         version: 10.9.2(@types/node@22.15.31)(typescript@5.8.3)
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.3
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.3
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.3(@types/node@22.15.31)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
+
+  packages/config:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.1.0
+        version: 22.15.31
+      '@vitest/coverage-v8':
+        specifier: ^3.2.3
+        version: 3.2.3(vitest@3.2.3(@types/node@22.15.31)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
