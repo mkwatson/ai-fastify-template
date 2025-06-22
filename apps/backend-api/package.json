@@ -25,7 +25,8 @@
     "test:watch": "NODE_OPTIONS='--import tsx/esm' vitest",
     "test:coverage": "NODE_OPTIONS='--import tsx/esm' vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build",
+    "graph:validate": "depcruise src --config ../../.dependency-cruiser.js --validate"
   },
   "keywords": [
     "fastify",
@@ -42,8 +43,8 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
   },
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
