@@ -50,13 +50,30 @@ function parseArgs() {
 }
 
 /**
+ * Validate and sanitize git reference
+ * Only allows alphanumeric, dash, underscore, slash, caret, and tilde
+ */
+function sanitizeGitRef(ref) {
+  if (!/^[a-zA-Z0-9\-_/^~.]+$/.test(ref)) {
+    throw new Error(
+      `Invalid git reference: ${ref}. Only alphanumeric characters, dash, underscore, slash, caret, tilde, and dot are allowed.`
+    );
+  }
+  return ref;
+}
+
+/**
  * Check if git base reference exists
  */
 function checkGitBase(base) {
   try {
-    execSync(`git rev-parse --verify ${base}`, { stdio: 'pipe' });
+    const sanitizedBase = sanitizeGitRef(base);
+    execSync(`git rev-parse --verify ${sanitizedBase}`, { stdio: 'pipe' });
     return true;
-  } catch {
+  } catch (error) {
+    if (error.message && error.message.includes('Invalid git reference')) {
+      console.error(error.message);
+    }
     return false;
   }
 }
@@ -66,11 +83,16 @@ function checkGitBase(base) {
  */
 function getChangedPackages(base) {
   try {
+    const sanitizedBase = sanitizeGitRef(base);
+
     // Get list of changed files
-    const changedFiles = execSync(`git diff --name-only ${base}...HEAD`, {
-      encoding: 'utf-8',
-      stdio: 'pipe',
-    })
+    const changedFiles = execSync(
+      `git diff --name-only ${sanitizedBase}...HEAD`,
+      {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      }
+    )
       .trim()
       .split('\n')
       .filter(Boolean);
