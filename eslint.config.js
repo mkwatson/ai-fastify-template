@@ -34,6 +34,28 @@ export default [
     },
   },
 
+  // Script files (Node.js ES modules)
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        Buffer: 'readonly',
+        global: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off', // Allow console in scripts
+      'prefer-const': 'error',
+      'no-var': 'error',
+    },
+  },
+
   // CommonJS config and tooling files
   {
     files: ['*.cjs', '**/.*.cjs', 'eslint-plugin-*.cjs'],
