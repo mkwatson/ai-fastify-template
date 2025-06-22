@@ -1,0 +1,51 @@
+{
+  "name": "@ai-fastify-template/config",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Configuration utilities for the AI Fastify Template monorepo",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint . && prettier --check .",
+    "test": "NODE_OPTIONS='--import tsx/esm' vitest run",
+    "test:watch": "NODE_OPTIONS='--import tsx/esm' vitest",
+    "test:coverage": "NODE_OPTIONS='--import tsx/esm' vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf build",
+    "graph:validate": "echo 'No dependency validation needed for config package'"
+  },
+  "files": [
+    "build/**/*",
+    "src/**/*"
+  ],
+  "keywords": [
+    "config",
+    "utilities",
+    "typescript",
+    "monorepo"
+  ],
+  "author": {
+    "name": "Mark Watson",
+    "email": "mark@example.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.1.0",
+    "@vitest/coverage-v8": "^3.2.3",
+    "tsx": "^4.20.3",
+    "typescript": "~5.8.2",
+    "vitest": "^3.2.3"
+  }
+}
