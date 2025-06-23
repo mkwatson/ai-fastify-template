@@ -1,1 +1,7 @@
-You’re an expert software architect. First, define the qualities of an exceptional implementation and pull request that passes a strict code review on the first attempt. Then, move the ticket we’ve just selected into ‘In Progress’ and fully implement it—from a fresh branch off main to a completed PR—ensuring it meets those exceptional standards. Do not move the ticket to ‘Done’; that will be handled separately after code review, approval, and merging by someone else.
+Think deeply about what makes an exceptional implementation that passes strict code review on the first attempt—one that demonstrates true software craftsmanship within our established architecture and quality standards.
+
+Now think harder about the specific ticket context: business value, technical complexity, user impact, and integration points. What would a senior architect prioritize? What could go wrong?
+
+Move the selected ticket to 'In Progress' and implement it completely—from fresh branch to ready-for-review PR—while embodying those exceptional standards. Adapt your approach based on the ticket's nature, but maintain our quality guardrails throughout.
+
+Use Linear MCP tools, our quality pipeline commands, and Git workflows as needed. Don't move to 'Done'—that's handled post-review.

@@ -6,6 +6,29 @@ const HelloWorldResponseSchema = z.object({
   message: z.string().describe('Welcome message'),
 });
 
+// Error response schemas for OpenAPI
+const ErrorResponseSchema = {
+  type: 'object',
+  properties: {
+    error: {
+      type: 'string',
+      description: 'Error type',
+      example: 'Bad Request',
+    },
+    message: {
+      type: 'string',
+      description: 'Error message',
+      example: 'Invalid request parameters',
+    },
+    statusCode: {
+      type: 'number',
+      description: 'HTTP status code',
+      example: 400,
+    },
+  },
+  required: ['error', 'message', 'statusCode'],
+} as const;
+
 const root: FastifyPluginAsync =
   // eslint-disable-next-line require-await
   async (fastify, _opts): Promise<void> => {
@@ -28,6 +51,10 @@ const root: FastifyPluginAsync =
                 },
               },
               required: ['message'],
+            },
+            500: {
+              description: 'Internal Server Error',
+              ...ErrorResponseSchema,
             },
           },
         },

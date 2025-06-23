@@ -24,10 +24,10 @@ describe('Example Route Unit Tests', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.payload).toBe('this is an example');
+    expect(response.payload).toBe('"this is an example"');
   });
 
-  it('should return plain text response', async () => {
+  it('should return JSON response', async () => {
     app = Fastify({ logger: false });
     await app.register(exampleRoute);
     await app.ready();
@@ -38,8 +38,8 @@ describe('Example Route Unit Tests', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.payload).toBe('this is an example');
-    expect(response.headers['content-type']).toMatch(/text\/plain/);
+    expect(response.payload).toBe('"this is an example"');
+    expect(response.headers['content-type']).toMatch(/application\/json/);
   });
 
   it('should handle string return value', async () => {

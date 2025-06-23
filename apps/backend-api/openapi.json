@@ -48,6 +48,35 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Internal Server Error",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error type",
+                      "example": "Bad Request"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "Invalid request parameters"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "description": "HTTP status code",
+                      "example": 400
+                    }
+                  },
+                  "required": ["error", "message", "statusCode"]
+                }
+              }
+            }
           }
         }
       }
@@ -66,6 +95,35 @@
                   "description": "Successful response",
                   "type": "string",
                   "example": "this is an example"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Internal Server Error",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error type",
+                      "example": "Bad Request"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "Invalid request parameters"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "description": "HTTP status code",
+                      "example": 400
+                    }
+                  },
+                  "required": ["error", "message", "statusCode"]
                 }
               }
             }

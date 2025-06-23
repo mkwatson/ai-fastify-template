@@ -4,6 +4,29 @@ import { z } from 'zod';
 // Response schemas
 const ExampleResponseSchema = z.string().describe('Example response message');
 
+// Error response schemas for OpenAPI
+const ErrorResponseSchema = {
+  type: 'object',
+  properties: {
+    error: {
+      type: 'string',
+      description: 'Error type',
+      example: 'Bad Request',
+    },
+    message: {
+      type: 'string',
+      description: 'Error message',
+      example: 'Invalid request parameters',
+    },
+    statusCode: {
+      type: 'number',
+      description: 'HTTP status code',
+      example: 400,
+    },
+  },
+  required: ['error', 'message', 'statusCode'],
+} as const;
+
 const example: FastifyPluginAsync =
   // eslint-disable-next-line require-await
   async (fastify, _opts): Promise<void> => {
@@ -20,11 +43,15 @@ const example: FastifyPluginAsync =
               type: 'string',
               example: 'this is an example',
             },
+            500: {
+              description: 'Internal Server Error',
+              ...ErrorResponseSchema,
+            },
           },
         },
       },
       // eslint-disable-next-line require-await
-      async (_request, _reply) => {
+      async (_request, reply) => {
         const response = 'this is an example';
 
         // Validate response against schema in development
@@ -32,7 +59,9 @@ const example: FastifyPluginAsync =
           ExampleResponseSchema.parse(response);
         }
 
-        return response;
+        // Ensure JSON response for consistency with OpenAPI spec
+        reply.type('application/json');
+        reply.send(JSON.stringify(response));
       }
     );
   };
