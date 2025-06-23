@@ -1,0 +1,151 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AI Fastify Template API",
+    "description": "Production-ready Fastify backend API with TypeScript and comprehensive validation",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Your Name",
+      "email": "your-email@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Get welcome message",
+        "tags": ["Root"],
+        "description": "Returns a hello world message for API health check",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Successful response",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Welcome message",
+                      "example": "Hello World!"
+                    }
+                  },
+                  "required": ["message"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Internal Server Error",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error type",
+                      "example": "Bad Request"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "Invalid request parameters"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "description": "HTTP status code",
+                      "example": 400
+                    }
+                  },
+                  "required": ["error", "message", "statusCode"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/example/": {
+      "get": {
+        "summary": "Get example message",
+        "tags": ["Example"],
+        "description": "Returns an example string response",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Successful response",
+                  "type": "string",
+                  "example": "this is an example"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Internal Server Error",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error type",
+                      "example": "Bad Request"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "Invalid request parameters"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "description": "HTTP status code",
+                      "example": 400
+                    }
+                  },
+                  "required": ["error", "message", "statusCode"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Root",
+      "description": "Root endpoints"
+    },
+    {
+      "name": "Example",
+      "description": "Example endpoints"
+    }
+  ]
+}

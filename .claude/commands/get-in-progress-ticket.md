@@ -1,1 +1,5 @@
-Use the Linear MCP tool to fetch the ticket currently in progress. Provide a clear and concise summary. Explicitly state whether there is an associated PR—if there is, briefly summarize it.
+Use Linear MCP tools to find the ticket currently in progress. Provide:
+
+- Ticket summary and ID
+- Whether there's an associated PR
+- If yes, PR number and status

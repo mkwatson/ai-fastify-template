@@ -24,8 +24,8 @@ describe('Example routes', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      expect(response.payload).toBe('this is an example');
-      expect(response.headers['content-type']).toContain('text/plain');
+      expect(response.payload).toBe('"this is an example"');
+      expect(response.headers['content-type']).toContain('application/json');
     });
 
     it('should handle HEAD requests', async () => {

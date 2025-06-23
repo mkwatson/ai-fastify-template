@@ -65,7 +65,7 @@ function createSafeConfig(config: Env): Record<string, unknown> {
 
 declare module 'fastify' {
   interface FastifyInstance {
-    config: Env;
+    config?: Env;
   }
 }
 

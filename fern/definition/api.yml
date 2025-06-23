@@ -1,0 +1,3 @@
+name: ai-fastify-template-api
+imports:
+  openapi: ../apps/backend-api/openapi.json
