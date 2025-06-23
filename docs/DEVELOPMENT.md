@@ -233,6 +233,28 @@ cat .claude/commands/start-ticket.md
 
 The files are minimal and focused, following the meta-prompt philosophy of teaching Claude to think rather than providing detailed steps.
 
+### Scientific Optimization Framework
+
+**Motivation**: Transform prompt engineering from subjective art into empirical optimization using measurable loss functions, aligning with enterprise LLM evaluation best practices.
+
+**Approach**: Each command has defined objectives optimized through systematic measurement:
+
+```typescript
+// Example: /start-ticket loss function
+L = w₁ × (1 - first_try_pass_rate) + w₂ × time_to_completion + w₃ × human_interventions_needed
+```
+
+**Implementation**: See [MAR-54](https://linear.app/markwatson/issue/MAR-54) for comprehensive framework development.
+
+**Future Work**:
+
+- Multi-objective optimization with Pareto frontiers
+- Reinforcement learning for dynamic prompt adaptation
+- Cross-project benchmarking for command effectiveness
+- Academic research on systematic prompt optimization methodologies
+
+This scientific approach enables data-driven improvement of AI-assisted development workflows, transitioning from experimental tooling to engineering discipline with measurable ROI.
+
 ## Creating New Features (AI Agent Process)
 
 When implementing features, AI agents follow this process:
