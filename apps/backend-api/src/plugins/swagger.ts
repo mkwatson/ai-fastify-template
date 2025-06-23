@@ -14,8 +14,8 @@ const swaggerPlugin: FastifyPluginAsync = async fastify => {
           'Production-ready Fastify backend API with TypeScript and comprehensive validation',
         version: '1.0.0',
         contact: {
-          name: 'Mark Watson',
-          email: 'mark@example.com',
+          name: 'Your Name',
+          email: 'your-email@example.com',
         },
         license: {
           name: 'MIT',

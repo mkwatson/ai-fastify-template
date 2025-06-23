@@ -33,8 +33,8 @@ describe('Swagger Plugin', () => {
         'Production-ready Fastify backend API'
       );
       expect(spec.info.contact).toEqual({
-        name: 'Mark Watson',
-        email: 'mark@example.com',
+        name: 'Your Name',
+        email: 'your-email@example.com',
       });
       expect(spec.info.license).toEqual({
         name: 'MIT',
