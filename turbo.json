@@ -50,6 +50,11 @@
       // Dependency graph validation - run after type safety confirmed
       "dependsOn": ["type-check"],
       "outputs": []
+    },
+    "openapi:generate": {
+      // OpenAPI specification generation - run after build for accurate specs
+      "dependsOn": ["build"],
+      "outputs": ["openapi.json"]
     }
   }
 }

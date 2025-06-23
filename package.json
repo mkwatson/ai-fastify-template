@@ -43,7 +43,11 @@
     "ci:doctor": "node scripts/ci-doctor.js",
     "setup:dev": "pnpm install && bash scripts/install-gitleaks.sh && echo '🎉 Development environment setup complete!'",
     "setup:gitleaks": "bash scripts/install-gitleaks.sh",
-    "security:scan": "gitleaks detect --source=. --verbose --no-banner --no-git"
+    "security:scan": "gitleaks detect --source=. --verbose --no-banner --no-git",
+    "openapi:generate": "turbo openapi:generate",
+    "sdk:generate": "pnpm openapi:generate && fern generate --local",
+    "fern:check": "fern check",
+    "fern:validate": "fern check && echo '✅ Fern configuration is valid'"
   },
   "keywords": [
     "fastify",
@@ -88,6 +92,7 @@
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-vitest": "^0.5.4",
     "fast-check": "^4.1.1",
+    "fern-api": "^0.64.15",
     "gitleaks": "^1.0.0",
     "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
