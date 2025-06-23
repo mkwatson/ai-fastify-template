@@ -1,6 +1,6 @@
 # Contributing to AI Fastify Template
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to the AI Fastify Template project.
+This document outlines the **AI-first collaboration model** for the AI Fastify Template project. AI agents handle 100% of code implementation, while humans provide strategic direction and final approval.
 
 ## Table of Contents
 
@@ -25,8 +25,8 @@ This project follows a professional, inclusive environment. Please:
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
+- Node.js >= 20.0.0
+- pnpm >= 10.0.0
 - Git
 
 ### Setup
@@ -47,8 +47,7 @@ This project follows a professional, inclusive environment. Please:
 3. **Verify setup**
 
    ```bash
-   pnpm build --dry-run
-   pnpm lint
+   pnpm ai:quick
    ```
 
 4. **Create a feature branch**
@@ -69,40 +68,52 @@ ai-fastify-template/
 └── .github/                 # GitHub workflows
 ```
 
-### Adding New Features
+### AI Agent Feature Implementation
 
-1. **Create appropriate structure**
+AI agents autonomously handle complete application development with automated SDK generation:
 
-   ```bash
-   # For new app
-   mkdir apps/my-app
-   cd apps/my-app
-   pnpm init
+1. **Complete Application Development**
 
-   # For new package
-   mkdir packages/my-package
-   cd packages/my-package
-   pnpm init
-   ```
+   - Full-stack TypeScript applications with Fastify backend
+   - Zod validation for all inputs and outputs
+   - Comprehensive error handling and business logic
+   - Service layer architecture and data models
 
-2. **Follow naming conventions**
+2. **OpenAPI Specification Generation**
 
-   - Apps: `kebab-case` (e.g., `backend-api`, `admin-dashboard`)
-   - Packages: `@ai-fastify-template/package-name`
-   - Files: `kebab-case.ts` or `camelCase.ts` for components
+   - Structured API contracts for client integration
+   - Type-safe request/response schemas
+   - Documentation for automated tooling
 
-3. **Add dependencies correctly**
+3. **Quality Assurance**
+   - Unit and integration tests
+   - Mutation testing validation
+   - Architecture compliance checks
 
-   ```bash
-   # App-specific dependency
-   pnpm add --filter my-app fastify
+**AI Agent Process:**
 
-   # Workspace-wide dev dependency
-   pnpm add -Dw typescript
+```bash
+# AI agents follow this autonomous workflow:
+1. Create feature branch from main
+2. Implement complete application with OpenAPI specs
+3. Automated SDK generation (via Fern) from API specifications
+4. Write comprehensive tests
+5. Run quality pipeline (pnpm ai:compliance)
+6. Create PR with detailed description
+```
 
-   # Package dependency
-   pnpm add --filter @ai-fastify-template/my-package zod
-   ```
+**Automated SDK Benefits:**
+
+- Type-safe client libraries generated automatically from OpenAPI specs
+- Zero manual client code maintenance
+- Contract enforcement prevents API/client mismatches
+- Instant client integration for rapid development
+
+**Human Role:**
+
+- Provide requirements and ticket approval
+- Review final implementation for business logic correctness
+- Approve deployment decisions
 
 ### Architecture Guidelines
 
@@ -122,25 +133,27 @@ ai-fastify-template/
 
 #### Dependency Rules
 
-- Apps → Packages ✅
-- Packages → Packages ✅
-- Apps → Apps ❌
-- Packages → Apps ❌
+See [ARCHITECTURE.md](ARCHITECTURE.md#monorepo-structure) for detailed architectural rules and patterns.
 
 ## Quality Standards
 
 ### Code Quality
 
-All contributions must pass the available quality checks:
+All contributions must pass the comprehensive quality pipeline:
 
 ```bash
-# Currently available
-pnpm build          # Build all packages
-pnpm lint           # Code formatting and style
+# AI-optimized quality commands (recommended)
+pnpm ai:quick       # Fast validation (lint + type-check)
+pnpm ai:check       # Standard validation (+ graph validation)
+pnpm ai:compliance  # Full quality pipeline (required before PR)
 
-# Coming with backend development (MAR-11+)
-pnpm test           # Unit and integration tests
-pnpm type-check     # TypeScript compilation
+# Individual quality checks
+pnpm lint           # ESLint + Prettier formatting
+pnpm type-check     # TypeScript strict compilation
+pnpm test           # Unit and integration tests (Vitest)
+pnpm test:mutation  # Mutation testing (Stryker) - 99.04% score
+pnpm graph:validate # Architecture dependency validation
+pnpm build          # Production build verification
 ```
 
 ### TypeScript Standards
@@ -250,12 +263,7 @@ BREAKING CHANGE: User IDs are now UUIDs instead of numbers"
 1. **Ensure quality checks pass**
 
    ```bash
-   pnpm build
-   pnpm lint
-
-   # Coming with MAR-11+: Full pipeline
-   # pnpm test
-   # pnpm type-check
+   pnpm ai:compliance    # Full quality pipeline (required before PR)
    ```
 
 2. **Update documentation**
@@ -307,29 +315,54 @@ Brief description of changes
 
 ## AI Agent Guidelines
 
-This project is optimized for AI-assisted development. When working with AI agents:
+This project implements **fully autonomous AI development** where AI agents handle 100% of implementation tasks:
 
-### Effective Prompts
+### AI Agent Workflow
 
+The development process uses three specialized AI coding tools:
+
+- **OpenAI Codex**: Direct access to `@AGENTS.md` guidelines
+- **Cursor IDE**: Accesses via `@.cursor/rules/default.mdc` → references `AGENTS.md`
+- **Claude Code**: Accesses via `@CLAUDE.md` → imports `AGENTS.md`
+
+All AI agents receive identical comprehensive guidelines ensuring **100% consistency** across tools.
+
+### Autonomous Development Process
+
+1. **Requirements Gathering**: AI agents pull tickets from Linear via MCP integration
+2. **Implementation**: AI agents generate complete applications with OpenAPI specs for automated SDK generation
+3. **Testing**: Comprehensive test suites with >90% mutation testing scores
+4. **Code Review**: Separate AI agents perform thorough code review
+5. **Human Approval**: Humans provide final approval for deployment
+
+### Quality Assurance Integration
+
+AI agents use the comprehensive quality pipeline:
+
+```bash
+pnpm ai:quick      # Fast validation (lint + type-check)
+pnpm ai:check      # Standard validation (includes security)
+pnpm ai:compliance # Full compliance validation
 ```
-✅ Good: "Add a new route that validates the request body with Zod and follows the existing error handling patterns"
 
-❌ Bad: "Add a route" (too vague, likely to skip validation)
-```
+### Linear MCP Integration
 
-### AI-Friendly Patterns
+AI agents autonomously manage project workflow:
 
-- **Explicit types**: Help AI understand expected shapes
-- **Clear interfaces**: Define contracts between modules
-- **Consistent patterns**: Follow established conventions
-- **Comprehensive tests**: Help AI understand expected behavior
+- **Ticket Selection**: `/get-next-ticket` - AI reviews backlog and selects optimal work
+- **Implementation**: `/start-ticket` - AI moves ticket to In Progress and implements
+- **Code Review**: `/code-review` - AI conducts thorough automated review
+- **Progress Tracking**: Real-time updates to Linear issues during development
 
-### When AI Gets Stuck
+### Human Role
 
-1. **Check build output**: `pnpm build` and `pnpm lint`
-2. **Look for specific errors**: Focus on one constraint at a time
-3. **Reference existing patterns**: Point AI to similar implementations
-4. **Break down requests**: Smaller, focused changes work better
+Human involvement is limited to:
+
+- **Strategic direction** and requirement clarification
+- **Final approval** of AI-generated implementations
+- **Deployment decisions** and production oversight
+
+**Key Principle**: AI agents handle 100% of coding, testing, and code review. Humans provide direction and approval.
 
 ## Getting Help
 

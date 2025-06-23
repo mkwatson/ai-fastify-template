@@ -3,12 +3,12 @@
 > Production-ready Fastify + TypeScript monorepo optimized for AI-assisted development
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
-[![pnpm Version](https://img.shields.io/badge/pnpm-%3E%3D8.0.0-orange)](https://pnpm.io/)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
+[![pnpm Version](https://img.shields.io/badge/pnpm-%3E%3D10.0.0-orange)](https://pnpm.io/)
 
 ## Overview
 
-This template provides a production-ready foundation for building **LLM-powered backend applications** with comprehensive guardrails that enable AI coding agents to work effectively without introducing technical debt or architectural violations.
+This template provides a production-ready foundation where **AI coding agents autonomously generate complete backend APIs with automatically generated type-safe client SDKs** using comprehensive guardrails that prevent technical debt and architectural violations.
 
 ### Why This Template Exists
 
@@ -19,16 +19,73 @@ Modern AI coding assistants are powerful but can introduce subtle bugs, architec
 - **Comprehensive quality gates** that catch issues before they reach production
 - **Clear architectural boundaries** that prevent spaghetti code
 
+### Why AI Development Needs Different Constraints
+
+Traditional software quality relies on experienced developers making good decisions. AI agents have different failure modes that require systematic prevention:
+
+**🧪 The "Coverage Theater" Problem**
+
+```typescript
+// AI frequently writes tests that achieve 100% coverage but validate nothing:
+it('should calculate tax', () => {
+  const result = calculateTax(100, 0.1);
+  expect(result).toBeDefined(); // ✅ Passes
+  expect(typeof result).toBe('number'); // ✅ Passes - 100% coverage!
+});
+
+// Our 99.04% mutation testing requirement catches this
+// When logic is mutated, the test still passes, revealing it's fake
+```
+
+**🏗️ Architectural Drift Without Understanding**
+
+```typescript
+// AI doesn't understand why this is problematic:
+const config = {
+  port: process.env.PORT || 3000, // ❌ No validation
+  secret: process.env.JWT_SECRET, // ❌ Could be undefined
+};
+
+// ESLint rules enforce proper patterns:
+const config = ConfigSchema.parse(process.env); // ✅ Validation required
+```
+
+**⚡ Different Development Velocity**
+
+- **Human pace**: Think → Code → Test → Review (minutes to hours)
+- **AI pace**: Generate → Validate → Iterate (seconds)
+- **Our solution**: Sub-5-second quality gates that match AI's speed
+
+This template implements **constraint-based development** where quality comes from systematic guardrails, not developer experience.
+
 ### Primary Use Case
 
-Built for **LLM-powered applications** that require secure backend infrastructure. Perfect for developers who want to build AI apps (chatbots, content generation, etc.) without exposing API keys in client code or managing complex backend concerns like authentication, rate limiting, and usage tracking.
+Built for **fully autonomous AI development workflows** where AI agents generate complete applications while automated tooling provides type-safe client integration. The human role is limited to:
+
+- **Requirements collaboration** with AI agents (pulling from Linear via MCP)
+- **Final approval** of AI-generated implementations
+- **Deployment decisions** and production oversight
+
+**AI agents handle 100% of development:**
+
+- **Complete application development** (backend APIs, testing, documentation)
+- **Code generation, testing, and code review** using **Cursor IDE**, **Claude Code**, and **OpenAI Codex**
+
+**Automated SDK generation provides:**
+
+- **Type-safe client libraries** automatically generated from API specifications (via Fern)
+- **Zero client integration overhead** - consume APIs immediately with full IntelliSense
+- **Contract enforcement** - breaking API changes are caught at compile-time
+- **Rapid prototyping** - frontend teams get working client libraries instantly
+
+This eliminates the traditional bottleneck where backend teams must manually write and maintain client SDKs, documentation, and coordinate API changes with frontend teams.
 
 ## Quick Start
 
 ### Prerequisites
 
-- **Node.js** >= 18.0.0
-- **pnpm** >= 8.0.0
+- **Node.js** >= 20.0.0
+- **pnpm** >= 10.0.0
 
 ### Installation
 
@@ -41,7 +98,7 @@ cd ai-fastify-template
 pnpm setup:dev
 
 # Verify setup
-pnpm build --dry-run
+pnpm ai:quick
 ```
 
 #### Manual GitLeaks Installation
@@ -82,12 +139,12 @@ pnpm clean            # Clean build artifacts
 ai-fastify-template/
 ├── apps/                    # Applications ✅
 │   └── backend-api/         # Fastify backend API ✅
-├── packages/                # Shared packages (empty - coming later)
+├── packages/                # Shared packages ✅
+│   └── config/              # Configuration utilities ✅
 ├── docs/                    # Documentation ✅
 │   ├── CONTRIBUTING.md      # Contributing guidelines ✅
 │   ├── DEVELOPMENT.md       # Development workflow ✅
-│   ├── ARCHITECTURE.md      # Architecture overview ✅
-│   └── AI_GUIDELINES.md     # AI agent guidance ✅
+│   └── ARCHITECTURE.md      # Architecture overview ✅
 ├── turbo.json              # TurboRepo configuration ✅
 ├── pnpm-workspace.yaml     # pnpm workspace configuration ✅
 └── package.json            # Root package configuration ✅
@@ -95,17 +152,17 @@ ai-fastify-template/
 
 ## Technology Stack
 
-| Category                    | Tool                        | Status     | Rationale                                            |
-| --------------------------- | --------------------------- | ---------- | ---------------------------------------------------- |
-| **Fast streaming API**      | Fastify + fastify-sse       | ✅ Active  | Essential for real-time AI responses                 |
-| **Linting + Formatting**    | ESLint + Prettier           | ✅ Active  | Industry standard with custom architectural rules    |
-| **Early type safety**       | TypeScript (strict)         | ✅ Active  | Catches AI-generated type errors immediately         |
-| **Schema validation**       | Zod (bodies & env)          | ✅ Active  | Runtime validation prevents silent failures          |
-| **Security scanning**       | GitLeaks + audit-ci         | ✅ Active  | Prevents credential leaks and vulnerability exposure |
-| **Guard against spaghetti** | dependency-cruiser          | 🔄 Planned | Enforces clean architecture boundaries               |
-| **High-trust tests**        | Vitest + Coverage           | ✅ Active  | Comprehensive testing with unit & integration        |
-| **Mutation testing**        | Stryker                     | ✅ Active  | Ensures tests validate business logic (99.04% score) |
-| **Task caching**            | pnpm workspaces + TurboRepo | ✅ Active  | Fast feedback for AI iteration cycles                |
+| Category                    | Tool                                 | Why Critical for AI                                                  | Traditional Projects      |
+| --------------------------- | ------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
+| **Fast streaming API**      | Fastify + fastify-sse                | AI needs real-time responses                                         | Standard in many projects |
+| **Linting + Formatting**    | ESLint + Prettier + **Custom Rules** | **AI-specific rules prevent common mistakes**                        | Usually just formatting   |
+| **Early type safety**       | TypeScript (strict)                  | AI can't use escape hatches like `any`                               | Often allows `any` types  |
+| **Schema validation**       | Zod (bodies & env)                   | **Mandatory** - AI doesn't know trust boundaries                     | Often optional/selective  |
+| **Security scanning**       | GitLeaks + audit-ci                  | AI might commit secrets without realizing                            | Manual review sufficient  |
+| **Guard against spaghetti** | dependency-cruiser                   | AI creates circular dependencies without understanding               | Relies on code review     |
+| **High-trust tests**        | Vitest + Coverage                    | Basic foundation for testing                                         | Same usage                |
+| **Mutation testing**        | Stryker (99.04% score)               | **Catches AI's "fake tests" that achieve coverage but test nothing** | Rarely used (expensive)   |
+| **Task caching**            | pnpm workspaces + TurboRepo          | Sub-5-second feedback for AI's rapid iteration                       | Same usage                |
 
 ## Available Scripts
 
@@ -157,9 +214,9 @@ Contains deployable applications:
 
 ### Packages Directory (`packages/`)
 
-**Status: Empty - Shared packages planned for future development**
+**Status: ✅ Active - Configuration utilities implemented**
 
-Will contain shared libraries:
+Contains shared libraries:
 
 - Reusable code across apps
 - Can depend on other packages
@@ -210,19 +267,19 @@ pnpm install
 - **Clear architectural boundaries** prevent violations
 - **Comprehensive validation** catches AI-generated errors
 
-### Quality Gates (Planned)
+### Quality Gates (Implemented)
 
-- **Strict TypeScript** - No `any` types, comprehensive checking
-- **Runtime Validation** - Zod schemas for all inputs
-- **Import Graph Validation** - Prevents circular dependencies
-- **Comprehensive Testing** - Unit, integration, and end-to-end
+- **Strict TypeScript** - No `any` types, comprehensive checking with type-aware ESLint rules
+- **Runtime Validation** - Zod schemas for all environment variables and request inputs
+- **Import Graph Validation** - dependency-cruiser prevents circular dependencies and enforces architecture
+- **Comprehensive Testing** - Unit, integration tests with 99.04% mutation testing score
 
-### Security First (Planned)
+### Security First (Implemented)
 
-- Environment variable validation
-- Input sanitization and validation
-- Secure defaults for all configurations
-- No secrets in client code
+- Environment variable validation with Zod schemas
+- Input sanitization and validation at all API boundaries
+- GitLeaks pre-commit scanning for credential detection
+- Dependency vulnerability scanning with audit-ci
 
 ## Current Status
 
@@ -241,31 +298,32 @@ This template is in **active development**. Current state:
 - Comprehensive test setup with Vitest
 - Development and production scripts
 
-📋 **Next Steps**
+✅ **Quality Tooling Complete**
 
-- Quality tooling (dependency-cruiser, mutation testing)
-- Zod validation patterns
-- SSE streaming capabilities
-- Testing framework (Vitest)
-- CI/CD pipeline
+- dependency-cruiser for architectural validation
+- Mutation testing with Stryker (99.04% score)
+- Zod validation patterns for environment and inputs
+- Comprehensive testing framework with Vitest
+- CI/CD pipeline with GitHub Actions
 
 ## Troubleshooting
 
 ### Common Issues
 
-**No packages to build/test**
+**Fast Quality Validation**
 
 ```bash
-# Expected - no apps/packages exist yet
-pnpm build  # Will show "0 packages"
-pnpm test   # Will show "0 packages"
+# Quick validation during development
+pnpm ai:quick        # Lint + type-check (fast)
+pnpm ai:check        # + dependency validation
+pnpm ai:compliance   # Full quality pipeline
 ```
 
 **Getting Started**
 
-- Follow the plan.md for step-by-step implementation
-- Start with MAR-11 (Backend API) for first working application
-- Refer to docs/ for detailed guidelines
+- Follow the [Quick Start](#quick-start) guide above
+- The backend API is already implemented and ready to use
+- Refer to [docs/](docs/) for detailed development guidelines
 
 ### Advanced Debugging
 
@@ -273,32 +331,40 @@ pnpm test   # Will show "0 packages"
 # Advanced turbo commands for debugging
 pnpm build --verbosity=2     # Verbose build output with detailed logs
 pnpm clean                   # Clear build artifacts and cache
-pnpm build --dry-run         # See what would run without executing
+turbo build --dry-run         # See what would run without executing
 ```
 
-## 🤖 AI Coding Agent Guidelines
+## 🤖 AI-First Development Workflow
 
-We maintain comprehensive, consistent coding guidelines across our three primary AI coding tools—**OpenAI Codex**, **Anthropic's Claude Code**, and **Cursor IDE**.
+This template is specifically designed for **autonomous AI development** where AI agents perform all coding tasks. We support three primary AI coding tools—**OpenAI Codex**, **Anthropic's Claude Code**, and **Cursor IDE**.
 
-### File Structure
+### AI Agent Guidelines Distribution
 
-- **[`AGENTS.md`](./AGENTS.md)** – Authoritative source for all coding guidelines
-- **[`CLAUDE.md`](./CLAUDE.md)** – Imports `AGENTS.md` for Claude Code integration
-- **[`.cursor/rules/default.mdc`](./.cursor/rules/default.mdc)** – References `AGENTS.md` for Cursor IDE
+All AI coding agents receive the same comprehensive guidelines from `AGENTS.md`:
 
-### Why This Structure?
+- **OpenAI Codex**: Direct access to `@AGENTS.md`
+- **Cursor IDE**: Accesses via `@.cursor/rules/default.mdc` → references `AGENTS.md`
+- **Claude Code**: Accesses via `@CLAUDE.md` → imports `AGENTS.md`
 
-- **Single Source of Truth:** One definitive place for all guidelines
-- **Tool Compatibility:** Each tool's specific import/reference requirements handled
-- **Maintainability:** Update once, applies everywhere
-- **Extensibility:** Clear path for tool-specific additions if needed
+This ensures **100% consistency** across all AI coding tools with a single source of truth.
+
+### AI Agent Workflow
+
+1. **Requirements Gathering**: AI agents pull tickets from Linear (via MCP integration)
+2. **Complete Development**: AI agents generate full applications (APIs, tests, documentation) with full TypeScript safety
+3. **Automated SDK Generation**: Fern automatically generates type-safe client SDKs from API specifications
+4. **Quality Validation**: Comprehensive automated quality gates ensure code quality
+5. **AI Code Review**: AI agents perform thorough code review and validation
+6. **Human Approval**: Humans review final output and approve for deployment
+
+**Key Principle**: Humans specify requirements and approve results. AI agents handle 100% of development implementation, while automated tooling provides seamless client integration.
 
 ### Quality Integration
 
 Guidelines integrate with our quality pipeline:
 
 ```bash
-pnpm ai:quick      # Quick validation (lint + types + patterns)
+pnpm ai:quick      # Quick validation (lint + type-check)
 pnpm ai:check      # Standard validation (includes security)
 pnpm ai:compliance # Full compliance validation
 ```
@@ -321,4 +387,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Ready to build AI-powered applications?** This template provides the foundation you need. Follow the implementation plan in `plan.md` to add your first backend API.
+**Ready to build AI-powered applications?** This template provides the complete foundation you need with a production-ready Fastify backend, comprehensive testing, and AI-optimized development workflows.

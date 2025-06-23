@@ -1,16 +1,78 @@
-# Development Workflow
+# AI Agent Development Workflow
 
-This document outlines the development workflow for the AI Fastify Template project, including setup, daily development practices, and release processes.
+This document outlines the **fully autonomous AI development workflow** for the AI Fastify Template project. AI agents handle 100% of development tasks from requirements to code review.
 
 ## Table of Contents
 
+- [AI Agent Workflow](#ai-agent-workflow)
 - [Environment Setup](#environment-setup)
-- [Daily Development](#daily-development)
+- [Linear MCP Integration](#linear-mcp-integration)
 - [Quality Assurance](#quality-assurance)
 - [Turbo Pipeline](#turbo-pipeline)
-- [Debugging](#debugging)
-- [Performance](#performance)
-- [Release Process](#release-process)
+- [Human Oversight](#human-oversight)
+
+## AI Agent Workflow
+
+This template implements a **fully autonomous development process** where AI agents handle all implementation tasks:
+
+### 1. Ticket Selection & Planning
+
+```bash
+# Human initiates the process
+/get-next-ticket          # AI agent reviews backlog and selects next priority ticket
+```
+
+The AI agent:
+
+- Reviews the Linear project board using MCP integration
+- Analyzes priority, dependencies, and project goals
+- Selects the optimal next ticket with clear rationale
+- Presents recommendation to human for approval
+
+### 2. Autonomous Implementation
+
+```bash
+# Human approves ticket selection
+/start-ticket            # AI agent implements complete feature end-to-end
+```
+
+The AI agent autonomously:
+
+- Creates fresh branch off main with proper naming convention
+- Implements complete feature including:
+  - Complete application development (APIs, business logic, data models)
+  - OpenAPI specification generation for client SDK automation
+  - Comprehensive test suites (unit + integration + mutation)
+  - Documentation updates
+- Runs all quality gates (`pnpm ai:compliance`)
+- Commits with conventional commit messages
+- Opens pull request with detailed description
+
+### 3. AI Code Review
+
+```bash
+# Separate AI agent performs code review
+/code-review             # AI agent conducts thorough code review
+```
+
+The reviewing AI agent:
+
+- Defines exceptional code review criteria
+- Analyzes implementation against strict quality standards
+- Posts detailed review comments on the PR
+- If changes needed: implements fixes autonomously
+- Ensures all quality gates pass before approval
+
+### 4. Human Oversight
+
+Human role is limited to:
+
+- **Initial approval** of ticket selection
+- **Final approval** of completed implementation
+- **Deployment decisions** and production oversight
+- **Strategic direction** and requirement clarification
+
+**Key Principle**: AI agents handle 100% of coding, testing, and code review. Humans provide direction and final approval.
 
 ## Environment Setup
 
@@ -20,8 +82,8 @@ Ensure you have the required tools installed:
 
 ```bash
 # Check versions
-node --version    # >= 18.0.0
-pnpm --version    # >= 8.0.0
+node --version    # >= 20.0.0
+pnpm --version    # >= 10.0.0
 git --version     # >= 2.0.0
 ```
 
@@ -41,22 +103,16 @@ git --version     # >= 2.0.0
    # Check workspace structure
    pnpm list --depth=0
 
-   # Verify turbo works
-   pnpm build --dry-run
-
-   # Run dry-run build
-   pnpm build --dry-run
+   # Verify development environment
+   pnpm ai:quick
    ```
 
 3. **Set up development environment**
 
    ```bash
-   # Copy environment template (when available)
-   cp .env.example .env.local
-
    # Configure your editor for TypeScript
    # VS Code: Install recommended extensions
-   # Cursor: AI rules are already configured
+   # Cursor: AI rules are already configured via AGENTS.md
    ```
 
 4. **Initialize git hooks** (Quality Gates)
@@ -79,23 +135,44 @@ git --version     # >= 2.0.0
    - 🔄 **Auto-staging** - Modified files are automatically re-staged after fixes
    - ⚡ **Fast execution** - Only processes staged files, not entire codebase
 
-## Daily Development
+## Linear MCP Integration
 
-### Starting Development
+The template integrates with Linear project management through MCP (Model Context Protocol) tools, enabling AI agents to autonomously interact with project boards.
+
+### Available Commands
+
+AI agents use these commands to manage the development workflow:
 
 ```bash
-# Pull latest changes
-git checkout main
-git pull origin main
-
-# Install any new dependencies
-pnpm install
-
-# Start development mode (when apps exist)
-pnpm dev
+/get-next-ticket          # Review backlog and select optimal next ticket
+/get-in-progress-ticket   # Check current ticket status and associated PR
+/start-ticket            # Move ticket to In Progress and implement complete feature
+/code-review             # Perform thorough code review of PR
 ```
 
-### Creating New Features
+### MCP Linear Tools
+
+The following Linear MCP tools are available to AI agents:
+
+- `mcp__linear__list_issues` - List and filter issues
+- `mcp__linear__get_issue` - Get detailed issue information
+- `mcp__linear__create_issue` - Create new issues
+- `mcp__linear__update_issue` - Update issue status and details
+- `mcp__linear__create_comment` - Add comments to issues
+- `mcp__linear__list_projects` - List projects
+- `mcp__linear__list_teams` - List teams
+
+### Ticket Lifecycle
+
+1. **Backlog Management**: AI agents analyze Linear board for priority tickets
+2. **Ticket Selection**: `/get-next-ticket` command selects optimal work
+3. **Implementation**: `/start-ticket` moves to In Progress and implements
+4. **Code Review**: `/code-review` provides thorough automated review
+5. **Human Approval**: Human approves final implementation for merge
+
+## Creating New Features (AI Agent Process)
+
+When implementing features, AI agents follow this process:
 
 1. **Create feature branch**
 
@@ -130,26 +207,35 @@ pnpm dev
    pnpm add --filter @ai-fastify-template/my-package zod
    ```
 
-### Development Loop
+### AI Agent Development Loop
 
-1. **Make changes**
+AI agents autonomously handle the complete development cycle:
 
-   - Write code following TypeScript strict mode
-   - Add tests for new functionality
-   - Update documentation as needed
+1. **Code Generation**
 
-2. **Run quality checks frequently**
+   - Generate TypeScript code following strict mode requirements
+   - Create comprehensive test suites (unit + integration + mutation)
+   - Update documentation automatically
+   - Generate OpenAPI specifications for automated SDK generation
+
+2. **Quality Validation**
 
    ```bash
-   # Available checks during development
-   pnpm lint
-   pnpm build
+   # AI agents run quality checks continuously
+   pnpm ai:quick      # Fast validation (lint + type-check)
+   pnpm ai:check      # Standard validation (includes graph validation)
+   pnpm ai:compliance # Full quality pipeline including mutation testing
    ```
 
-3. **Commit changes**
+3. **Autonomous Commits**
+
    ```bash
+   # AI agents commit with conventional commit format
    git add .
    git commit -m "feat(scope): description of changes"
+
+   # AI agents create PR with detailed description
+   gh pr create --title "..." --body "..."
    ```
 
 ### Conventional Commit Format
@@ -225,27 +311,29 @@ git commit -m "feat(api): this is a very long commit message that exceeds the ma
 
 ### Quality Checks
 
-The project will use a fail-fast pipeline (coming with backend development):
+The project implements a comprehensive fail-fast pipeline:
 
 ```
-lint → type-check → graph → test → mutation → build
+lint → type-check → graph:validate → test → test:mutation → build
 ```
 
-**Current Status**: Only `lint` and `build` are implemented. Full pipeline coming with MAR-11+.
+**Current Status**: ✅ Full quality pipeline implemented and operational.
 
 ### Running Quality Checks
 
 ```bash
-# Currently available
-pnpm lint           # Code formatting and linting
-pnpm build          # Production build
-pnpm clean          # Clear build artifacts
+# AI-optimized commands (recommended)
+pnpm ai:quick       # Fast validation (lint + type-check)
+pnpm ai:check       # Standard validation (+ graph validation)
+pnpm ai:compliance  # Full quality pipeline including mutation testing
 
-# Coming with backend development (MAR-11+)
-pnpm type-check     # TypeScript compilation
-pnpm test           # Unit and integration tests
-pnpm graph          # Dependency validation
-pnpm mutation       # Mutation testing (if implemented)
+# Individual commands
+pnpm lint           # ESLint + Prettier formatting
+pnpm type-check     # TypeScript strict compilation
+pnpm test           # Unit and integration tests (Vitest)
+pnpm test:mutation  # Mutation testing (Stryker) - 99.04% score
+pnpm graph:validate # Dependency architecture validation
+pnpm build          # Production build verification
 ```
 
 ### Quality Standards
