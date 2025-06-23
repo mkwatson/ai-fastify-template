@@ -8,7 +8,7 @@
 
 ## Overview
 
-This template provides a production-ready foundation where **AI coding agents autonomously generate entire backend applications** with comprehensive guardrails that prevent technical debt and architectural violations.
+This template provides a production-ready foundation where **AI coding agents autonomously generate complete backend APIs with automatically generated type-safe client SDKs** using comprehensive guardrails that prevent technical debt and architectural violations.
 
 ### Why This Template Exists
 
@@ -21,17 +21,25 @@ Modern AI coding assistants are powerful but can introduce subtle bugs, architec
 
 ### Primary Use Case
 
-Built for **fully autonomous AI development workflows** where AI agents generate complete backend applications with client SDKs. The human role is limited to:
+Built for **fully autonomous AI development workflows** where AI agents generate complete applications while automated tooling provides type-safe client integration. The human role is limited to:
 
 - **Requirements collaboration** with AI agents (pulling from Linear via MCP)
 - **Final approval** of AI-generated implementations
 - **Deployment decisions** and production oversight
 
-AI agents handle 100% of:
+**AI agents handle 100% of development:**
 
-- **Backend API development** (Fastify + TypeScript)
-- **SDK generation** for seamless client integration
+- **Complete application development** (backend APIs, testing, documentation)
 - **Code generation, testing, and code review** using **Cursor IDE**, **Claude Code**, and **OpenAI Codex**
+
+**Automated SDK generation provides:**
+
+- **Type-safe client libraries** automatically generated from API specifications (via Fern)
+- **Zero client integration overhead** - consume APIs immediately with full IntelliSense
+- **Contract enforcement** - breaking API changes are caught at compile-time
+- **Rapid prototyping** - frontend teams get working client libraries instantly
+
+This eliminates the traditional bottleneck where backend teams must manually write and maintain client SDKs, documentation, and coordinate API changes with frontend teams.
 
 ## Quick Start
 
@@ -304,13 +312,13 @@ This ensures **100% consistency** across all AI coding tools with a single sourc
 ### AI Agent Workflow
 
 1. **Requirements Gathering**: AI agents pull tickets from Linear (via MCP integration)
-2. **Backend Development**: AI agents generate Fastify APIs with full TypeScript safety
-3. **SDK Generation**: Automatic client SDK generation for seamless API consumption
+2. **Complete Development**: AI agents generate full applications (APIs, tests, documentation) with full TypeScript safety
+3. **Automated SDK Generation**: Fern automatically generates type-safe client SDKs from API specifications
 4. **Quality Validation**: Comprehensive automated quality gates ensure code quality
 5. **AI Code Review**: AI agents perform thorough code review and validation
 6. **Human Approval**: Humans review final output and approve for deployment
 
-**Key Principle**: Humans specify requirements and approve results. AI agents handle 100% of implementation.
+**Key Principle**: Humans specify requirements and approve results. AI agents handle 100% of development implementation, while automated tooling provides seamless client integration.
 
 ### Quality Integration
 

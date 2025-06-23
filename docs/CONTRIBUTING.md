@@ -70,20 +70,20 @@ ai-fastify-template/
 
 ### AI Agent Feature Implementation
 
-AI agents autonomously handle complete feature implementation from backend APIs to client SDKs:
+AI agents autonomously handle complete application development with automated SDK generation:
 
-1. **Backend API Development**
+1. **Complete Application Development**
 
-   - Fastify routes with full TypeScript safety
-   - Zod validation for all inputs
-   - Comprehensive error handling
-   - Service layer architecture
+   - Full-stack TypeScript applications with Fastify backend
+   - Zod validation for all inputs and outputs
+   - Comprehensive error handling and business logic
+   - Service layer architecture and data models
 
-2. **SDK Generation**
+2. **OpenAPI Specification Generation**
 
-   - Automatic client SDK generation for API consumption
-   - Type-safe client libraries
-   - Documentation generation
+   - Structured API contracts for client integration
+   - Type-safe request/response schemas
+   - Documentation for automated tooling
 
 3. **Quality Assurance**
    - Unit and integration tests
@@ -95,12 +95,19 @@ AI agents autonomously handle complete feature implementation from backend APIs 
 ```bash
 # AI agents follow this autonomous workflow:
 1. Create feature branch from main
-2. Implement backend APIs with full validation
-3. Generate client SDKs
+2. Implement complete application with OpenAPI specs
+3. Automated SDK generation (via Fern) from API specifications
 4. Write comprehensive tests
 5. Run quality pipeline (pnpm ai:compliance)
 6. Create PR with detailed description
 ```
+
+**Automated SDK Benefits:**
+
+- Type-safe client libraries generated automatically from OpenAPI specs
+- Zero manual client code maintenance
+- Contract enforcement prevents API/client mismatches
+- Instant client integration for rapid development
 
 **Human Role:**
 
@@ -323,7 +330,7 @@ All AI agents receive identical comprehensive guidelines ensuring **100% consist
 ### Autonomous Development Process
 
 1. **Requirements Gathering**: AI agents pull tickets from Linear via MCP integration
-2. **Implementation**: AI agents generate complete features (backend APIs + client SDKs)
+2. **Implementation**: AI agents generate complete applications with OpenAPI specs for automated SDK generation
 3. **Testing**: Comprehensive test suites with >90% mutation testing scores
 4. **Code Review**: Separate AI agents perform thorough code review
 5. **Human Approval**: Humans provide final approval for deployment

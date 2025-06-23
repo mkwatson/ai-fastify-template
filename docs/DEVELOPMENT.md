@@ -40,8 +40,8 @@ The AI agent autonomously:
 
 - Creates fresh branch off main with proper naming convention
 - Implements complete feature including:
-  - Backend API endpoints (Fastify + TypeScript)
-  - Generated client SDKs for API consumption
+  - Complete application development (APIs, business logic, data models)
+  - OpenAPI specification generation for client SDK automation
   - Comprehensive test suites (unit + integration + mutation)
   - Documentation updates
 - Runs all quality gates (`pnpm ai:compliance`)
@@ -216,7 +216,7 @@ AI agents autonomously handle the complete development cycle:
    - Generate TypeScript code following strict mode requirements
    - Create comprehensive test suites (unit + integration + mutation)
    - Update documentation automatically
-   - Generate client SDKs for API consumption
+   - Generate OpenAPI specifications for automated SDK generation
 
 2. **Quality Validation**
 
