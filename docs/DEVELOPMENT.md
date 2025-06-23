@@ -7,6 +7,7 @@ This document outlines the **fully autonomous AI development workflow** for the 
 - [AI Agent Workflow](#ai-agent-workflow)
 - [Environment Setup](#environment-setup)
 - [Linear MCP Integration](#linear-mcp-integration)
+- [Custom Slash Commands](#custom-slash-commands)
 - [Quality Assurance](#quality-assurance)
 - [Turbo Pipeline](#turbo-pipeline)
 - [Human Oversight](#human-oversight)
@@ -169,6 +170,68 @@ The following Linear MCP tools are available to AI agents:
 3. **Implementation**: `/start-ticket` moves to In Progress and implements
 4. **Code Review**: `/code-review` provides thorough automated review
 5. **Human Approval**: Human approves final implementation for merge
+
+## Custom Slash Commands
+
+The workflow commands referenced above are now included in the project as custom slash commands in `.claude/commands/`. These represent workflow patterns that have proven effective in practice with Claude Code.
+
+### Available Commands
+
+```bash
+/get-next-ticket          # Analyze backlog and recommend next priority ticket
+/get-in-progress-ticket   # Check status of current in-progress work
+/start-ticket            # Move ticket to In Progress and implement complete feature
+/code-review             # Perform thorough code review with quality criteria
+```
+
+### Philosophy: Meta-Prompts Over Prescriptive Steps
+
+These commands demonstrate a **meta-prompt approach** rather than prescriptive step-by-step instructions. Each command asks Claude to:
+
+1. **First define quality standards** (e.g., "define the qualities of an exceptional implementation")
+2. **Then apply those standards** to the specific task
+
+This approach is more effective than detailed instructions because it:
+
+- **Teaches Claude to think** about the problem domain
+- **Adapts to different contexts** rather than following rigid steps
+- **Produces higher quality results** by establishing criteria first
+- **Scales better** as requirements evolve
+
+### Customization and Evolution
+
+**These are examples, not requirements.** You can:
+
+- **Modify existing commands** to match your workflow preferences
+- **Create new commands** for your specific use cases
+- **Remove commands** that don't fit your development style
+- **Adapt the meta-prompt pattern** to other domains
+
+**These will continue to evolve** based on what works in practice. They represent current workflow patterns, not definitive best practices.
+
+### When Specific Callouts Are Needed
+
+While meta-prompts are preferred, sometimes explicit instructions are necessary when patterns emerge where Claude Code doesn't follow expected behavior:
+
+**Common examples:**
+
+- **Unnecessary file creation**: Claude Code may create documentation files when not requested, despite instructions to avoid this
+- **TodoWrite tool usage**: For complex multi-step tasks, Claude Code may not use the TodoWrite tool even when it would be helpful for tracking progress
+- **Over-explanation**: Providing lengthy explanations when a concise response was requested
+
+These specific callouts are added to project guidelines (like `AGENTS.md`) when patterns consistently emerge.
+
+### Command Implementation
+
+Each command is implemented as a simple markdown file containing the prompt:
+
+```bash
+# View command implementations
+ls .claude/commands/
+cat .claude/commands/start-ticket.md
+```
+
+The files are minimal and focused, following the meta-prompt philosophy of teaching Claude to think rather than providing detailed steps.
 
 ## Creating New Features (AI Agent Process)
 
