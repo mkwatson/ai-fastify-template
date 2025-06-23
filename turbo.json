@@ -42,8 +42,8 @@
       "cache": false
     },
     "type-check": {
-      // TypeScript compilation check - run after code formatting
-      "dependsOn": ["lint"],
+      // TypeScript compilation check - run after dependencies built and code formatted
+      "dependsOn": ["^build", "lint"],
       "outputs": []
     },
     "graph:validate": {
