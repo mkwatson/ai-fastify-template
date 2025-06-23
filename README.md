@@ -8,7 +8,7 @@
 
 ## Overview
 
-This template provides a production-ready foundation for building **LLM-powered backend applications** with comprehensive guardrails that enable AI coding agents to work effectively without introducing technical debt or architectural violations.
+This template provides a production-ready foundation where **AI coding agents autonomously generate entire backend applications** with comprehensive guardrails that prevent technical debt and architectural violations.
 
 ### Why This Template Exists
 
@@ -21,7 +21,17 @@ Modern AI coding assistants are powerful but can introduce subtle bugs, architec
 
 ### Primary Use Case
 
-Built for **LLM-powered applications** that require secure backend infrastructure. Perfect for developers who want to build AI apps (chatbots, content generation, etc.) without exposing API keys in client code or managing complex backend concerns like authentication, rate limiting, and usage tracking.
+Built for **fully autonomous AI development workflows** where AI agents generate complete backend applications with client SDKs. The human role is limited to:
+
+- **Requirements collaboration** with AI agents (pulling from Linear via MCP)
+- **Final approval** of AI-generated implementations
+- **Deployment decisions** and production oversight
+
+AI agents handle 100% of:
+
+- **Backend API development** (Fastify + TypeScript)
+- **SDK generation** for seamless client integration
+- **Code generation, testing, and code review** using **Cursor IDE**, **Claude Code**, and **OpenAI Codex**
 
 ## Quick Start
 
@@ -277,22 +287,30 @@ pnpm clean                   # Clear build artifacts and cache
 turbo build --dry-run         # See what would run without executing
 ```
 
-## 🤖 AI Coding Agent Guidelines
+## 🤖 AI-First Development Workflow
 
-We maintain comprehensive, consistent coding guidelines across our three primary AI coding tools—**OpenAI Codex**, **Anthropic's Claude Code**, and **Cursor IDE**.
+This template is specifically designed for **autonomous AI development** where AI agents perform all coding tasks. We support three primary AI coding tools—**OpenAI Codex**, **Anthropic's Claude Code**, and **Cursor IDE**.
 
-### File Structure
+### AI Agent Guidelines Distribution
 
-- **[`AGENTS.md`](./AGENTS.md)** – Authoritative source for all coding guidelines
-- **[`CLAUDE.md`](./CLAUDE.md)** – Imports `AGENTS.md` for Claude Code integration
-- **Cursor IDE** – Configure to reference `AGENTS.md` for consistent guidelines
+All AI coding agents receive the same comprehensive guidelines from `AGENTS.md`:
 
-### Why This Structure?
+- **OpenAI Codex**: Direct access to `@AGENTS.md`
+- **Cursor IDE**: Accesses via `@.cursor/rules/default.mdc` → references `AGENTS.md`
+- **Claude Code**: Accesses via `@CLAUDE.md` → imports `AGENTS.md`
 
-- **Single Source of Truth:** One definitive place for all guidelines
-- **Tool Compatibility:** Each tool's specific import/reference requirements handled
-- **Maintainability:** Update once, applies everywhere
-- **Extensibility:** Clear path for tool-specific additions if needed
+This ensures **100% consistency** across all AI coding tools with a single source of truth.
+
+### AI Agent Workflow
+
+1. **Requirements Gathering**: AI agents pull tickets from Linear (via MCP integration)
+2. **Backend Development**: AI agents generate Fastify APIs with full TypeScript safety
+3. **SDK Generation**: Automatic client SDK generation for seamless API consumption
+4. **Quality Validation**: Comprehensive automated quality gates ensure code quality
+5. **AI Code Review**: AI agents perform thorough code review and validation
+6. **Human Approval**: Humans review final output and approve for deployment
+
+**Key Principle**: Humans specify requirements and approve results. AI agents handle 100% of implementation.
 
 ### Quality Integration
 
