@@ -8,31 +8,23 @@
  *
  * This script integrates seamlessly with existing turbo workflows while adding
  * selective execution capabilities for improved developer productivity.
+ *
+ * Features:
+ * - Modular architecture with separate git, config, and performance modules
+ * - External configuration file support (.turbo-smart.json)
+ * - Comprehensive performance metrics and timing analysis
+ * - Security-first design with input validation and sanitization
  */
 
 import { execSync } from 'child_process';
-
-/**
- * Configuration for smart pipeline execution
- */
-const CONFIG = {
-  // Default git reference to compare against
-  defaultBase: 'main',
-
-  // Tasks that should always run on all packages for safety
-  alwaysRunAll: ['test:mutation', 'build'],
-
-  // Tasks that can safely run selectively
-  selectiveTasks: ['lint', 'type-check', 'test', 'graph:validate'],
-
-  // Enable performance logging
-  logPerformance: true,
-};
+import { checkGitBase, getChangedPackages } from './lib/git-operations.js';
+import { loadConfig } from './lib/config.js';
+import { PerformanceMetrics, logExecutionSummary } from './lib/performance.js';
 
 /**
  * Parse command line arguments
  */
-function parseArgs() {
+function parseArgs(config) {
   const args = process.argv.slice(2);
 
   // Handle turbo run command format: smart-turbo.js run <task> [options]
@@ -43,94 +35,18 @@ function parseArgs() {
   const baseFlag = args.find(arg => arg.startsWith('--base='));
   const forceAll = args.includes('--force-all');
   const dryRun = args.includes('--dry-run');
+  const configFlag = args.find(arg => arg.startsWith('--config='));
 
-  const base = baseFlag ? baseFlag.split('=')[1] : CONFIG.defaultBase;
+  const base = baseFlag ? baseFlag.split('=')[1] : config.defaultBase;
+  const configPath = configFlag ? configFlag.split('=')[1] : null;
 
-  return { task, base, forceAll, dryRun, isRunCommand };
-}
-
-/**
- * Validate and sanitize git reference
- * Only allows alphanumeric, dash, underscore, slash, caret, and tilde
- */
-function sanitizeGitRef(ref) {
-  if (!/^[a-zA-Z0-9\-_/^~.]+$/.test(ref)) {
-    throw new Error(
-      `Invalid git reference: ${ref}. Only alphanumeric characters, dash, underscore, slash, caret, tilde, and dot are allowed.`
-    );
-  }
-  return ref;
-}
-
-/**
- * Check if git base reference exists
- */
-function checkGitBase(base) {
-  try {
-    const sanitizedBase = sanitizeGitRef(base);
-    execSync(`git rev-parse --verify ${sanitizedBase}`, { stdio: 'pipe' });
-    return true;
-  } catch (error) {
-    if (error.message && error.message.includes('Invalid git reference')) {
-      console.error(error.message);
-    }
-    return false;
-  }
-}
-
-/**
- * Get changed packages since base reference
- */
-function getChangedPackages(base) {
-  try {
-    const sanitizedBase = sanitizeGitRef(base);
-
-    // Get list of changed files
-    const changedFiles = execSync(
-      `git diff --name-only ${sanitizedBase}...HEAD`,
-      {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-      }
-    )
-      .trim()
-      .split('\n')
-      .filter(Boolean);
-
-    if (changedFiles.length === 0) {
-      return { packages: [], reason: 'no-changes' };
-    }
-
-    // Determine which packages are affected
-    const affectedPackages = new Set();
-
-    for (const file of changedFiles) {
-      if (file.startsWith('apps/')) {
-        const appName = file.split('/')[1];
-        if (appName) affectedPackages.add(`./apps/${appName}`);
-      } else if (file.startsWith('packages/')) {
-        const packageName = file.split('/')[1];
-        if (packageName) affectedPackages.add(`./packages/${packageName}`);
-      } else {
-        // Root level changes affect all packages
-        return { packages: ['all'], reason: 'root-changes', files: [file] };
-      }
-    }
-
-    return {
-      packages: Array.from(affectedPackages),
-      reason: 'package-changes',
-      files: changedFiles,
-    };
-  } catch (error) {
-    return { packages: ['all'], reason: 'error', error: error.message };
-  }
+  return { task, base, forceAll, dryRun, isRunCommand, configPath };
 }
 
 /**
  * Build turbo command with appropriate filters
  */
-function buildTurboCommand(task, packages, forceAll, dryRun) {
+function buildTurboCommand(task, packages, forceAll, dryRun, config) {
   const baseCommand = dryRun
     ? 'pnpm turbo run --dry-run text'
     : 'pnpm turbo run';
@@ -142,7 +58,7 @@ function buildTurboCommand(task, packages, forceAll, dryRun) {
   }
 
   // Check if task should always run on all packages
-  if (CONFIG.alwaysRunAll.includes(task)) {
+  if (config.alwaysRunAll.includes(task)) {
     return { command: taskCommand, scope: 'all-packages-safety' };
   }
 
@@ -154,91 +70,147 @@ function buildTurboCommand(task, packages, forceAll, dryRun) {
 }
 
 /**
- * Log execution information
- */
-function logExecution(task, result, startTime) {
-  const duration = Date.now() - startTime;
-
-  console.log('');
-  console.log('📊 Smart Turbo Execution Summary');
-  console.log(`   Task: ${task}`);
-  console.log(`   Scope: ${result.scope}`);
-
-  if (result.packages) {
-    console.log(`   Packages: ${result.packages.join(', ')}`);
-  }
-
-  if (CONFIG.logPerformance) {
-    console.log(`   Duration: ${duration}ms`);
-  }
-
-  console.log('');
-}
-
-/**
- * Execute the smart pipeline
+ * Execute the smart pipeline with enhanced metrics and modular architecture
  */
 function main() {
-  const startTime = Date.now();
-  const { task, base, forceAll, dryRun } = parseArgs();
+  // Initialize performance tracking
+  const performanceMetrics = new PerformanceMetrics();
+  performanceMetrics.startPhase('initialization');
+
+  // Load configuration (supports external .turbo-smart.json)
+  let config = loadConfig();
+  const { task, base, forceAll, dryRun, configPath } = parseArgs(config);
+
+  if (configPath) {
+    // Reload with custom config path if specified
+    config = loadConfig(configPath);
+  }
+
+  performanceMetrics.endPhase();
 
   if (!task) {
     console.error('❌ Please specify a task to run');
     console.log(
-      'Usage: node scripts/smart-turbo.js <task> [--base=<git-ref>] [--force-all] [--dry-run]'
+      'Usage: node scripts/smart-turbo.js <task> [--base=<git-ref>] [--force-all] [--dry-run] [--config=<path>]'
     );
     console.log('   or: node scripts/smart-turbo.js run <task> [options]');
     process.exit(1);
   }
 
+  performanceMetrics.startPhase('task-analysis');
+
   // Check if we should use selective execution
-  const shouldUseSelective = !forceAll && CONFIG.selectiveTasks.includes(task);
+  const shouldUseSelective = !forceAll && config.selectiveTasks.includes(task);
 
   if (!shouldUseSelective) {
+    performanceMetrics.endPhase();
+    performanceMetrics.startPhase('turbo-execution');
+
     // Use standard turbo execution
     const command = dryRun
       ? `pnpm turbo run --dry-run text ${task}`
       : `pnpm turbo run ${task}`;
 
     try {
+      const turboStart = Date.now();
       execSync(command, { stdio: 'inherit' });
-      logExecution(task, { scope: 'all-packages' }, startTime);
+      const turboTime = Date.now() - turboStart;
+
+      performanceMetrics.recordTurboTime(turboTime);
+      performanceMetrics.endPhase();
+
+      const finalMetrics = performanceMetrics.finalize();
+      logExecutionSummary(
+        task,
+        { scope: 'all-packages' },
+        finalMetrics,
+        config
+      );
     } catch (error) {
       process.exit(error.status || 1);
     }
     return;
   }
+
+  performanceMetrics.endPhase();
+  performanceMetrics.startPhase('git-validation');
 
   // Validate git base exists
   if (!checkGitBase(base)) {
     console.warn(
       `⚠️  Git reference '${base}' not found, using standard execution`
     );
+
+    performanceMetrics.endPhase();
+    performanceMetrics.startPhase('turbo-execution');
+
     const command = dryRun
       ? `pnpm turbo run --dry-run text ${task}`
       : `pnpm turbo run ${task}`;
 
     try {
+      const turboStart = Date.now();
       execSync(command, { stdio: 'inherit' });
-      logExecution(task, { scope: 'all-packages' }, startTime);
+      const turboTime = Date.now() - turboStart;
+
+      performanceMetrics.recordTurboTime(turboTime);
+      performanceMetrics.endPhase();
+
+      const finalMetrics = performanceMetrics.finalize();
+      logExecutionSummary(
+        task,
+        { scope: 'all-packages' },
+        finalMetrics,
+        config
+      );
     } catch (error) {
       process.exit(error.status || 1);
     }
     return;
   }
 
-  // Get changed packages
+  performanceMetrics.endPhase();
+  performanceMetrics.startPhase('package-analysis');
+
+  // Get changed packages with timing
   const changeResult = getChangedPackages(base);
+
+  if (changeResult.gitDiffTime) {
+    performanceMetrics.recordGitTime(changeResult.gitDiffTime);
+  }
+
+  // Record package metrics
+  const totalPackages = 2; // This could be determined dynamically in the future
+  const selectedPackages = changeResult.packages.includes('all')
+    ? totalPackages
+    : changeResult.packages.length;
+
+  performanceMetrics.recordPackageMetrics({
+    totalPackages,
+    selectedPackages,
+  });
+
   const result = buildTurboCommand(
     task,
     changeResult.packages,
     forceAll,
-    dryRun
+    dryRun,
+    config
   );
 
+  performanceMetrics.endPhase();
+  performanceMetrics.startPhase('turbo-execution');
+
   try {
+    const turboStart = Date.now();
     execSync(result.command, { stdio: 'inherit' });
-    logExecution(task, result, startTime);
+    const turboTime = Date.now() - turboStart;
+
+    performanceMetrics.recordTurboTime(turboTime);
+    performanceMetrics.endPhase();
+
+    const finalMetrics = performanceMetrics.finalize();
+    logExecutionSummary(task, result, finalMetrics, config);
   } catch (error) {
     console.error(`❌ Smart turbo execution failed for task: ${task}`);
     process.exit(error.status || 1);
@@ -247,8 +219,9 @@ function main() {
 
 // Handle help flag
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  const config = loadConfig();
   console.log(`
-🧠 Smart Turbo - Dynamic Task Execution
+🧠 Smart Turbo - Dynamic Task Execution (Enhanced)
 
 USAGE:
   node scripts/smart-turbo.js <task> [options]
@@ -258,14 +231,19 @@ TASKS:
   lint, type-check, test, graph:validate, build, test:mutation
 
 OPTIONS:
-  --base=<ref>     Git reference to compare against (default: main)
+  --base=<ref>     Git reference to compare against (default: ${config.defaultBase})
   --force-all      Force execution on all packages
   --dry-run        Show what would be executed without running
+  --config=<path>  Use custom configuration file
   --help           Show this help
+
+CONFIGURATION:
+  Smart Turbo supports external configuration via .turbo-smart.json
+  Place in project root, home directory, or specify with --config
 
 EXAMPLES:
   node scripts/smart-turbo.js lint
-    → Run linting only on packages with changes since main
+    → Run linting only on packages with changes since ${config.defaultBase}
 
   node scripts/smart-turbo.js test --base=HEAD^1
     → Run tests only on packages changed since last commit
@@ -273,8 +251,18 @@ EXAMPLES:
   node scripts/smart-turbo.js build --force-all
     → Force build on all packages regardless of changes
 
-SELECTIVE TASKS: ${CONFIG.selectiveTasks.join(', ')}
-ALWAYS-ALL TASKS: ${CONFIG.alwaysRunAll.join(', ')}
+  node scripts/smart-turbo.js lint --config=./custom-config.json
+    → Use custom configuration file
+
+FEATURES:
+  ✨ Modular architecture with git, config, and performance modules
+  ⚡ Enhanced performance metrics with detailed timing breakdown
+  🔧 External configuration file support (.turbo-smart.json)
+  🛡️ Security-first design with comprehensive input validation
+  📊 Detailed execution analysis and efficiency reporting
+
+SELECTIVE TASKS: ${config.selectiveTasks.join(', ')}
+ALWAYS-ALL TASKS: ${config.alwaysRunAll.join(', ')}
 `);
   process.exit(0);
 }

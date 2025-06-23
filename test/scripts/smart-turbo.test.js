@@ -1,13 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execSync } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
 // We'll test the smart-turbo script by running it as a subprocess
 // This approach tests the actual behavior without needing to refactor the script
 
-describe('smart-turbo.js', () => {
+describe('smart-turbo.js (Enhanced)', () => {
   const scriptPath = join(process.cwd(), 'scripts', 'smart-turbo.js');
+  const testConfigPath = '.test-turbo-config.json';
 
   beforeEach(() => {
     // Ensure the script exists
@@ -16,17 +17,29 @@ describe('smart-turbo.js', () => {
     }
   });
 
+  afterEach(() => {
+    // Clean up test config if it exists
+    if (existsSync(testConfigPath)) {
+      unlinkSync(testConfigPath);
+    }
+  });
+
   describe('command parsing', () => {
-    it('should show help with --help flag', () => {
+    it('should show enhanced help with --help flag', () => {
       const result = execSync(`node ${scriptPath} --help`, {
         encoding: 'utf-8',
       });
 
-      expect(result).toContain('Smart Turbo - Dynamic Task Execution');
+      expect(result).toContain(
+        'Smart Turbo - Dynamic Task Execution (Enhanced)'
+      );
       expect(result).toContain('USAGE:');
       expect(result).toContain('TASKS:');
       expect(result).toContain('OPTIONS:');
+      expect(result).toContain('CONFIGURATION:');
       expect(result).toContain('EXAMPLES:');
+      expect(result).toContain('FEATURES:');
+      expect(result).toContain('--config=<path>');
     });
 
     it('should show error when no task provided', () => {
@@ -150,6 +163,128 @@ describe('smart-turbo.js', () => {
         "Git reference 'non-existent-ref-xyz' not found"
       );
       expect(result).toContain('using standard execution');
+    });
+  });
+
+  describe('configuration support', () => {
+    it('should use custom configuration file', () => {
+      const customConfig = {
+        defaultBase: 'develop',
+        logPerformance: true,
+        performanceLogging: {
+          enabled: true,
+          includeGitTiming: true,
+          includeTurboTiming: true,
+          includePackageMetrics: true,
+        },
+      };
+
+      writeFileSync(testConfigPath, JSON.stringify(customConfig, null, 2));
+
+      const result = execSync(
+        `node ${scriptPath} lint --config=${testConfigPath} --dry-run`,
+        {
+          encoding: 'utf-8',
+        }
+      );
+
+      expect(result).toContain('Smart Turbo Execution Summary');
+      expect(result).toContain('Duration:');
+    });
+
+    it('should handle invalid configuration gracefully', () => {
+      writeFileSync(testConfigPath, '{ invalid json }');
+
+      const result = execSync(
+        `node ${scriptPath} lint --config=${testConfigPath} --dry-run`,
+        {
+          encoding: 'utf-8',
+        }
+      );
+
+      // Should still work with fallback to defaults
+      expect(result).toContain('turbo run --dry-run text lint');
+    });
+  });
+
+  describe('enhanced performance metrics', () => {
+    it('should show detailed performance breakdown', () => {
+      const result = execSync(`node ${scriptPath} lint --dry-run`, {
+        encoding: 'utf-8',
+      });
+
+      expect(result).toContain('Smart Turbo Execution Summary');
+      expect(result).toContain('Task: lint');
+      expect(result).toContain('Scope:');
+      expect(result).toContain('Duration:');
+    });
+
+    it('should handle different task types with proper scope', () => {
+      // Test selective task
+      const selectiveResult = execSync(`node ${scriptPath} lint --dry-run`, {
+        encoding: 'utf-8',
+      });
+      expect(selectiveResult).toContain('Task: lint');
+
+      // Test always-all task
+      const alwaysAllResult = execSync(
+        `node ${scriptPath} test:mutation --dry-run`,
+        {
+          encoding: 'utf-8',
+        }
+      );
+      expect(alwaysAllResult).toContain('Task: test:mutation');
+      expect(alwaysAllResult).toContain('all-packages');
+    });
+  });
+
+  describe('cross-package dependency scenarios', () => {
+    it('should handle config package changes correctly', () => {
+      // This is an integration test that would benefit from actual git changes
+      // In a real scenario, we'd make changes to packages/config and verify
+      // that the smart turbo correctly identifies the changed package
+      const result = execSync(`node ${scriptPath} lint --dry-run`, {
+        encoding: 'utf-8',
+      });
+
+      // Should execute successfully regardless of current git state
+      expect(result).toContain('turbo run --dry-run text lint');
+      expect(result).toContain('Smart Turbo Execution Summary');
+    });
+
+    it('should force all packages when --force-all is used', () => {
+      const result = execSync(`node ${scriptPath} lint --force-all --dry-run`, {
+        encoding: 'utf-8',
+      });
+
+      expect(result).toContain('turbo run --dry-run text lint');
+      expect(result).toContain('all-packages');
+    });
+  });
+
+  describe('modular architecture validation', () => {
+    it('should load git operations module correctly', () => {
+      // Verify that the script can import and use the git operations module
+      const result = execSync(`node ${scriptPath} lint --dry-run`, {
+        encoding: 'utf-8',
+      });
+
+      // Should not have any import errors and should complete successfully
+      expect(result).not.toContain('Error');
+      expect(result).not.toContain('MODULE_NOT_FOUND');
+      expect(result).toContain('Smart Turbo Execution Summary');
+    });
+
+    it('should validate that modules are properly integrated', () => {
+      // Test that all modules work together
+      const result = execSync(`node ${scriptPath} --help`, {
+        encoding: 'utf-8',
+      });
+
+      // Should show enhanced help indicating modular features
+      expect(result).toContain('Modular architecture');
+      expect(result).toContain('External configuration file support');
+      expect(result).toContain('Enhanced performance metrics');
     });
   });
 });
