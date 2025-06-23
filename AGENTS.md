@@ -17,7 +17,7 @@
 pnpm install           # Install dependencies
 pnpm dev               # Start development servers
 pnpm ai:quick          # Quick validation (lint + types)
-pnpm ai:check          # Standard validation (includes patterns)
+pnpm ai:check          # Standard validation (includes graph validation)
 pnpm ai:compliance     # Full compliance validation
 pnpm build             # Production build
 pnpm test              # Run all tests
@@ -27,8 +27,8 @@ pnpm test              # Run all tests
 
 **Required Tools**:
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
+- Node.js >= 20.0.0
+- pnpm >= 10.0.0
 - Git >= 2.0.0
 
 **Setup Verification**:
@@ -253,7 +253,7 @@ pnpm lint                 # Security linting rules
 pnpm ai:quick          # lint + type-check
 
 # Layer 2: Standard validation (<30 sec)
-pnpm ai:check          # ai:quick + security
+pnpm ai:check          # ai:quick + graph validation
 
 # Layer 3: Full validation
 pnpm ai:compliance     # ai:check + tests + mutation testing + build

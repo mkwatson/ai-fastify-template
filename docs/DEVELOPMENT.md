@@ -20,8 +20,8 @@ Ensure you have the required tools installed:
 
 ```bash
 # Check versions
-node --version    # >= 18.0.0
-pnpm --version    # >= 8.0.0
+node --version    # >= 20.0.0
+pnpm --version    # >= 10.0.0
 git --version     # >= 2.0.0
 ```
 
@@ -41,22 +41,16 @@ git --version     # >= 2.0.0
    # Check workspace structure
    pnpm list --depth=0
 
-   # Verify turbo works
-   pnpm build --dry-run
-
-   # Run dry-run build
-   pnpm build --dry-run
+   # Verify development environment
+   pnpm ai:quick
    ```
 
 3. **Set up development environment**
 
    ```bash
-   # Copy environment template (when available)
-   cp .env.example .env.local
-
    # Configure your editor for TypeScript
    # VS Code: Install recommended extensions
-   # Cursor: AI rules are already configured
+   # Cursor: AI rules are already configured via AGENTS.md
    ```
 
 4. **Initialize git hooks** (Quality Gates)
@@ -142,8 +136,9 @@ pnpm dev
 
    ```bash
    # Available checks during development
-   pnpm lint
-   pnpm build
+   pnpm ai:quick      # Fast validation (lint + type-check)
+   pnpm ai:check      # Standard validation (includes graph validation)
+   pnpm ai:compliance # Full quality pipeline
    ```
 
 3. **Commit changes**
@@ -225,27 +220,29 @@ git commit -m "feat(api): this is a very long commit message that exceeds the ma
 
 ### Quality Checks
 
-The project will use a fail-fast pipeline (coming with backend development):
+The project implements a comprehensive fail-fast pipeline:
 
 ```
-lint → type-check → graph → test → mutation → build
+lint → type-check → graph:validate → test → test:mutation → build
 ```
 
-**Current Status**: Only `lint` and `build` are implemented. Full pipeline coming with MAR-11+.
+**Current Status**: ✅ Full quality pipeline implemented and operational.
 
 ### Running Quality Checks
 
 ```bash
-# Currently available
-pnpm lint           # Code formatting and linting
-pnpm build          # Production build
-pnpm clean          # Clear build artifacts
+# AI-optimized commands (recommended)
+pnpm ai:quick       # Fast validation (lint + type-check)
+pnpm ai:check       # Standard validation (+ graph validation)
+pnpm ai:compliance  # Full quality pipeline including mutation testing
 
-# Coming with backend development (MAR-11+)
-pnpm type-check     # TypeScript compilation
-pnpm test           # Unit and integration tests
-pnpm graph          # Dependency validation
-pnpm mutation       # Mutation testing (if implemented)
+# Individual commands
+pnpm lint           # ESLint + Prettier formatting
+pnpm type-check     # TypeScript strict compilation
+pnpm test           # Unit and integration tests (Vitest)
+pnpm test:mutation  # Mutation testing (Stryker) - 99.04% score
+pnpm graph:validate # Dependency architecture validation
+pnpm build          # Production build verification
 ```
 
 ### Quality Standards

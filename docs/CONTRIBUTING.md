@@ -25,8 +25,8 @@ This project follows a professional, inclusive environment. Please:
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
+- Node.js >= 20.0.0
+- pnpm >= 10.0.0
 - Git
 
 ### Setup
@@ -47,8 +47,7 @@ This project follows a professional, inclusive environment. Please:
 3. **Verify setup**
 
    ```bash
-   pnpm build --dry-run
-   pnpm lint
+   pnpm ai:quick
    ```
 
 4. **Create a feature branch**
@@ -122,25 +121,27 @@ ai-fastify-template/
 
 #### Dependency Rules
 
-- Apps → Packages ✅
-- Packages → Packages ✅
-- Apps → Apps ❌
-- Packages → Apps ❌
+See [ARCHITECTURE.md](ARCHITECTURE.md#monorepo-structure) for detailed architectural rules and patterns.
 
 ## Quality Standards
 
 ### Code Quality
 
-All contributions must pass the available quality checks:
+All contributions must pass the comprehensive quality pipeline:
 
 ```bash
-# Currently available
-pnpm build          # Build all packages
-pnpm lint           # Code formatting and style
+# AI-optimized quality commands (recommended)
+pnpm ai:quick       # Fast validation (lint + type-check)
+pnpm ai:check       # Standard validation (+ graph validation)
+pnpm ai:compliance  # Full quality pipeline (required before PR)
 
-# Coming with backend development (MAR-11+)
-pnpm test           # Unit and integration tests
-pnpm type-check     # TypeScript compilation
+# Individual quality checks
+pnpm lint           # ESLint + Prettier formatting
+pnpm type-check     # TypeScript strict compilation
+pnpm test           # Unit and integration tests (Vitest)
+pnpm test:mutation  # Mutation testing (Stryker) - 99.04% score
+pnpm graph:validate # Architecture dependency validation
+pnpm build          # Production build verification
 ```
 
 ### TypeScript Standards
