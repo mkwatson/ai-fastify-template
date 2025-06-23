@@ -19,6 +19,45 @@ Modern AI coding assistants are powerful but can introduce subtle bugs, architec
 - **Comprehensive quality gates** that catch issues before they reach production
 - **Clear architectural boundaries** that prevent spaghetti code
 
+### Why AI Development Needs Different Constraints
+
+Traditional software quality relies on experienced developers making good decisions. AI agents have different failure modes that require systematic prevention:
+
+**🧪 The "Coverage Theater" Problem**
+
+```typescript
+// AI frequently writes tests that achieve 100% coverage but validate nothing:
+it('should calculate tax', () => {
+  const result = calculateTax(100, 0.1);
+  expect(result).toBeDefined(); // ✅ Passes
+  expect(typeof result).toBe('number'); // ✅ Passes - 100% coverage!
+});
+
+// Our 99.04% mutation testing requirement catches this
+// When logic is mutated, the test still passes, revealing it's fake
+```
+
+**🏗️ Architectural Drift Without Understanding**
+
+```typescript
+// AI doesn't understand why this is problematic:
+const config = {
+  port: process.env.PORT || 3000, // ❌ No validation
+  secret: process.env.JWT_SECRET, // ❌ Could be undefined
+};
+
+// ESLint rules enforce proper patterns:
+const config = ConfigSchema.parse(process.env); // ✅ Validation required
+```
+
+**⚡ Different Development Velocity**
+
+- **Human pace**: Think → Code → Test → Review (minutes to hours)
+- **AI pace**: Generate → Validate → Iterate (seconds)
+- **Our solution**: Sub-5-second quality gates that match AI's speed
+
+This template implements **constraint-based development** where quality comes from systematic guardrails, not developer experience.
+
 ### Primary Use Case
 
 Built for **fully autonomous AI development workflows** where AI agents generate complete applications while automated tooling provides type-safe client integration. The human role is limited to:
@@ -113,17 +152,17 @@ ai-fastify-template/
 
 ## Technology Stack
 
-| Category                    | Tool                        | Status    | Rationale                                            |
-| --------------------------- | --------------------------- | --------- | ---------------------------------------------------- |
-| **Fast streaming API**      | Fastify + fastify-sse       | ✅ Active | Essential for real-time AI responses                 |
-| **Linting + Formatting**    | ESLint + Prettier           | ✅ Active | Industry standard with custom architectural rules    |
-| **Early type safety**       | TypeScript (strict)         | ✅ Active | Catches AI-generated type errors immediately         |
-| **Schema validation**       | Zod (bodies & env)          | ✅ Active | Runtime validation prevents silent failures          |
-| **Security scanning**       | GitLeaks + audit-ci         | ✅ Active | Prevents credential leaks and vulnerability exposure |
-| **Guard against spaghetti** | dependency-cruiser          | ✅ Active | Enforces clean architecture boundaries               |
-| **High-trust tests**        | Vitest + Coverage           | ✅ Active | Comprehensive testing with unit & integration        |
-| **Mutation testing**        | Stryker                     | ✅ Active | Ensures tests validate business logic (99.04% score) |
-| **Task caching**            | pnpm workspaces + TurboRepo | ✅ Active | Fast feedback for AI iteration cycles                |
+| Category                    | Tool                                 | Why Critical for AI                                                  | Traditional Projects      |
+| --------------------------- | ------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
+| **Fast streaming API**      | Fastify + fastify-sse                | AI needs real-time responses                                         | Standard in many projects |
+| **Linting + Formatting**    | ESLint + Prettier + **Custom Rules** | **AI-specific rules prevent common mistakes**                        | Usually just formatting   |
+| **Early type safety**       | TypeScript (strict)                  | AI can't use escape hatches like `any`                               | Often allows `any` types  |
+| **Schema validation**       | Zod (bodies & env)                   | **Mandatory** - AI doesn't know trust boundaries                     | Often optional/selective  |
+| **Security scanning**       | GitLeaks + audit-ci                  | AI might commit secrets without realizing                            | Manual review sufficient  |
+| **Guard against spaghetti** | dependency-cruiser                   | AI creates circular dependencies without understanding               | Relies on code review     |
+| **High-trust tests**        | Vitest + Coverage                    | Basic foundation for testing                                         | Same usage                |
+| **Mutation testing**        | Stryker (99.04% score)               | **Catches AI's "fake tests" that achieve coverage but test nothing** | Rarely used (expensive)   |
+| **Task caching**            | pnpm workspaces + TurboRepo          | Sub-5-second feedback for AI's rapid iteration                       | Same usage                |
 
 ## Available Scripts
 
