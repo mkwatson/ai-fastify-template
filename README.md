@@ -33,7 +33,7 @@ it('should calculate tax', () => {
   expect(typeof result).toBe('number'); // ✅ Passes - 100% coverage!
 });
 
-// Our 99.04% mutation testing requirement catches this
+// Our mutation testing with Stryker catches this
 // When logic is mutated, the test still passes, revealing it's fake
 ```
 
@@ -54,7 +54,7 @@ const config = ConfigSchema.parse(process.env); // ✅ Validation required
 
 - **Human pace**: Think → Code → Test → Review (minutes to hours)
 - **AI pace**: Generate → Validate → Iterate (seconds)
-- **Our solution**: Sub-5-second quality gates that match AI's speed
+- **Our solution**: Fast quality gates optimized for AI's rapid iteration
 
 This template implements **constraint-based development** where quality comes from systematic guardrails, not developer experience.
 
@@ -161,7 +161,7 @@ ai-fastify-template/
 | **Security scanning**       | GitLeaks + audit-ci                  | AI might commit secrets without realizing                            | Manual review sufficient  |
 | **Guard against spaghetti** | dependency-cruiser                   | AI creates circular dependencies without understanding               | Relies on code review     |
 | **High-trust tests**        | Vitest + Coverage                    | Basic foundation for testing                                         | Same usage                |
-| **Mutation testing**        | Stryker (99.04% score)               | **Catches AI's "fake tests" that achieve coverage but test nothing** | Rarely used (expensive)   |
+| **Mutation testing**        | Stryker (high standards)             | **Catches AI's "fake tests" that achieve coverage but test nothing** | Rarely used (expensive)   |
 | **Task caching**            | pnpm workspaces + TurboRepo          | Sub-5-second feedback for AI's rapid iteration                       | Same usage                |
 
 ## Available Scripts
@@ -196,7 +196,7 @@ pnpm setup:gitleaks   # Install/update GitLeaks scanner
 
 # Advanced Quality Gates
 pnpm lint             # Code formatting and linting (ESLint + Prettier)
-pnpm test:mutation    # Run mutation tests (99.04% score)
+pnpm test:mutation    # Run mutation tests with quality validation
 ```
 
 ## Workspace Structure
@@ -272,7 +272,7 @@ pnpm install
 - **Strict TypeScript** - No `any` types, comprehensive checking with type-aware ESLint rules
 - **Runtime Validation** - Zod schemas for all environment variables and request inputs
 - **Import Graph Validation** - dependency-cruiser prevents circular dependencies and enforces architecture
-- **Comprehensive Testing** - Unit, integration tests with 99.04% mutation testing score
+- **Comprehensive Testing** - Unit, integration tests with high-standard mutation testing
 
 ### Security First (Implemented)
 
@@ -301,7 +301,7 @@ This template is in **active development**. Current state:
 ✅ **Quality Tooling Complete**
 
 - dependency-cruiser for architectural validation
-- Mutation testing with Stryker (99.04% score)
+- Mutation testing with Stryker for test quality validation
 - Zod validation patterns for environment and inputs
 - Comprehensive testing framework with Vitest
 - CI/CD pipeline with GitHub Actions

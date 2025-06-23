@@ -151,7 +151,7 @@ pnpm ai:compliance  # Full quality pipeline (required before PR)
 pnpm lint           # ESLint + Prettier formatting
 pnpm type-check     # TypeScript strict compilation
 pnpm test           # Unit and integration tests (Vitest)
-pnpm test:mutation  # Mutation testing (Stryker) - 99.04% score
+pnpm test:mutation  # Mutation testing (Stryker) - high-quality standards
 pnpm graph:validate # Architecture dependency validation
 pnpm build          # Production build verification
 ```
