@@ -24,6 +24,10 @@ const config = {
   tsconfigFile: './apps/backend-api/tsconfig.json',
   ignoreStatic: true, // Ignore static mutants for performance
   thresholds: {
+    // IMPORTANT: Do not document these specific threshold values in documentation files.
+    // Keep thresholds only in this config to prevent documentation drift.
+    // Documentation should refer to "rigorous standards" or "enterprise-grade thresholds"
+    // rather than specific percentages that may change over time.
     high: 90, // High quality threshold - matches MAR-17 requirements
     low: 80, // Low quality threshold - matches MAR-17 coverage requirement
     break: 90, // Build fails below 90% - enforces MAR-17 mutation score requirement

@@ -264,7 +264,7 @@ pnpm type-check        # TypeScript compilation
 pnpm test              # Unit and integration tests (Vitest)
 pnpm test:watch        # Run tests in watch mode
 pnpm test:coverage     # Run tests with coverage report
-pnpm test:mutation     # Mutation testing (Stryker) - 90% threshold
+pnpm test:mutation     # Mutation testing (Stryker) - rigorous quality threshold
 pnpm build             # Production build verification
 ```
 
@@ -322,7 +322,7 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 
 - **Unit tests**: For all business logic and utility functions
 - **Integration tests**: For all API routes and plugin functionality
-- **Test coverage**: Maintain >80% line coverage (configured in vitest.config.ts)
+- **Test coverage**: Maintain high line coverage (configured in vitest.config.ts)
 - **Test structure**: Arrange-Act-Assert pattern with descriptive names
 - **Test helpers**: Use shared test helpers for consistent app setup
 - **Zod validation testing**: Test input validation and error cases
@@ -333,7 +333,7 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 
 **Requirements**:
 
-- **Minimum mutation score**: 90% (enforced in CI/CD)
+- **Minimum mutation score**: Rigorous threshold (enforced in CI/CD)
 - **Strategic exclusions**: Only exclude low-business-value code (bootstrap, error formatting)
 - **Dual test strategy**: Both unit tests (direct imports) and integration tests (full app)
 - **Property-based testing**: Use fast-check for comprehensive edge case coverage
@@ -349,8 +349,8 @@ pnpm ai:compliance    # Includes mutation testing in full pipeline
 
 - **Focus on business logic**: Exclude bootstrap files (`server.ts`, `app.ts`)
 - **Document exclusions**: Each exclusion requires clear rationale
-- **Incremental improvement**: Start with 60% threshold, work up to 90%
-- **No fake tests**: Don't write tests just to improve mutation scores
+- **Incremental improvement**: Start with baseline threshold, work up to enterprise standards
+- **No fake tests**: Don't write tests just to improve metrics
 
 See [docs/MUTATION_TESTING_GUIDE.md](./docs/MUTATION_TESTING_GUIDE.md) for detailed implementation patterns.
 
@@ -381,7 +381,7 @@ See [docs/MUTATION_TESTING_GUIDE.md](./docs/MUTATION_TESTING_GUIDE.md) for detai
 #### AI Testing Anti-Patterns to Avoid
 
 ```typescript
-// ❌ BAD: Coverage theater - achieves 100% coverage but tests nothing
+// ❌ BAD: Coverage theater - achieves full coverage but tests nothing
 it('should work', () => {
   const result = calculateTax(100);
   expect(result).toBeDefined();
@@ -389,12 +389,12 @@ it('should work', () => {
 });
 
 // ✅ GOOD: Logic validation
-it('should calculate 10% tax on standard items', () => {
+it('should calculate standard tax rate correctly', () => {
   const result = calculateTax(100, 'standard');
   expect(result).toBe(10);
 });
 
-it('should calculate 0% tax on exempt items', () => {
+it('should calculate exempt tax correctly', () => {
   const result = calculateTax(100, 'exempt');
   expect(result).toBe(0);
 });
@@ -579,9 +579,9 @@ describe('User routes - Complete Workflow', () => {
 
 ### Mutation Testing (Stryker)
 
-- **Mutation score**: Minimum 90% - enforced in CI
+- **Mutation score**: Rigorous standards - enforced in CI
 - **Purpose**: Ensure tests actually validate business logic
-- **Configuration**: `stryker.config.mjs` with break threshold at 90%
+- **Configuration**: `stryker.config.mjs` with enterprise-grade break threshold
 - **Run**: `pnpm test:mutation`
 
 #### Why Mutation Testing Matters
@@ -603,7 +603,7 @@ it('should apply discount', () => {
 });
 
 // ✅ Strong test (fails with mutation)
-it('should calculate 10% discount correctly', () => {
+it('should calculate discount correctly', () => {
   expect(calculateDiscount(100, 0.1)).toBe(90);
 });
 ```
@@ -871,7 +871,7 @@ pnpm build             # Check build issues
 - ✅ All TypeScript strict mode checks pass
 - ✅ All Zod validations in place
 - ✅ No circular dependencies
-- ✅ >90% test coverage
+- ✅ High test coverage with meaningful validation
 - ✅ Proper error handling with status codes
 - ✅ Clean separation of concerns
 
@@ -879,7 +879,7 @@ pnpm build             # Check build issues
 
 - ✅ `pnpm ai:quick` completes in <5 seconds
 - ✅ `pnpm ai:check` completes in <30 seconds
-- ✅ First-time PR success rate >90%
+- ✅ High first-time PR success rate
 - ✅ Minimal review iterations needed
 
 Remember: These guidelines exist to help AI agents generate high-quality, maintainable code that integrates seamlessly with the project's architecture and passes all quality gates on the first try.

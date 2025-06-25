@@ -137,6 +137,18 @@ See [ARCHITECTURE.md](ARCHITECTURE.md#monorepo-structure) for detailed architect
 
 ## Quality Standards
 
+### Quality Standards Philosophy
+
+We maintain enterprise-grade quality thresholds across all metrics:
+
+- **Mutation testing configured to catch even subtle logic errors** - Our Stryker configuration ensures tests actually validate business logic, not just achieve coverage
+- **Test coverage that ensures meaningful validation** - Focus on testing behavior and edge cases, not just hitting coverage numbers
+- **Performance optimized for rapid AI-assisted development cycles** - Near-instant feedback loops enable AI agents to iterate quickly while maintaining quality
+- **Architecture validation prevents technical debt** - dependency-cruiser enforces clean boundaries and prevents circular dependencies
+- **Security-first approach** - GitLeaks, audit-ci, and ESLint security rules catch vulnerabilities before they reach production
+
+Our quality gates are designed to catch the specific failure modes of AI-generated code while enabling rapid iteration. Specific thresholds are configured in tool configuration files rather than documented, ensuring they remain accurate and maintainable.
+
 ### Code Quality
 
 All contributions must pass the comprehensive quality pipeline:
@@ -151,7 +163,7 @@ pnpm ai:compliance  # Full quality pipeline (required before PR)
 pnpm lint           # ESLint + Prettier formatting
 pnpm type-check     # TypeScript strict compilation
 pnpm test           # Unit and integration tests (Vitest)
-pnpm test:mutation  # Mutation testing (Stryker) - high-quality standards
+pnpm test:mutation  # Mutation testing (Stryker) - rigorous quality standards
 pnpm graph:validate # Architecture dependency validation
 pnpm build          # Production build verification
 ```
