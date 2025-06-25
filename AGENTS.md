@@ -381,7 +381,7 @@ See [docs/MUTATION_TESTING_GUIDE.md](./docs/MUTATION_TESTING_GUIDE.md) for detai
 #### AI Testing Anti-Patterns to Avoid
 
 ```typescript
-// ❌ BAD: Coverage theater - achieves full coverage but tests nothing
+// ❌ BAD: Coverage theater - achieves 100% coverage but tests nothing
 it('should work', () => {
   const result = calculateTax(100);
   expect(result).toBeDefined();
@@ -389,12 +389,12 @@ it('should work', () => {
 });
 
 // ✅ GOOD: Logic validation
-it('should calculate standard tax rate correctly', () => {
+it('should calculate 10% tax on standard items', () => {
   const result = calculateTax(100, 'standard');
   expect(result).toBe(10);
 });
 
-it('should calculate exempt tax correctly', () => {
+it('should calculate 0% tax on exempt items', () => {
   const result = calculateTax(100, 'exempt');
   expect(result).toBe(0);
 });
@@ -603,7 +603,7 @@ it('should apply discount', () => {
 });
 
 // ✅ Strong test (fails with mutation)
-it('should calculate discount correctly', () => {
+it('should calculate 10% discount correctly', () => {
   expect(calculateDiscount(100, 0.1)).toBe(90);
 });
 ```
@@ -877,8 +877,8 @@ pnpm build             # Check build issues
 
 **Development Velocity Indicators**:
 
-- ✅ `pnpm ai:quick` completes in <5 seconds
-- ✅ `pnpm ai:check` completes in <30 seconds
+- ✅ `pnpm ai:quick` provides near-instant feedback
+- ✅ `pnpm ai:check` completes rapidly for iterative development
 - ✅ High first-time PR success rate
 - ✅ Minimal review iterations needed
 

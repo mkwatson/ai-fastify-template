@@ -54,7 +54,7 @@ const config = ConfigSchema.parse(process.env); // ✅ Validation required
 
 - **Human pace**: Think → Code → Test → Review (minutes to hours)
 - **AI pace**: Generate → Validate → Iterate (seconds)
-- **Our solution**: Near-instant quality gates optimized for AI's rapid iteration
+- **Our solution**: Sub-second quality gates optimized for AI's rapid iteration
 
 This template implements **constraint-based development** where quality comes from systematic guardrails, not developer experience.
 
