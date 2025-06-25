@@ -26,7 +26,7 @@ const config = {
   thresholds: {
     // IMPORTANT: Do not document these specific threshold values in documentation files.
     // Keep thresholds only in this config to prevent documentation drift.
-    // Documentation should refer to "rigorous standards" or "enterprise-grade thresholds"
+    // Documentation should refer to "enterprise-grade quality standards"
     // rather than specific percentages that may change over time.
     high: 90, // High quality threshold - matches MAR-17 requirements
     low: 80, // Low quality threshold - matches MAR-17 coverage requirement

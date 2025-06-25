@@ -264,7 +264,7 @@ pnpm type-check        # TypeScript compilation
 pnpm test              # Unit and integration tests (Vitest)
 pnpm test:watch        # Run tests in watch mode
 pnpm test:coverage     # Run tests with coverage report
-pnpm test:mutation     # Mutation testing (Stryker) - rigorous quality threshold
+pnpm test:mutation     # Mutation testing (Stryker) - enterprise-grade quality standards
 pnpm build             # Production build verification
 ```
 
@@ -333,7 +333,7 @@ Our ESLint configuration includes comprehensive rules specifically designed for 
 
 **Requirements**:
 
-- **Minimum mutation score**: Rigorous threshold (enforced in CI/CD)
+- **Minimum mutation score**: Enterprise-grade standards (enforced in CI/CD)
 - **Strategic exclusions**: Only exclude low-business-value code (bootstrap, error formatting)
 - **Dual test strategy**: Both unit tests (direct imports) and integration tests (full app)
 - **Property-based testing**: Use fast-check for comprehensive edge case coverage
@@ -579,7 +579,7 @@ describe('User routes - Complete Workflow', () => {
 
 ### Mutation Testing (Stryker)
 
-- **Mutation score**: Rigorous standards - enforced in CI
+- **Mutation score**: Enterprise-grade quality standards - enforced in CI
 - **Purpose**: Ensure tests actually validate business logic
 - **Configuration**: `stryker.config.mjs` with enterprise-grade break threshold
 - **Run**: `pnpm test:mutation`

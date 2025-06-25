@@ -33,7 +33,7 @@ it('should calculate tax', () => {
   expect(typeof result).toBe('number'); // ✅ Passes - 100% coverage!
 });
 
-// Our rigorous mutation testing standards catch this
+// Our enterprise-grade mutation testing standards catch this
 // When logic is mutated, the test still passes, revealing it's fake
 ```
 
@@ -54,7 +54,7 @@ const config = ConfigSchema.parse(process.env); // ✅ Validation required
 
 - **Human pace**: Think → Code → Test → Review (minutes to hours)
 - **AI pace**: Generate → Validate → Iterate (seconds)
-- **Our solution**: Sub-second quality gates optimized for AI's rapid iteration
+- **Our solution**: Rapid feedback loops optimized for AI's iterative development
 
 This template implements **constraint-based development** where quality comes from systematic guardrails, not developer experience.
 
@@ -152,17 +152,17 @@ ai-fastify-template/
 
 ## Technology Stack
 
-| Category                    | Tool                                 | Why Critical for AI                                                  | Traditional Projects      |
-| --------------------------- | ------------------------------------ | -------------------------------------------------------------------- | ------------------------- |
-| **Fast streaming API**      | Fastify + fastify-sse                | AI needs real-time responses                                         | Standard in many projects |
-| **Linting + Formatting**    | ESLint + Prettier + **Custom Rules** | **AI-specific rules prevent common mistakes**                        | Usually just formatting   |
-| **Early type safety**       | TypeScript (strict)                  | AI can't use escape hatches like `any`                               | Often allows `any` types  |
-| **Schema validation**       | Zod (bodies & env)                   | **Mandatory** - AI doesn't know trust boundaries                     | Often optional/selective  |
-| **Security scanning**       | GitLeaks + audit-ci                  | AI might commit secrets without realizing                            | Manual review sufficient  |
-| **Guard against spaghetti** | dependency-cruiser                   | AI creates circular dependencies without understanding               | Relies on code review     |
-| **High-trust tests**        | Vitest + Coverage                    | Basic foundation for testing                                         | Same usage                |
-| **Mutation testing**        | Stryker (rigorous standards)         | **Catches AI's "fake tests" that achieve coverage but test nothing** | Rarely used (expensive)   |
-| **Task caching**            | pnpm workspaces + TurboRepo          | Sub-5-second feedback for AI's rapid iteration                       | Same usage                |
+| Category                    | Tool                                 | Why Critical for AI                                                                                                   | Traditional Projects      |
+| --------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| **Fast streaming API**      | Fastify + fastify-sse                | AI needs real-time responses                                                                                          | Standard in many projects |
+| **Linting + Formatting**    | ESLint + Prettier + **Custom Rules** | **AI-specific rules prevent common mistakes**                                                                         | Usually just formatting   |
+| **Early type safety**       | TypeScript (strict)                  | AI can't use escape hatches like `any`                                                                                | Often allows `any` types  |
+| **Schema validation**       | Zod (bodies & env)                   | **Mandatory** - AI doesn't know trust boundaries                                                                      | Often optional/selective  |
+| **Security scanning**       | GitLeaks + audit-ci                  | AI might commit secrets without realizing                                                                             | Manual review sufficient  |
+| **Guard against spaghetti** | dependency-cruiser                   | AI creates circular dependencies without understanding                                                                | Relies on code review     |
+| **High-trust tests**        | Vitest + Coverage                    | Basic foundation for testing                                                                                          | Same usage                |
+| **Mutation testing**        | Stryker (enterprise-grade standards) | **Catches AI's "fake tests" that achieve coverage but test nothing - ensures tests actually validate business logic** | Rarely used (expensive)   |
+| **Task caching**            | pnpm workspaces + TurboRepo          | Rapid feedback optimized for AI's iterative development                                                               | Same usage                |
 
 ## Available Scripts
 
@@ -196,7 +196,7 @@ pnpm setup:gitleaks   # Install/update GitLeaks scanner
 
 # Advanced Quality Gates
 pnpm lint             # Code formatting and linting (ESLint + Prettier)
-pnpm test:mutation    # Run mutation tests (configured for enterprise-grade quality thresholds)
+pnpm test:mutation    # Run mutation tests (enterprise-grade quality standards)
 ```
 
 ## Workspace Structure
@@ -272,7 +272,7 @@ pnpm install
 - **Strict TypeScript** - No `any` types, comprehensive checking with type-aware ESLint rules
 - **Runtime Validation** - Zod schemas for all environment variables and request inputs
 - **Import Graph Validation** - dependency-cruiser prevents circular dependencies and enforces architecture
-- **Comprehensive Testing** - Unit, integration tests with rigorous mutation testing standards
+- **Comprehensive Testing** - Unit, integration tests with enterprise-grade mutation testing standards that catch logic errors traditional coverage metrics miss
 
 ### Security First (Implemented)
 
@@ -301,7 +301,7 @@ This template is in **active development**. Current state:
 ✅ **Quality Tooling Complete**
 
 - dependency-cruiser for architectural validation
-- Mutation testing with Stryker (rigorous standards for test quality validation)
+- Mutation testing with Stryker (enterprise-grade standards ensure tests validate business logic, not just achieve coverage)
 - Zod validation patterns for environment and inputs
 - Comprehensive testing framework with Vitest
 - CI/CD pipeline with GitHub Actions

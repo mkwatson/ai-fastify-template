@@ -416,7 +416,7 @@ pnpm ai:compliance  # Full quality pipeline including mutation testing
 pnpm lint           # ESLint + Prettier formatting
 pnpm type-check     # TypeScript strict compilation
 pnpm test           # Unit and integration tests (Vitest)
-pnpm test:mutation  # Mutation testing (Stryker) - rigorous quality standards
+pnpm test:mutation  # Mutation testing (Stryker) - enterprise-grade quality standards
 pnpm graph:validate # Dependency architecture validation
 pnpm build          # Production build verification
 ```
