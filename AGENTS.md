@@ -734,6 +734,40 @@ export function validateEnv(): Env {
 
 ### Linear MCP Integration
 
+**🚨 CRITICAL: Project Assignment Rules**
+
+1. **Never create orphaned issues** - Always include `projectId` when creating issues
+2. **Maintain consistency** - All issues for this repository should use the same project
+3. **Fail safely** - If you can't determine the project, ask rather than guess
+
+#### Creating Issues
+
+```typescript
+// ✅ CORRECT: Always specify projectId
+mcp__linear__create_issue({
+  teamId: '...',
+  projectId: '...', // REQUIRED - determine from context
+  title: '...',
+  description: '...',
+});
+
+// ❌ WRONG: Missing projectId creates orphaned issues
+mcp__linear__create_issue({
+  teamId: '...',
+  title: '...',
+  // No projectId!
+});
+```
+
+#### How to Determine the Correct Project
+
+- Check for existing Linear issues in the codebase (commits, PRs, comments)
+- If found, query one to get its `projectId` and use the same project
+- If none found, list available projects and select the most appropriate one
+- When uncertain, ask which project to use
+
+#### Standard Workflow
+
 - **Issue management**: Use `mcp__linear__create_issue` and `mcp__linear__update_issue`
 - **Branch naming**: Create branches that reference Linear issue IDs
 - **Progress tracking**: Update Linear issues as development progresses
@@ -741,7 +775,7 @@ export function validateEnv(): Env {
 
 ```bash
 # Example workflow with Linear
-# 1. Create or update Linear issue
+# 1. Create or update Linear issue (with correct project!)
 # 2. Create branch with issue reference
 git checkout -b feature/LIN-123-user-authentication
 
