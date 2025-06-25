@@ -374,6 +374,7 @@ _Always edit AGENTS.md for shared guidelines. Tool-specific files should remain 
 ### Getting Help
 
 - 📖 [Documentation](docs/)
+- 🦀 [Rust Patterns Analysis](docs/RUST_PATTERNS_ANALYSIS.md) - How we achieve Rust-like safety in TypeScript
 - 🐛 [Issue Tracker](https://github.com/mkwatson/ai-fastify-template/issues)
 - 💬 [Discussions](https://github.com/mkwatson/ai-fastify-template/discussions)
 
