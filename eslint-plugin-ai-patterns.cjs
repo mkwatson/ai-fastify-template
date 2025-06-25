@@ -215,5 +215,263 @@ module.exports = {
         };
       },
     },
+
+    // Rule 6: Enforce Result types for async service operations
+    'require-result-type': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Require Result<T, E> return types for async service operations',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        messages: {
+          missingResultType:
+            'Async service methods must return Result<T, E> or AsyncResult<T, E> for explicit error handling',
+          avoidThrowInService:
+            'Service methods should return Result errors instead of throwing - use err() from result utils',
+        },
+        schema: [
+          {
+            type: 'object',
+            properties: {
+              enforceInServices: {
+                type: 'boolean',
+                default: true,
+              },
+              enforceInUtils: {
+                type: 'boolean',
+                default: true,
+              },
+              allowThrowInTests: {
+                type: 'boolean',
+                default: true,
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      create(context) {
+        const options = context.options[0] || {};
+        const enforceInServices = options.enforceInServices !== false;
+        const enforceInUtils = options.enforceInUtils !== false;
+        const allowThrowInTests = options.allowThrowInTests !== false;
+
+        function isServiceFile(filename) {
+          return filename.includes('/services/') || filename.includes('/utils/');
+        }
+
+        function isTestFile(filename) {
+          return (
+            filename.includes('/test/') ||
+            filename.includes('.test.') ||
+            filename.includes('.spec.')
+          );
+        }
+
+        function isExampleFile(filename) {
+          return filename.includes('-example.') || filename.includes('.example.');
+        }
+
+        function hasResultReturnType(node) {
+          if (!node.returnType) return false;
+
+          const returnTypeText = context.getSourceCode().getText(node.returnType);
+          return (
+            returnTypeText.includes('Result<') ||
+            returnTypeText.includes('AsyncResult<') ||
+            returnTypeText.includes('ServiceResult<') ||
+            returnTypeText.includes('AsyncServiceResult<') ||
+            returnTypeText.includes('Promise<Result<')
+          );
+        }
+
+        function isAsyncFunction(node) {
+          return node.async === true;
+        }
+
+        function isServiceMethod(node) {
+          // Check if it's a method in a service class
+          if (node.parent && node.parent.type === 'MethodDefinition') {
+            const classNode = node.parent.parent.parent;
+            if (classNode && classNode.type === 'ClassDeclaration') {
+              const className = classNode.id?.name || '';
+              return className.includes('Service');
+            }
+          }
+
+          // Check if it's an exported function in services/utils
+          if (node.parent && node.parent.type === 'VariableDeclarator') {
+            const exportNode = node.parent.parent.parent;
+            if (exportNode && exportNode.type === 'ExportNamedDeclaration') {
+              return true;
+            }
+          }
+
+          // Check if it's a direct export function
+          if (
+            node.parent &&
+            (node.parent.type === 'ExportDefaultDeclaration' ||
+              node.parent.type === 'ExportNamedDeclaration')
+          ) {
+            return true;
+          }
+
+          return false;
+        }
+
+        return {
+          // Check async function declarations and expressions
+          FunctionDeclaration(node) {
+            const filename = context.getFilename();
+
+            // Skip test files if allowed
+            if (allowThrowInTests && isTestFile(filename)) {
+              return;
+            }
+
+            // Skip example files (they're for demonstration)
+            if (isExampleFile(filename)) {
+              return;
+            }
+
+            // Only check service files
+            if (!isServiceFile(filename)) {
+              return;
+            }
+
+            // Only check async functions that look like service methods
+            if (!isAsyncFunction(node) || !isServiceMethod(node)) {
+              return;
+            }
+
+            // Check for Result return type
+            if (!hasResultReturnType(node)) {
+              context.report({
+                node: node.id || node,
+                messageId: 'missingResultType',
+              });
+            }
+          },
+
+          // Check async arrow functions
+          ArrowFunctionExpression(node) {
+            const filename = context.getFilename();
+
+            if (allowThrowInTests && isTestFile(filename)) {
+              return;
+            }
+
+            if (isExampleFile(filename)) {
+              return;
+            }
+
+            if (!isServiceFile(filename)) {
+              return;
+            }
+
+            if (!isAsyncFunction(node) || !isServiceMethod(node)) {
+              return;
+            }
+
+            if (!hasResultReturnType(node)) {
+              context.report({
+                node,
+                messageId: 'missingResultType',
+              });
+            }
+          },
+
+          // Check method definitions in classes
+          MethodDefinition(node) {
+            const filename = context.getFilename();
+
+            if (allowThrowInTests && isTestFile(filename)) {
+              return;
+            }
+
+            if (isExampleFile(filename)) {
+              return;
+            }
+
+            if (!isServiceFile(filename)) {
+              return;
+            }
+
+            // Check if it's in a service class
+            const classNode = node.parent.parent;
+            if (!classNode || classNode.type !== 'ClassDeclaration') {
+              return;
+            }
+
+            const className = classNode.id?.name || '';
+            if (!className.includes('Service')) {
+              return;
+            }
+
+            // Check async methods
+            if (!node.value || !isAsyncFunction(node.value)) {
+              return;
+            }
+
+            // Skip constructor and private methods
+            if (
+              node.kind === 'constructor' ||
+              (node.key && node.key.name && node.key.name.startsWith('_'))
+            ) {
+              return;
+            }
+
+            if (!hasResultReturnType(node.value)) {
+              context.report({
+                node: node.key || node,
+                messageId: 'missingResultType',
+              });
+            }
+          },
+
+          // Check for throw statements in service files
+          ThrowStatement(node) {
+            const filename = context.getFilename();
+
+            if (allowThrowInTests && isTestFile(filename)) {
+              return;
+            }
+
+            if (isExampleFile(filename)) {
+              return;
+            }
+
+            // Only check service files
+            if (!isServiceFile(filename)) {
+              return;
+            }
+
+            // Allow throws in validation/setup code, but warn in service methods
+            const functionNode = node.parent;
+            let currentNode = functionNode;
+            
+            // Walk up to find if we're in a service method
+            while (currentNode && currentNode.type !== 'Program') {
+              if (
+                (currentNode.type === 'FunctionDeclaration' ||
+                  currentNode.type === 'FunctionExpression' ||
+                  currentNode.type === 'ArrowFunctionExpression') &&
+                isAsyncFunction(currentNode)
+              ) {
+                // We're in an async function that might be a service method
+                context.report({
+                  node,
+                  messageId: 'avoidThrowInService',
+                });
+                break;
+              }
+              currentNode = currentNode.parent;
+            }
+          },
+        };
+      },
+    },
   },
 };

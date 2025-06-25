@@ -1,0 +1,396 @@
+/**
+ * Example user routes demonstrating Result-based error handling integration with Fastify
+ * 
+ * This module shows how to integrate Result types with Fastify routes,
+ * automatically converting service errors to proper HTTP responses.
+ * 
+ * @module users-example
+ */
+
+import type { FastifyInstance } from 'fastify';
+import { FastifyPluginAsync } from 'fastify';
+import { z } from 'zod';
+
+import { UserService } from '../services/user-service-example.js';
+import { FastifyResultUtils } from '../utils/result.js';
+
+/**
+ * Zod schemas for request/response validation
+ */
+const CreateUserRequestSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  phone: z.string().optional(),
+});
+
+const UpdateUserRequestSchema = z.object({
+  email: z.string().email('Invalid email format').optional(),
+  name: z.string().min(1, 'Name cannot be empty').max(100, 'Name too long').optional(),
+  phone: z.string().optional(),
+});
+
+const UserResponseSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string(),
+  phone: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  isActive: z.boolean(),
+});
+
+const UsersListResponseSchema = z.object({
+  users: z.array(UserResponseSchema),
+  total: z.number(),
+  limit: z.number(),
+  offset: z.number(),
+});
+
+const ErrorResponseSchema = z.object({
+  error: z.string(),
+  message: z.string(),
+  statusCode: z.number(),
+  context: z.record(z.unknown()).optional(),
+});
+
+/**
+ * Query parameters for listing users
+ */
+const ListUsersQuerySchema = z.object({
+  limit: z.string().regex(/^\d+$/).transform(Number).default('10'),
+  offset: z.string().regex(/^\d+$/).transform(Number).default('0'),
+});
+
+/**
+ * URL parameters for user operations
+ */
+const UserParamsSchema = z.object({
+  id: z.string().min(1, 'User ID is required'),
+});
+
+/**
+ * Declare Fastify instance decorations for TypeScript
+ */
+declare module 'fastify' {
+  interface FastifyInstance {
+    userService: UserService;
+  }
+}
+
+/**
+ * User routes with Result-based error handling
+ */
+const userRoutes: FastifyPluginAsync = async (fastify) => {
+  /**
+   * Create a new user
+   * POST /users
+   */
+  fastify.post(
+    '/users',
+    {
+      schema: {
+        body: CreateUserRequestSchema,
+        response: {
+          201: UserResponseSchema,
+          400: ErrorResponseSchema,
+          409: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      fastify.log.info({ body: request.body }, 'Creating new user');
+
+      // Use Result-based service - errors are automatically converted to HTTP responses
+      const result = await fastify.userService.createUser(request.body);
+      const user = FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.code(201).send({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      });
+    }
+  );
+
+  /**
+   * Get user by ID
+   * GET /users/:id
+   */
+  fastify.get(
+    '/users/:id',
+    {
+      schema: {
+        params: UserParamsSchema,
+        response: {
+          200: UserResponseSchema,
+          404: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      fastify.log.debug({ userId: id }, 'Getting user by ID');
+
+      const result = await fastify.userService.findUserById(id);
+      const user = FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.send({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      });
+    }
+  );
+
+  /**
+   * Update user
+   * PUT /users/:id
+   */
+  fastify.put(
+    '/users/:id',
+    {
+      schema: {
+        params: UserParamsSchema,
+        body: UpdateUserRequestSchema,
+        response: {
+          200: UserResponseSchema,
+          400: ErrorResponseSchema,
+          404: ErrorResponseSchema,
+          409: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      fastify.log.info({ userId: id, body: request.body }, 'Updating user');
+
+      const result = await fastify.userService.updateUser(id, request.body);
+      const user = FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.send({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      });
+    }
+  );
+
+  /**
+   * Deactivate user (soft delete)
+   * PATCH /users/:id/deactivate
+   */
+  fastify.patch(
+    '/users/:id/deactivate',
+    {
+      schema: {
+        params: UserParamsSchema,
+        response: {
+          200: UserResponseSchema,
+          404: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      fastify.log.info({ userId: id }, 'Deactivating user');
+
+      const result = await fastify.userService.deactivateUser(id);
+      const user = FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.send({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      });
+    }
+  );
+
+  /**
+   * Delete user permanently
+   * DELETE /users/:id
+   */
+  fastify.delete(
+    '/users/:id',
+    {
+      schema: {
+        params: UserParamsSchema,
+        response: {
+          204: z.null(),
+          404: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      fastify.log.info({ userId: id }, 'Deleting user permanently');
+
+      const result = await fastify.userService.deleteUser(id);
+      FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.code(204).send();
+    }
+  );
+
+  /**
+   * List users with pagination
+   * GET /users
+   */
+  fastify.get(
+    '/users',
+    {
+      schema: {
+        querystring: ListUsersQuerySchema,
+        response: {
+          200: UsersListResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { limit, offset } = request.query;
+      fastify.log.debug({ limit, offset }, 'Listing users');
+
+      const [usersResult, countResult] = await Promise.all([
+        fastify.userService.listUsers({ limit, offset }),
+        fastify.userService.getUserCount(),
+      ]);
+
+      // Handle both results using Result pattern
+      const users = FastifyResultUtils.handleResult(fastify, usersResult);
+      const total = FastifyResultUtils.handleResult(fastify, countResult);
+
+      return reply.send({
+        users: users.map(user => ({
+          ...user,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+        })),
+        total,
+        limit,
+        offset,
+      });
+    }
+  );
+
+  /**
+   * Batch create users
+   * POST /users/batch
+   */
+  fastify.post(
+    '/users/batch',
+    {
+      schema: {
+        body: z.object({
+          users: z.array(CreateUserRequestSchema).min(1, 'At least one user required'),
+        }),
+        response: {
+          201: z.object({
+            users: z.array(UserResponseSchema),
+            created: z.number(),
+          }),
+          400: ErrorResponseSchema,
+          409: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { users: usersData } = request.body;
+      fastify.log.info({ userCount: usersData.length }, 'Batch creating users');
+
+      const result = await fastify.userService.createMultipleUsers(usersData);
+      const users = FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.code(201).send({
+        users: users.map(user => ({
+          ...user,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+        })),
+        created: users.length,
+      });
+    }
+  );
+
+  /**
+   * Alternative pattern: Using wrapped handlers for even cleaner code
+   */
+  const createUserWrapped = FastifyResultUtils.wrapHandler(
+    fastify,
+    async (userData: unknown) => {
+      return fastify.userService.createUser(userData);
+    }
+  );
+
+  /**
+   * Example using wrapped handler (alternative approach)
+   * POST /users/alternative
+   */
+  fastify.post(
+    '/users/alternative',
+    {
+      schema: {
+        body: CreateUserRequestSchema,
+        response: {
+          201: UserResponseSchema,
+          400: ErrorResponseSchema,
+          409: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      // Even cleaner - wrapped handler automatically handles Result conversion
+      const user = await createUserWrapped(request.body);
+
+      return reply.code(201).send({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      });
+    }
+  );
+};
+
+export default userRoutes;
+
+/**
+ * Usage example and integration patterns
+ */
+export const RoutePatterns = {
+  /**
+   * Standard pattern: Manual Result handling
+   */
+  manual: async <T>(fastify: FastifyInstance, serviceCall: () => Promise<T>): Promise<T> => {
+    const result = await serviceCall();
+    return FastifyResultUtils.handleResult(fastify, result);
+  },
+
+  /**
+   * Wrapped pattern: Automatic Result handling
+   */
+  wrapped: <TArgs extends unknown[], TReturn>(
+    fastify: FastifyInstance, 
+    serviceMethod: (...args: TArgs) => Promise<TReturn>
+  ): ((...args: TArgs) => Promise<TReturn>) => {
+    return FastifyResultUtils.wrapHandler(fastify, serviceMethod);
+  },
+
+  /**
+   * Batch pattern: Handle multiple Results
+   */
+  batch: async <T>(
+    fastify: FastifyInstance, 
+    serviceCalls: Array<() => Promise<T>>
+  ): Promise<T[]> => {
+    const results = await Promise.all(serviceCalls.map(call => call()));
+    return Promise.all(
+      results.map(result => FastifyResultUtils.handleResult(fastify, result))
+    );
+  },
+};

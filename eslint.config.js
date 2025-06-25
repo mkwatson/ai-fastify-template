@@ -144,6 +144,7 @@ export default [
       'ai-patterns/require-input-validation': 'error',
       'ai-patterns/service-dependency-injection': 'error',
       'ai-patterns/fastify-plugin-wrapper': 'error',
+      'ai-patterns/require-result-type': 'error',
 
       // Import organization and circular dependency detection
       'import/order': [
@@ -251,6 +252,7 @@ export default [
 
       // Relax some rules for test files
       'ai-patterns/no-direct-env-access': 'off',
+      'ai-patterns/require-result-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'no-console': 'off',

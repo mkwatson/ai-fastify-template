@@ -207,6 +207,277 @@ class UserNotFoundError extends Error {
 throw new Error('Something went wrong'); // Too generic!
 ```
 
+### Result/Option Types for Explicit Error Handling
+
+**🚨 CRITICAL ENTERPRISE REQUIREMENT**: All async service operations MUST return `Result<T, E>` types for explicit error handling. This eliminates entire classes of runtime errors and ensures all error paths are visible in type signatures.
+
+#### Core Principles
+
+- **Explicit error handling**: Every error path is visible in the function signature
+- **No hidden exceptions**: Service methods never throw - they return Results
+- **Composable error handling**: Chain operations without nested try/catch
+- **Type-safe error propagation**: Errors are part of the type system
+- **Centralized error mapping**: Convert service errors to HTTP responses automatically
+
+#### Result Type Patterns
+
+```typescript
+import { 
+  Result, ok, err, ResultUtils, FastifyResultUtils,
+  type AsyncServiceResult, ValidationError, NotFoundError 
+} from '../utils/result.js';
+
+// ✅ REQUIRED: Service methods return Results
+class UserService {
+  async createUser(data: CreateUserRequest): AsyncServiceResult<User> {
+    // Validate input
+    const validationResult = validateUserRegistration(data);
+    if (validationResult.isErr()) {
+      return err(validationResult.error);
+    }
+
+    // Check for existing user
+    const existingResult = await this.findUserByEmail(data.email);
+    if (existingResult.isOk()) {
+      return err(new ConflictError('User', 'Email already exists'));
+    }
+
+    // Create user with automatic error wrapping
+    const createResult = await ResultUtils.fromPromise(
+      this.repository.create(data),
+      (error) => new InternalError('Failed to create user', { originalError: error })
+    );
+
+    return createResult;
+  }
+
+  async findUserById(id: string): AsyncServiceResult<User> {
+    const result = await ResultUtils.fromPromise(
+      this.repository.findById(id),
+      (error) => new InternalError('Database query failed', { originalError: error })
+    );
+
+    if (result.isErr()) return err(result.error);
+    
+    if (!result.value) {
+      return err(new NotFoundError('User', id));
+    }
+
+    return ok(result.value);
+  }
+}
+
+// ✅ REQUIRED: Routes use FastifyResultUtils for automatic error conversion
+fastify.post('/users', {
+  schema: { body: CreateUserSchema }
+}, async (request, reply) => {
+  // Automatic error handling - one line!
+  const result = await fastify.userService.createUser(request.body);
+  const user = await FastifyResultUtils.handleResult(fastify, result);
+  
+  return reply.code(201).send(user);
+});
+
+// ✅ Alternative: Manual Result handling for custom logic
+fastify.get('/users/:id', async (request, reply) => {
+  const result = await fastify.userService.findUserById(request.params.id);
+  
+  if (result.isErr()) {
+    fastify.log.error({ error: result.error.toSafeObject() }, 'User lookup failed');
+    throw FastifyResultUtils.toHttpError(fastify, result.error);
+  }
+  
+  return reply.send(result.value);
+});
+```
+
+#### Error Type Hierarchy
+
+```typescript
+// ✅ Standard application errors with HTTP status mapping
+class ValidationError extends AppError {
+  readonly code = 'VALIDATION_ERROR';
+  readonly statusCode = 400;  // Bad Request
+  readonly isOperational = true;
+}
+
+class NotFoundError extends AppError {
+  readonly code = 'NOT_FOUND';
+  readonly statusCode = 404;  // Not Found
+  readonly isOperational = true;
+}
+
+class ConflictError extends AppError {
+  readonly code = 'CONFLICT';
+  readonly statusCode = 409;  // Conflict
+  readonly isOperational = true;
+}
+
+class InternalError extends AppError {
+  readonly code = 'INTERNAL_ERROR';
+  readonly statusCode = 500;  // Internal Server Error
+  readonly isOperational = false;  // Non-operational - indicates system issues
+}
+```
+
+#### Chaining and Composition Patterns
+
+```typescript
+// ✅ Chain multiple operations
+async function createUserWithProfile(userData: CreateUserRequest): AsyncServiceResult<UserWithProfile> {
+  const userResult = await userService.createUser(userData);
+  
+  return AsyncResultUtils.chain(userResult, async (user) => {
+    const profileResult = await profileService.createProfile(user.id, userData.profile);
+    
+    return ResultUtils.chain(profileResult, (profile) => {
+      return ok({ user, profile });
+    });
+  });
+}
+
+// ✅ Parallel operations with error handling
+async function getUserDashboard(userId: string): AsyncServiceResult<Dashboard> {
+  const [userResult, postsResult, settingsResult] = await Promise.all([
+    userService.getUser(userId),
+    postService.getUserPosts(userId),
+    settingsService.getUserSettings(userId),
+  ]);
+
+  const combinedResult = ResultUtils.combine([userResult, postsResult, settingsResult]);
+  
+  return ResultUtils.chain(combinedResult, ([user, posts, settings]) => {
+    return ok({ user, posts, settings });
+  });
+}
+
+// ✅ Validation with Results
+function validateAndSanitizeInput(data: unknown): ServiceResult<CleanedData> {
+  return ResultUtils.parseZod(InputSchema, data)
+    .chain(validated => sanitizeData(validated))
+    .chain(sanitized => performBusinessValidation(sanitized));
+}
+```
+
+#### Integration with Existing Patterns
+
+```typescript
+// ✅ Zod validation integration
+const validateUserData = (data: unknown): ServiceResult<UserData> => {
+  return ResultUtils.parseZod(UserSchema, data);
+};
+
+// ✅ Database operation wrapping
+const safeDbOperation = async <T>(operation: Promise<T>): AsyncServiceResult<T> => {
+  return ResultUtils.fromPromise(
+    operation,
+    (error) => new InternalError('Database operation failed', { originalError: error })
+  );
+};
+
+// ✅ Multiple validation patterns
+const ValidationPatterns = {
+  // Collect all errors for detailed feedback
+  validateAllFields: (data: Record<string, unknown>) => {
+    const results = Object.entries(data).map(([key, value]) => 
+      validateField(key, value)
+    );
+    
+    const errors = ResultUtils.collectErrors(results);
+    if (errors.length > 0) {
+      return err(new ValidationError('Multiple validation errors', undefined, undefined, { errors }));
+    }
+    
+    return ok(ResultUtils.collectSuccesses(results));
+  },
+
+  // Stop on first error for performance
+  validateSequentially: async (data: unknown[]) => {
+    for (const item of data) {
+      const result = await validateItem(item);
+      if (result.isErr()) return err(result.error);
+    }
+    return ok(data);
+  },
+};
+```
+
+#### Testing Result-Based Code
+
+```typescript
+// ✅ Testing service methods
+describe('UserService', () => {
+  it('should return validation error for invalid email', async () => {
+    const result = await userService.createUser({ email: 'invalid' });
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toBeInstanceOf(ValidationError);
+      expect(result.error.field).toBe('email');
+    }
+  });
+
+  it('should return user for valid creation', async () => {
+    const userData = { email: 'user@example.com', name: 'John' };
+    const result = await userService.createUser(userData);
+    
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toMatchObject(userData);
+    }
+  });
+});
+
+// ✅ Testing routes with Results
+describe('User routes', () => {
+  it('should handle service errors correctly', async () => {
+    const mockService = {
+      createUser: vi.fn().mockResolvedValue(err(new ValidationError('Invalid email'))),
+    };
+    
+    fastify.decorate('userService', mockService);
+    
+    const response = await fastify.inject({
+      method: 'POST',
+      url: '/users',
+      payload: { email: 'invalid' },
+    });
+    
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.payload).message).toContain('Invalid email');
+  });
+});
+```
+
+#### ESLint Enforcement
+
+The custom ESLint rule `ai-patterns/require-result-type` enforces these patterns:
+
+```typescript
+// ✅ ENFORCED: Async service methods must return Result types
+async function serviceMethod(data: InputType): AsyncServiceResult<OutputType> {
+  // Implementation must return Result
+}
+
+// ❌ FORBIDDEN: Throwing in service methods
+async function badServiceMethod(data: InputType): Promise<OutputType> {
+  throw new Error('This will trigger ESLint error'); // ESLint: Use Result types
+}
+
+// ✅ ALLOWED: Non-service files can still throw (tests, utilities)
+// ✅ ALLOWED: Validation and setup code can throw for system errors
+```
+
+#### Migration Strategy
+
+1. **New code first**: All new services use Result types immediately
+2. **Gradual migration**: Convert existing services one at a time
+3. **Route updates**: Update routes to use `FastifyResultUtils`
+4. **Test migration**: Update tests to verify Result behavior
+5. **ESLint enforcement**: Enable rule to prevent regression
+
+See `/docs/RESULT_MIGRATION_GUIDE.md` for detailed migration examples and patterns.
+
 ### Security Requirements
 
 - **Input sanitization**: All user inputs validated and sanitized
@@ -615,6 +886,7 @@ it('should calculate 10% discount correctly', () => {
 ```typescript
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
+import { FastifyResultUtils } from '../utils/result.js';
 
 const RequestSchema = z.object({
   // Define request schema
@@ -624,9 +896,78 @@ const ResponseSchema = z.object({
   // Define response schema
 });
 
+const ErrorResponseSchema = z.object({
+  error: z.string(),
+  message: z.string(),
+  statusCode: z.number(),
+});
+
 const routes: FastifyPluginAsync = async fastify => {
   fastify.post(
     '/endpoint',
+    {
+      schema: {
+        body: RequestSchema,
+        response: { 
+          201: ResponseSchema,
+          400: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      fastify.log.info({ body: request.body }, 'Processing request');
+
+      // Service returns Result - automatically handle errors
+      const result = await fastify.service.operation(request.body);
+      const data = await FastifyResultUtils.handleResult(fastify, result);
+
+      return reply.code(201).send(data);
+    }
+  );
+
+  // Alternative pattern: Manual Result handling
+  fastify.get(
+    '/endpoint/:id',
+    {
+      schema: {
+        params: z.object({ id: z.string() }),
+        response: { 
+          200: ResponseSchema,
+          404: ErrorResponseSchema,
+          500: ErrorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      fastify.log.debug({ id }, 'Getting resource by ID');
+
+      const result = await fastify.service.getById(id);
+      
+      if (result.isErr()) {
+        // Manual error handling for custom responses
+        fastify.log.error(
+          { error: result.error.toSafeObject(), id },
+          'Failed to get resource'
+        );
+        throw FastifyResultUtils.toHttpError(fastify, result.error);
+      }
+
+      return reply.send(result.value);
+    }
+  );
+
+  // Wrapped handler pattern for even cleaner code
+  const createResource = FastifyResultUtils.wrapHandler(
+    fastify,
+    async (data: unknown) => {
+      return fastify.service.operation(data);
+    }
+  );
+
+  fastify.post(
+    '/endpoint/wrapped',
     {
       schema: {
         body: RequestSchema,
@@ -634,14 +975,9 @@ const routes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      try {
-        const data = RequestSchema.parse(request.body);
-        const result = await fastify.service.operation(data);
-        return reply.code(201).send(result);
-      } catch (error) {
-        fastify.log.error({ error }, 'Operation failed');
-        throw error; // Let Fastify handle error response
-      }
+      // Cleanest pattern - wrapper handles all Result conversion
+      const data = await createResource(request.body);
+      return reply.code(201).send(data);
     }
   );
 };
@@ -652,8 +988,18 @@ export default routes;
 ### Service Layer Template
 
 ```typescript
+import { 
+  Result, 
+  ok, 
+  err, 
+  ResultUtils, 
+  type AsyncServiceResult, 
+  ValidationError, 
+  InternalError 
+} from '../utils/result.js';
+
 export interface ServiceInterface {
-  operation(data: InputType): Promise<OutputType>;
+  operation(data: InputType): AsyncServiceResult<OutputType>;
 }
 
 export class ServiceImplementation implements ServiceInterface {
@@ -662,16 +1008,57 @@ export class ServiceImplementation implements ServiceInterface {
     private readonly logger: Logger
   ) {}
 
-  async operation(data: InputType): Promise<OutputType> {
+  async operation(data: InputType): AsyncServiceResult<OutputType> {
     this.logger.info({ data: sanitizedData }, 'Starting operation');
 
+    // Use Result patterns instead of try/catch
+    const dbResult = await ResultUtils.fromPromise(
+      this.db.collection.operation(data),
+      (error) => new InternalError('Database operation failed', { originalError: error })
+    );
+
+    if (dbResult.isErr()) {
+      this.logger.error(
+        { error: dbResult.error.toSafeObject(), data: sanitizedData },
+        'Operation failed'
+      );
+      return err(dbResult.error);
+    }
+
+    const result = dbResult.value;
+    this.logger.info({ resultId: result.id }, 'Operation completed');
+    return ok(result);
+  }
+
+  // Alternative pattern: Manual Result handling
+  async alternativeOperation(data: InputType): AsyncServiceResult<OutputType> {
+    this.logger.info({ data: sanitizedData }, 'Starting alternative operation');
+
+    // Validate input first
+    if (!data || typeof data !== 'object') {
+      const validationError = new ValidationError('Invalid input data', 'data');
+      this.logger.warn(
+        { error: validationError.toSafeObject() },
+        'Operation failed: validation error'
+      );
+      return err(validationError);
+    }
+
+    // Perform database operation
     try {
       const result = await this.db.collection.operation(data);
-      this.logger.info({ resultId: result.id }, 'Operation completed');
-      return result;
+      this.logger.info({ resultId: result.id }, 'Alternative operation completed');
+      return ok(result);
     } catch (error) {
-      this.logger.error({ error, data: sanitizedData }, 'Operation failed');
-      throw error;
+      const internalError = new InternalError(
+        'Database operation failed',
+        { originalError: error }
+      );
+      this.logger.error(
+        { error: internalError.toSafeObject(), data: sanitizedData },
+        'Alternative operation failed'
+      );
+      return err(internalError);
     }
   }
 }
