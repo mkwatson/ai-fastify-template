@@ -149,6 +149,12 @@ We maintain enterprise-grade quality thresholds across all metrics:
 
 Our quality gates are designed to catch the specific failure modes of AI-generated code while enabling rapid iteration. Specific thresholds are configured in tool configuration files rather than documented, ensuring they remain accurate and maintainable.
 
+For current quality thresholds and metrics, refer to:
+
+- **Mutation testing thresholds**: `stryker.config.mjs`
+- **Test coverage requirements**: `vitest.config.ts`
+- **Performance benchmarks**: Run `pnpm ai:quick` to measure in your environment
+
 ### Code Quality
 
 All contributions must pass the comprehensive quality pipeline:
