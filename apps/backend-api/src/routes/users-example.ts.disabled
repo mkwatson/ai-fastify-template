@@ -96,20 +96,79 @@ const userRoutes: FastifyPluginAsync = async fastify => {
     '/users',
     {
       schema: {
-        body: CreateUserRequestSchema,
+        body: {
+          type: 'object',
+          required: ['email', 'name'],
+          properties: {
+            email: { type: 'string', format: 'email' },
+            name: { type: 'string', minLength: 1, maxLength: 100 },
+            phone: { type: 'string' },
+          },
+          additionalProperties: false,
+        },
         response: {
-          201: UserResponseSchema,
-          400: ErrorResponseSchema,
-          409: ErrorResponseSchema,
-          500: ErrorResponseSchema,
+          201: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              email: { type: 'string' },
+              name: { type: 'string' },
+              phone: { type: 'string' },
+              createdAt: { type: 'string' },
+              updatedAt: { type: 'string' },
+              isActive: { type: 'boolean' },
+            },
+            required: ['id', 'email', 'name', 'createdAt', 'updatedAt', 'isActive'],
+          },
+          400: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              statusCode: { type: 'number' },
+              context: { type: 'object' },
+            },
+            required: ['error', 'message', 'statusCode'],
+          },
+          409: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              statusCode: { type: 'number' },
+              context: { type: 'object' },
+            },
+            required: ['error', 'message', 'statusCode'],
+          },
+          500: {
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              statusCode: { type: 'number' },
+              context: { type: 'object' },
+            },
+            required: ['error', 'message', 'statusCode'],
+          },
         },
       },
     },
     async (request, reply) => {
       fastify.log.info({ body: request.body }, 'Creating new user');
 
+      // Validate with Zod for runtime type safety
+      const validationResult = CreateUserRequestSchema.safeParse(request.body);
+      if (!validationResult.success) {
+        return reply.code(400).send({
+          error: 'Bad Request',
+          message: 'Invalid request data',
+          statusCode: 400,
+          context: { validation: validationResult.error.issues },
+        });
+      }
+
       // Use Result-based service - errors are automatically converted to HTTP responses
-      const result = await fastify.userService.createUser(request.body);
+      const result = await fastify.userService.createUser(validationResult.data);
       const user = FastifyResultUtils.handleResult(fastify, result);
 
       return reply.code(201).send({

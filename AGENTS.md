@@ -16,8 +16,8 @@
 ```bash
 pnpm install           # Install dependencies
 pnpm dev               # Start development servers
-pnpm ai:quick          # Quick validation (lint + types)
-pnpm ai:check          # Standard validation (includes graph validation)
+pnpm ai:quick          # Quick validation (lint + types + tests)
+pnpm ai:check          # Standard validation (includes tests + graph validation)
 pnpm ai:compliance     # Full compliance validation
 pnpm build             # Production build
 pnpm test              # Run all tests
@@ -47,11 +47,11 @@ git checkout -b feature/your-feature-name
 pnpm install
 
 # During development
-pnpm ai:quick          # Fast feedback during coding
+pnpm ai:quick          # Fast feedback during coding (includes tests!)
 pnpm dev               # Start development servers
 
 # Before committing
-pnpm ai:check          # Comprehensive validation
+pnpm ai:check          # Comprehensive validation (includes tests!)
 git add . && git commit -m "feat(scope): description"
 # Note: Husky + lint-staged automatically runs ESLint and Prettier on staged files
 
