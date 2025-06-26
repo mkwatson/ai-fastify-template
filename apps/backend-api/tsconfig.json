@@ -3,7 +3,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "build",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -11,8 +10,8 @@
     "composite": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "build", "test"],
+  "include": ["src/**/*", "vitest.config.ts"],
+  "exclude": ["node_modules", "build"],
   "references": [
     { "path": "../../packages/config" },
     { "path": "../../packages/types" }

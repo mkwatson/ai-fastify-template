@@ -1,7 +1,7 @@
 /* eslint-env node */
 /**
  * ESLint Plugin for Runtime Safety Patterns
- * 
+ *
  * Minimal custom rules for patterns TypeScript cannot enforce at compile-time.
  * Focus: Environment validation and request validation only.
  */
@@ -13,12 +13,14 @@ module.exports = {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Disallow direct process.env access outside of environment validation files',
+          description:
+            'Disallow direct process.env access outside of environment validation files',
           category: 'Security',
           recommended: true,
         },
         messages: {
-          noDirectEnv: 'Direct process.env access found - use validated env schema instead',
+          noDirectEnv:
+            'Direct process.env access found - use validated env schema instead',
         },
         schema: [],
       },
@@ -58,12 +60,14 @@ module.exports = {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require Zod schema validation for routes using request.body',
+          description:
+            'Require Zod schema validation for routes using request.body',
           category: 'Security',
           recommended: true,
         },
         messages: {
-          missingValidation: 'Route uses request.body without Zod schema validation',
+          missingValidation:
+            'Route uses request.body without Zod schema validation',
         },
         schema: [],
       },

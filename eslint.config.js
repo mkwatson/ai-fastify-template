@@ -25,9 +25,7 @@ export default tseslint.config(
     extends: [tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
-        projectService: {
-          allowDefaultProject: ['*.config.ts', '*.config.js'],
-        },
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -71,6 +69,13 @@ export default tseslint.config(
     },
   },
   {
+    // Plugin files - Fastify plugins often need async but may not use await
+    files: ['**/plugins/**/*.ts', '**/src/plugins/**/*.ts'],
+    rules: {
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
     // Test files - very minimal rules (TypeScript already validates these)
     files: [
       '**/*.test.ts',
@@ -89,6 +94,10 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off',
       'runtime-safety/no-direct-env-access': 'off',
       'runtime-safety/require-zod-validation': 'off',

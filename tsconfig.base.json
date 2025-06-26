@@ -21,7 +21,6 @@
 
     // Extra strictness not in preset
     "noEmitOnError": true,
-    "preserveConstEnums": false,
     "removeComments": false
   }
 }

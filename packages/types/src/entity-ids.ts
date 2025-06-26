@@ -1,6 +1,6 @@
 /**
  * Common entity ID types with branded type safety.
- * 
+ *
  * These branded types prevent ID mixups at compile time while providing
  * runtime validation for safety. Each ID type has its own constructor
  * with appropriate validation.
@@ -30,7 +30,7 @@ export type UserId = Brand<string, 'UserId'>;
 
 /**
  * Constructor for UserId with UUID validation.
- * 
+ *
  * @example
  * ```typescript
  * const userId = UserId('550e8400-e29b-41d4-a716-446655440000');
@@ -68,7 +68,10 @@ export const SessionId = createBrandConstructor<string, 'SessionId'>({
 /**
  * Unsafe constructor for SessionId.
  */
-export const UnsafeSessionId = createUnsafeBrandConstructor<string, 'SessionId'>();
+export const UnsafeSessionId = createUnsafeBrandConstructor<
+  string,
+  'SessionId'
+>();
 
 /**
  * Branded type for role identifiers.
@@ -110,7 +113,10 @@ export const ProductId = createBrandConstructor<string, 'ProductId'>({
 /**
  * Unsafe constructor for ProductId.
  */
-export const UnsafeProductId = createUnsafeBrandConstructor<string, 'ProductId'>();
+export const UnsafeProductId = createUnsafeBrandConstructor<
+  string,
+  'ProductId'
+>();
 
 /**
  * Branded type for order identifiers.
@@ -148,7 +154,10 @@ export const CustomerId = createBrandConstructor<string, 'CustomerId'>({
 /**
  * Unsafe constructor for CustomerId.
  */
-export const UnsafeCustomerId = createUnsafeBrandConstructor<string, 'CustomerId'>();
+export const UnsafeCustomerId = createUnsafeBrandConstructor<
+  string,
+  'CustomerId'
+>();
 
 /**
  * Branded type for category identifiers.
@@ -167,7 +176,10 @@ export const CategoryId = createBrandConstructor<string, 'CategoryId'>({
 /**
  * Unsafe constructor for CategoryId.
  */
-export const UnsafeCategoryId = createUnsafeBrandConstructor<string, 'CategoryId'>();
+export const UnsafeCategoryId = createUnsafeBrandConstructor<
+  string,
+  'CategoryId'
+>();
 
 // ============================================================================
 // Content Management Domain
@@ -190,7 +202,10 @@ export const ArticleId = createBrandConstructor<string, 'ArticleId'>({
 /**
  * Unsafe constructor for ArticleId.
  */
-export const UnsafeArticleId = createUnsafeBrandConstructor<string, 'ArticleId'>();
+export const UnsafeArticleId = createUnsafeBrandConstructor<
+  string,
+  'ArticleId'
+>();
 
 /**
  * Branded type for comment identifiers.
@@ -209,7 +224,10 @@ export const CommentId = createBrandConstructor<string, 'CommentId'>({
 /**
  * Unsafe constructor for CommentId.
  */
-export const UnsafeCommentId = createUnsafeBrandConstructor<string, 'CommentId'>();
+export const UnsafeCommentId = createUnsafeBrandConstructor<
+  string,
+  'CommentId'
+>();
 
 /**
  * Branded type for author identifiers.
@@ -228,7 +246,10 @@ export const AuthorId = createBrandConstructor<string, 'AuthorId'>({
 /**
  * Unsafe constructor for AuthorId.
  */
-export const UnsafeAuthorId = createUnsafeBrandConstructor<string, 'AuthorId'>();
+export const UnsafeAuthorId = createUnsafeBrandConstructor<
+  string,
+  'AuthorId'
+>();
 
 // ============================================================================
 // System Resource Domain
@@ -251,7 +272,10 @@ export const RequestId = createBrandConstructor<string, 'RequestId'>({
 /**
  * Unsafe constructor for RequestId.
  */
-export const UnsafeRequestId = createUnsafeBrandConstructor<string, 'RequestId'>();
+export const UnsafeRequestId = createUnsafeBrandConstructor<
+  string,
+  'RequestId'
+>();
 
 /**
  * Branded type for transaction identifiers.
@@ -270,7 +294,10 @@ export const TransactionId = createBrandConstructor<string, 'TransactionId'>({
 /**
  * Unsafe constructor for TransactionId.
  */
-export const UnsafeTransactionId = createUnsafeBrandConstructor<string, 'TransactionId'>();
+export const UnsafeTransactionId = createUnsafeBrandConstructor<
+  string,
+  'TransactionId'
+>();
 
 /**
  * Branded type for log entry identifiers.
@@ -312,7 +339,10 @@ export const EmailAddress = createBrandConstructor<string, 'EmailAddress'>({
 /**
  * Unsafe constructor for EmailAddress.
  */
-export const UnsafeEmailAddress = createUnsafeBrandConstructor<string, 'EmailAddress'>();
+export const UnsafeEmailAddress = createUnsafeBrandConstructor<
+  string,
+  'EmailAddress'
+>();
 
 /**
  * Branded type for slug identifiers (URL-friendly strings).

@@ -1,6 +1,6 @@
 /**
  * Tests for core branded type utilities.
- * 
+ *
  * Tests both compile-time type safety and runtime behavior
  * to ensure branded types work correctly in all scenarios.
  */
@@ -30,25 +30,31 @@ describe('Core Brand Utilities', () => {
       // Type-level tests: these should compile
       expectTypeOf('user-123' as TestUserId).toEqualTypeOf<TestUserId>();
       expectTypeOf('order-123' as TestOrderId).toEqualTypeOf<TestOrderId>();
-      
+
       // These should be type errors (but we can't test compilation errors in runtime tests)
       // The brand provides compile-time safety
       const userId: TestUserId = 'user-123' as TestUserId;
       const orderId: TestOrderId = 'order-123' as TestOrderId;
-      
+
       // Runtime: both are strings
       expect(typeof userId).toBe('string');
       expect(typeof orderId).toBe('string');
-      
+
       // But they're distinct types at compile time
       expectTypeOf(userId).toEqualTypeOf<TestUserId>();
       expectTypeOf(orderId).toEqualTypeOf<TestOrderId>();
     });
 
     it('should work with different underlying types', () => {
-      const stringId: Brand<string, 'StringId'> = 'test' as Brand<string, 'StringId'>;
-      const numberId: Brand<number, 'NumberId'> = 123 as Brand<number, 'NumberId'>;
-      
+      const stringId: Brand<string, 'StringId'> = 'test' as Brand<
+        string,
+        'StringId'
+      >;
+      const numberId: Brand<number, 'NumberId'> = 123 as Brand<
+        number,
+        'NumberId'
+      >;
+
       expectTypeOf(stringId as string).toEqualTypeOf<string>();
       expectTypeOf(numberId as number).toEqualTypeOf<number>();
     });
@@ -58,7 +64,7 @@ describe('Core Brand Utilities', () => {
     it('should extract underlying type from branded type', () => {
       type UnbrandedUserId = Unbranded<TestUserId>;
       expectTypeOf({} as UnbrandedUserId).toEqualTypeOf<string>();
-      
+
       type UnbrandedNumberId = Unbranded<TestNumberId>;
       expectTypeOf({} as UnbrandedNumberId).toEqualTypeOf<number>();
     });
@@ -73,7 +79,7 @@ describe('Core Brand Utilities', () => {
     it('should extract brand from branded type', () => {
       type UserIdBrand = ExtractBrand<TestUserId>;
       expectTypeOf({} as UserIdBrand).toEqualTypeOf<'TestUserId'>();
-      
+
       type OrderIdBrand = ExtractBrand<TestOrderId>;
       expectTypeOf({} as OrderIdBrand).toEqualTypeOf<'TestOrderId'>();
     });
@@ -86,8 +92,12 @@ describe('Core Brand Utilities', () => {
 
   describe('BrandValidationError', () => {
     it('should create error with correct properties', () => {
-      const error = new BrandValidationError('TestType', 'invalid-value', 'Custom message');
-      
+      const error = new BrandValidationError(
+        'TestType',
+        'invalid-value',
+        'Custom message'
+      );
+
       expect(error).toBeInstanceOf(Error);
       expect(error).toBeInstanceOf(BrandValidationError);
       expect(error.name).toBe('BrandValidationError');
@@ -99,7 +109,7 @@ describe('Core Brand Utilities', () => {
 
     it('should use default message when none provided', () => {
       const error = new BrandValidationError('TestType', 123);
-      
+
       expect(error.message).toBe('Invalid value for TestType: 123');
     });
   });
@@ -115,7 +125,7 @@ describe('Core Brand Utilities', () => {
 
     it('should create constructor that validates and brands values', () => {
       const validId = TestId('test-123');
-      
+
       expectTypeOf(validId).toEqualTypeOf<Brand<string, 'TestId'>>();
       expect(validId).toBe('test-123');
     });
@@ -130,7 +140,7 @@ describe('Core Brand Utilities', () => {
       const CustomTestId = createBrandConstructor<string, 'CustomTestId'>({
         name: 'CustomTestId',
         validate: isValidTestId,
-        errorMessage: (value) => `Custom error for ${value}`,
+        errorMessage: value => `Custom error for ${value}`,
       });
 
       expect(() => CustomTestId('invalid')).toThrow('Custom error for invalid');
@@ -139,7 +149,7 @@ describe('Core Brand Utilities', () => {
     it('should handle edge cases', () => {
       expect(() => TestId('')).toThrow();
       expect(() => TestId(undefined)).toThrow();
-      
+
       // Valid edge case
       const edgeCase = TestId('test-');
       expect(edgeCase).toBe('test-');
@@ -151,7 +161,7 @@ describe('Core Brand Utilities', () => {
 
     it('should create constructor that skips validation', () => {
       const id = UnsafeTestId('any-value');
-      
+
       expectTypeOf(id).toEqualTypeOf<Brand<string, 'UnsafeTestId'>>();
       expect(id).toBe('any-value');
     });
@@ -165,20 +175,29 @@ describe('Core Brand Utilities', () => {
 
   describe('unwrap', () => {
     it('should extract underlying value from branded type', () => {
-      const brandedValue: Brand<string, 'Test'> = 'test-value' as Brand<string, 'Test'>;
+      const brandedValue: Brand<string, 'Test'> = 'test-value' as Brand<
+        string,
+        'Test'
+      >;
       const unwrapped = unwrap(brandedValue);
-      
+
       expectTypeOf(unwrapped).toEqualTypeOf<string>();
       expect(unwrapped).toBe('test-value');
     });
 
     it('should work with different types', () => {
-      const stringBranded: Brand<string, 'String'> = 'test' as Brand<string, 'String'>;
-      const numberBranded: Brand<number, 'Number'> = 123 as Brand<number, 'Number'>;
-      
+      const stringBranded: Brand<string, 'String'> = 'test' as Brand<
+        string,
+        'String'
+      >;
+      const numberBranded: Brand<number, 'Number'> = 123 as Brand<
+        number,
+        'Number'
+      >;
+
       expectTypeOf(unwrap(stringBranded)).toEqualTypeOf<string>();
       expectTypeOf(unwrap(numberBranded)).toEqualTypeOf<number>();
-      
+
       expect(unwrap(stringBranded)).toBe('test');
       expect(unwrap(numberBranded)).toBe(123);
     });
@@ -188,8 +207,11 @@ describe('Core Brand Utilities', () => {
     it('should compare branded values correctly', () => {
       const id1: Brand<string, 'Test'> = 'same-value' as Brand<string, 'Test'>;
       const id2: Brand<string, 'Test'> = 'same-value' as Brand<string, 'Test'>;
-      const id3: Brand<string, 'Test'> = 'different-value' as Brand<string, 'Test'>;
-      
+      const id3: Brand<string, 'Test'> = 'different-value' as Brand<
+        string,
+        'Test'
+      >;
+
       expect(brandedEquals(id1, id2)).toBe(true);
       expect(brandedEquals(id1, id3)).toBe(false);
     });
@@ -198,7 +220,7 @@ describe('Core Brand Utilities', () => {
       const num1: Brand<number, 'TestNum'> = 123 as Brand<number, 'TestNum'>;
       const num2: Brand<number, 'TestNum'> = 123 as Brand<number, 'TestNum'>;
       const num3: Brand<number, 'TestNum'> = 456 as Brand<number, 'TestNum'>;
-      
+
       expect(brandedEquals(num1, num2)).toBe(true);
       expect(brandedEquals(num1, num3)).toBe(false);
     });
@@ -206,28 +228,46 @@ describe('Core Brand Utilities', () => {
 
   describe('createBrandedComparator', () => {
     it('should create comparator for branded types', () => {
-      const stringComparator = createBrandedComparator<Brand<string, 'TestString'>>(
-        (a, b) => a.localeCompare(b)
-      );
-      
-      const id1: Brand<string, 'TestString'> = 'apple' as Brand<string, 'TestString'>;
-      const id2: Brand<string, 'TestString'> = 'banana' as Brand<string, 'TestString'>;
-      const id3: Brand<string, 'TestString'> = 'apple' as Brand<string, 'TestString'>;
-      
+      const stringComparator = createBrandedComparator<
+        Brand<string, 'TestString'>
+      >((a, b) => a.localeCompare(b));
+
+      const id1: Brand<string, 'TestString'> = 'apple' as Brand<
+        string,
+        'TestString'
+      >;
+      const id2: Brand<string, 'TestString'> = 'banana' as Brand<
+        string,
+        'TestString'
+      >;
+      const id3: Brand<string, 'TestString'> = 'apple' as Brand<
+        string,
+        'TestString'
+      >;
+
       expect(stringComparator(id1, id2)).toBeLessThan(0);
       expect(stringComparator(id2, id1)).toBeGreaterThan(0);
       expect(stringComparator(id1, id3)).toBe(0);
     });
 
     it('should work with numeric branded types', () => {
-      const numberComparator = createBrandedComparator<Brand<number, 'TestNumber'>>(
-        (a, b) => a - b
-      );
-      
-      const num1: Brand<number, 'TestNumber'> = 10 as Brand<number, 'TestNumber'>;
-      const num2: Brand<number, 'TestNumber'> = 20 as Brand<number, 'TestNumber'>;
-      const num3: Brand<number, 'TestNumber'> = 10 as Brand<number, 'TestNumber'>;
-      
+      const numberComparator = createBrandedComparator<
+        Brand<number, 'TestNumber'>
+      >((a, b) => a - b);
+
+      const num1: Brand<number, 'TestNumber'> = 10 as Brand<
+        number,
+        'TestNumber'
+      >;
+      const num2: Brand<number, 'TestNumber'> = 20 as Brand<
+        number,
+        'TestNumber'
+      >;
+      const num3: Brand<number, 'TestNumber'> = 10 as Brand<
+        number,
+        'TestNumber'
+      >;
+
       expect(numberComparator(num1, num2)).toBeLessThan(0);
       expect(numberComparator(num2, num1)).toBeGreaterThan(0);
       expect(numberComparator(num1, num3)).toBe(0);
@@ -242,7 +282,7 @@ describe('Core Brand Utilities', () => {
       });
 
       const start = performance.now();
-      
+
       // Create many branded values
       for (let i = 0; i < 10000; i++) {
         const id = TestId(`test-${i}`);
@@ -250,10 +290,10 @@ describe('Core Brand Utilities', () => {
         // Use the values to prevent optimization
         if (unwrapped === 'impossible') break;
       }
-      
+
       const end = performance.now();
       const duration = end - start;
-      
+
       // Should complete quickly (under 100ms for 10k operations)
       expect(duration).toBeLessThan(100);
     });
@@ -263,18 +303,18 @@ describe('Core Brand Utilities', () => {
     it('should prevent mixing different branded types at compile time', () => {
       // These tests document the expected compile-time behavior
       // In actual usage, mixing these would be compilation errors
-      
+
       const userId: TestUserId = 'user-123' as TestUserId;
       const orderId: TestOrderId = 'order-123' as TestOrderId;
-      
+
       // These would be compile errors in real code:
       // function processUser(id: TestUserId) { }
       // processUser(orderId); // ❌ Compile error
-      
+
       // But we can verify they're different types at the type level
       expectTypeOf(userId).toEqualTypeOf<TestUserId>();
       expectTypeOf(orderId).toEqualTypeOf<TestOrderId>();
-      
+
       // And that they don't automatically convert
       expect(userId).not.toBe(orderId);
     });

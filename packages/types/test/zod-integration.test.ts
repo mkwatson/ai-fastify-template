@@ -1,6 +1,6 @@
 /**
  * Tests for Zod integration with branded types.
- * 
+ *
  * Tests the seamless integration between Zod schemas and branded types
  * for API boundary validation and type safety.
  */
@@ -49,13 +49,13 @@ describe('Zod Integration', () => {
         z.string().uuid(),
         {
           name: 'TestUserId',
-          validate: (value): value is string => 
+          validate: (value): value is string =>
             typeof value === 'string' && /^[0-9a-f-]{36}$/i.test(value),
         }
       );
 
       const result = UserIdSchema.parse(VALID_UUID);
-      
+
       expect(unwrap(result)).toBe(VALID_UUID);
       expect(() => UserIdSchema.parse(INVALID_UUID)).toThrow();
     });
@@ -71,9 +71,11 @@ describe('Zod Integration', () => {
 
       const result = StrictUserIdSchema.parse(VALID_UUID);
       expect(unwrap(result)).toBe(VALID_UUID);
-      
+
       // Should fail Zod validation first
-      expect(() => StrictUserIdSchema.parse('6ba7b810-9dad-41d1-80b4-00c04fd430c8')).toThrow();
+      expect(() =>
+        StrictUserIdSchema.parse('6ba7b810-9dad-41d1-80b4-00c04fd430c8')
+      ).toThrow();
     });
   });
 
@@ -81,13 +83,13 @@ describe('Zod Integration', () => {
     it('should create branded string schema', () => {
       const BrandedNameSchema = brandedString<'TestName'>({
         name: 'TestName',
-        validate: (value): value is string => 
+        validate: (value): value is string =>
           typeof value === 'string' && value.length >= 2,
       });
 
       const result = BrandedNameSchema.parse('John');
       expect(unwrap(result)).toBe('John');
-      
+
       expect(() => BrandedNameSchema.parse('A')).toThrow(BrandValidationError);
       expect(() => BrandedNameSchema.parse(123)).toThrow();
     });
@@ -99,13 +101,13 @@ describe('Zod Integration', () => {
 
       const result = UserIdSchema.parse(VALID_UUID);
       expect(unwrap(result)).toBe(VALID_UUID);
-      
+
       expect(() => UserIdSchema.parse(INVALID_UUID)).toThrow();
     });
 
     it('should validate UUID format before branding', () => {
       const UserIdSchema = brandedUuid<'TestUserId'>('TestUserId');
-      
+
       // Zod validation should fail first
       expect(() => UserIdSchema.parse('not-uuid')).toThrow();
       expect(() => UserIdSchema.parse('')).toThrow();
@@ -119,13 +121,13 @@ describe('Zod Integration', () => {
 
       const result = EmailSchema.parse(VALID_EMAIL);
       expect(unwrap(result)).toBe(VALID_EMAIL);
-      
+
       expect(() => EmailSchema.parse(INVALID_EMAIL)).toThrow();
     });
 
     it('should validate various email formats', () => {
       const EmailSchema = brandedEmail<'TestEmail'>('TestEmail');
-      
+
       const validEmails = [
         'user@example.com',
         'user.name@domain.co.uk',
@@ -146,15 +148,21 @@ describe('Zod Integration', () => {
 
       const result = SlugSchema.parse(VALID_SLUG);
       expect(unwrap(result)).toBe(VALID_SLUG);
-      
+
       expect(() => SlugSchema.parse(INVALID_SLUG)).toThrow();
     });
 
     it('should validate slug format', () => {
       const SlugSchema = brandedSlug<'TestSlug'>('TestSlug');
-      
+
       const validSlugs = ['hello', 'hello-world', 'article-123', 'a-b-c-1-2-3'];
-      const invalidSlugs = ['Hello', 'hello_world', 'hello.world', 'hello world', ''];
+      const invalidSlugs = [
+        'Hello',
+        'hello_world',
+        'hello.world',
+        'hello world',
+        '',
+      ];
 
       for (const slug of validSlugs) {
         const result = SlugSchema.parse(slug);
@@ -173,10 +181,10 @@ describe('Zod Integration', () => {
       const userId = ZodBrandedSchemas.UserId.parse(VALID_UUID);
       const productId = ZodBrandedSchemas.ProductId.parse(VALID_UUID);
       const orderId = ZodBrandedSchemas.OrderId.parse(VALID_UUID);
-      
+
       expectTypeOf(userId).toEqualTypeOf<UserId>();
       expectTypeOf(productId).toEqualTypeOf<ProductId>();
-      
+
       expect(unwrap(userId)).toBe(VALID_UUID);
       expect(unwrap(productId)).toBe(VALID_UUID);
       expect(unwrap(orderId)).toBe(VALID_UUID);
@@ -185,10 +193,10 @@ describe('Zod Integration', () => {
     it('should validate string-based schemas', () => {
       const roleId = ZodBrandedSchemas.RoleId.parse('admin');
       const categoryId = ZodBrandedSchemas.CategoryId.parse('electronics');
-      
+
       expect(unwrap(roleId)).toBe('admin');
       expect(unwrap(categoryId)).toBe('electronics');
-      
+
       expect(() => ZodBrandedSchemas.RoleId.parse('')).toThrow();
       expect(() => ZodBrandedSchemas.CategoryId.parse('')).toThrow();
     });
@@ -196,10 +204,10 @@ describe('Zod Integration', () => {
     it('should validate alternative ID types', () => {
       const email = ZodBrandedSchemas.EmailAddress.parse(VALID_EMAIL);
       const slug = ZodBrandedSchemas.Slug.parse(VALID_SLUG);
-      
+
       expectTypeOf(email).toEqualTypeOf<EmailAddress>();
       expectTypeOf(slug).toEqualTypeOf<Slug>();
-      
+
       expect(unwrap(email)).toBe(VALID_EMAIL);
       expect(unwrap(slug)).toBe(VALID_SLUG);
     });
@@ -208,29 +216,40 @@ describe('Zod Integration', () => {
   describe('Schema Pattern Utilities', () => {
     describe('createIdParamSchema', () => {
       it('should create route parameter schema', () => {
-        const GetUserParams = createIdParamSchema('userId', ZodBrandedSchemas.UserId);
-        
+        const GetUserParams = createIdParamSchema(
+          'userId',
+          ZodBrandedSchemas.UserId
+        );
+
         const result = GetUserParams.parse({ userId: VALID_UUID });
-        
+
         expectTypeOf(result).toEqualTypeOf<{ userId: UserId }>();
         expect(unwrap(result.userId)).toBe(VALID_UUID);
       });
 
       it('should validate parameter format', () => {
-        const GetProductParams = createIdParamSchema('productId', ZodBrandedSchemas.ProductId);
-        
-        expect(() => GetProductParams.parse({ productId: INVALID_UUID })).toThrow();
+        const GetProductParams = createIdParamSchema(
+          'productId',
+          ZodBrandedSchemas.ProductId
+        );
+
+        expect(() =>
+          GetProductParams.parse({ productId: INVALID_UUID })
+        ).toThrow();
         expect(() => GetProductParams.parse({})).toThrow(); // Missing required param
       });
     });
 
     describe('createIdQuerySchema', () => {
       it('should create optional query parameter schema', () => {
-        const QuerySchema = createIdQuerySchema('userId', ZodBrandedSchemas.UserId);
-        
+        const QuerySchema = createIdQuerySchema(
+          'userId',
+          ZodBrandedSchemas.UserId
+        );
+
         const withParam = QuerySchema.parse({ userId: VALID_UUID });
         const withoutParam = QuerySchema.parse({});
-        
+
         expect(unwrap(withParam.userId!)).toBe(VALID_UUID);
         expect(withoutParam.userId).toBeUndefined();
       });
@@ -278,7 +297,7 @@ describe('Zod Integration', () => {
           name: 'John',
         });
 
-        expect(unwrap(withId.id!)).toBe(VALID_UUID);
+        expect(unwrap(withId.id)).toBe(VALID_UUID);
         expect(withoutId.id).toBeUndefined();
       });
     });
@@ -293,9 +312,7 @@ describe('Zod Integration', () => {
         const PaginatedUsersSchema = createPaginatedResponseSchema(UserSchema);
 
         const result = PaginatedUsersSchema.parse({
-          items: [
-            { id: VALID_UUID, name: 'John' },
-          ],
+          items: [{ id: VALID_UUID, name: 'John' }],
           total: 1,
           page: 1,
           pageSize: 20,
@@ -459,10 +476,10 @@ describe('Zod Integration', () => {
   describe('Type Safety', () => {
     it('should maintain type safety through Zod transformation', () => {
       const result = ZodBrandedSchemas.UserId.parse(VALID_UUID);
-      
+
       // Should be typed as UserId, not string
       expectTypeOf(result).toEqualTypeOf<UserId>();
-      
+
       // Runtime verification
       expect(typeof result).toBe('string');
       expect(unwrap(result)).toBe(VALID_UUID);
@@ -472,10 +489,12 @@ describe('Zod Integration', () => {
       const OrderSchema = z.object({
         id: ZodBrandedSchemas.OrderId,
         customerId: ZodBrandedSchemas.CustomerId,
-        items: z.array(z.object({
-          productId: ZodBrandedSchemas.ProductId,
-          quantity: z.number(),
-        })),
+        items: z.array(
+          z.object({
+            productId: ZodBrandedSchemas.ProductId,
+            quantity: z.number(),
+          })
+        ),
       });
 
       const result = OrderSchema.parse({
@@ -492,8 +511,9 @@ describe('Zod Integration', () => {
       // All IDs should have proper types
       expectTypeOf(result.id).toEqualTypeOf<typeof result.id>();
       expectTypeOf(result.customerId).toEqualTypeOf<typeof result.customerId>();
-      expectTypeOf(result.items[0].productId).toEqualTypeOf<typeof result.items[0].productId>();
-      
+      // Type assertion: result.items[0]!.productId should be ProductId
+      expectTypeOf(result.items[0]!.productId).toEqualTypeOf<ProductId>();
+
       // Cannot mix up ID types (would be compile error in real usage)
       expect(unwrap(result.id)).toBe(VALID_UUID);
       expect(unwrap(result.customerId)).not.toBe(unwrap(result.id));
@@ -503,21 +523,22 @@ describe('Zod Integration', () => {
   describe('Performance', () => {
     it('should parse branded types efficiently', () => {
       const UserIdSchema = ZodBrandedSchemas.UserId;
-      const testData = Array.from({ length: 1000 }, (_, i) => 
-        `550e8400-e29b-41d4-a716-${i.toString().padStart(12, '0')}`
+      const testData = Array.from(
+        { length: 1000 },
+        (_, i) => `550e8400-e29b-41d4-a716-${i.toString().padStart(12, '0')}`
       );
 
       const start = performance.now();
-      
+
       for (const uuid of testData) {
         const result = UserIdSchema.parse(uuid);
         // Use result to prevent optimization
         if (unwrap(result) === 'impossible') break;
       }
-      
+
       const end = performance.now();
       const duration = end - start;
-      
+
       // Should complete quickly (under 100ms for 1k parses)
       expect(duration).toBeLessThan(100);
     });
@@ -533,10 +554,10 @@ describe('Zod Integration', () => {
     it('should differentiate between Zod and brand validation errors', () => {
       // Zod validation fails first (not a string)
       expect(() => ZodBrandedSchemas.UserId.parse(123)).toThrow();
-      
+
       // Zod string validation passes, but UUID format fails
       expect(() => ZodBrandedSchemas.UserId.parse('not-uuid')).toThrow();
-      
+
       // Brand validation fails after Zod validation passes
       const TestSchema = createBrandedZodSchema(
         z.string(), // Passes
@@ -545,8 +566,10 @@ describe('Zod Integration', () => {
           validate: () => false, // Always fails
         }
       );
-      
-      expect(() => TestSchema.parse('valid-string')).toThrow(BrandValidationError);
+
+      expect(() => TestSchema.parse('valid-string')).toThrow(
+        BrandValidationError
+      );
     });
   });
 });
