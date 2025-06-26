@@ -28,5 +28,5 @@ export function getPort(): number {
  * @returns The host to bind to
  */
 export function getHost(): string {
-  return process.env['HOST'] || DEFAULT_HOST;
+  return process.env['HOST'] ?? DEFAULT_HOST;
 }
