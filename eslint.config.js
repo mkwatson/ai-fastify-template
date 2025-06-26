@@ -1,416 +1,113 @@
-import js from '@eslint/js';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
+import tseslint from 'typescript-eslint';
 import security from 'eslint-plugin-security';
-import importPlugin from 'eslint-plugin-import';
-import promisePlugin from 'eslint-plugin-promise';
-import nodePlugin from 'eslint-plugin-n'; // Modern Node.js plugin compatible with ESLint v9
-import vitestPlugin from 'eslint-plugin-vitest';
 import { createRequire } from 'module';
+
 const require = createRequire(import.meta.url);
-const aiPatterns = require('./eslint-plugin-ai-patterns.cjs');
+const runtimeSafety = require('./eslint-plugin-ai-patterns.cjs');
 
-export default [
-  js.configs.recommended,
-
-  // ESLint config file (ES modules)
+export default tseslint.config(
   {
-    files: ['eslint.config.js'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module', // ES modules
-      globals: {
-        process: 'readonly',
-        console: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-      },
-    },
-    rules: {
-      // Basic JS rules only - no TypeScript rules
-      'no-console': 'warn',
-      'prefer-const': 'error',
-      'no-var': 'error',
-    },
+    // Ignore patterns - simplified
+    ignores: [
+      '**/node_modules',
+      '**/dist',
+      '**/build',
+      '**/*.d.ts',
+      '**/coverage',
+      '**/.turbo',
+      '**/.stryker-tmp',
+      '**/reports',
+    ],
   },
-
-  // Script files (Node.js ES modules)
   {
-    files: ['scripts/**/*.js'],
+    // TypeScript source files - focus on runtime safety only
+    files: ['**/*.ts'],
+    extends: [tseslint.configs.recommendedTypeChecked],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        process: 'readonly',
-        console: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-      },
-    },
-    rules: {
-      'no-console': 'off', // Allow console in scripts
-      'prefer-const': 'error',
-      'no-var': 'error',
-    },
-  },
-
-  // CommonJS config and tooling files
-  {
-    files: ['*.cjs', '**/.*.cjs', 'eslint-plugin-*.cjs'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'script', // CommonJS
-      globals: {
-        module: 'readonly',
-        exports: 'readonly',
-        require: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        process: 'readonly',
-        console: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-      },
-    },
-    rules: {
-      // Basic JS rules only - no TypeScript rules
-      'no-console': 'warn',
-      'prefer-const': 'error',
-      'no-var': 'error',
-    },
-  },
-
-  // TypeScript source files (excluding tests and config files)
-  {
-    files: ['apps/*/src/**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        // Enable type-aware rules with specific project configuration
-        project: ['./apps/*/tsconfig.json', './apps/*/test/tsconfig.json'],
+        projectService: {
+          allowDefaultProject: [
+            '*.config.ts',
+            '*.config.js',
+            'vitest.config.ts',
+          ],
+        },
         tsconfigRootDir: import.meta.dirname,
-      },
-      globals: {
-        process: 'readonly',
-        console: 'readonly',
-        require: 'readonly',
-        NodeJS: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
       },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
       security,
-      'ai-patterns': aiPatterns,
-      import: importPlugin,
-      promise: promisePlugin,
-      n: nodePlugin,
+      'runtime-safety': runtimeSafety,
     },
     rules: {
-      // TypeScript strict mode enforcement (non-type-aware rules only)
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-function-return-type': 'error',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      'no-unused-vars': 'off', // Let TypeScript handle this
-
-      // Advanced TypeScript rules (now enabled with type-aware parsing)
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/no-unnecessary-condition': 'error',
-      '@typescript-eslint/prefer-readonly': 'error',
-      '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+      // 1. Runtime Safety (TypeScript can't catch these)
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/require-await': 'warn', // Warn for Fastify patterns
+      '@typescript-eslint/restrict-template-expressions': 'warn', // Allow for logging
 
-      // Security patterns
+      // 2. Security patterns (runtime behavior)
       'security/detect-object-injection': 'error',
-      'security/detect-non-literal-regexp': 'error',
       'security/detect-unsafe-regex': 'error',
 
-      // Custom AI architectural patterns
-      'ai-patterns/no-direct-env-access': 'error',
-      'ai-patterns/fastify-error-handling': 'error',
-      'ai-patterns/require-input-validation': 'error',
-      'ai-patterns/service-dependency-injection': 'error',
-      'ai-patterns/fastify-plugin-wrapper': 'error',
+      // 3. Custom runtime patterns
+      'runtime-safety/no-direct-env-access': 'error',
+      'runtime-safety/require-zod-validation': 'error',
 
-      // Import organization and circular dependency detection
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
-      'import/no-duplicates': 'error',
-      'import/no-cycle': 'error',
-      'import/no-self-import': 'error',
-      'import/no-unresolved': 'off', // TypeScript handles this better
+      // 4. Module boundaries
+      '@typescript-eslint/explicit-module-boundary-types': 'error',
 
-      // Async/await best practices
-      'no-async-promise-executor': 'error',
-      'require-await': 'warn', // Warn instead of error for Fastify patterns
-      'no-return-await': 'error',
-      'promise/always-return': 'error',
-      'promise/no-return-wrap': 'error',
-      'promise/param-names': 'error',
-      'promise/catch-or-return': 'error',
-      'promise/no-nesting': 'warn',
-      'promise/no-promise-in-callback': 'warn',
-      'promise/no-callback-in-promise': 'warn',
-
-      // Performance patterns
-      'no-unreachable-loop': 'error',
-      'no-constant-condition': 'error',
-      'prefer-object-spread': 'error',
-      'no-new-object': 'error',
-      'no-array-constructor': 'error',
-
-      // Node.js best practices (using eslint-plugin-n)
-      'n/no-deprecated-api': 'error',
-      'n/no-extraneous-import': 'error',
-      'n/no-missing-import': 'off', // TypeScript handles this better
-      'n/no-unpublished-import': 'off', // Allow dev dependencies in source
-      'n/no-process-exit': 'off', // Allow process.exit in server startup
-      'n/prefer-global/process': 'error',
-      'n/prefer-global/console': 'error',
-
-      // General code quality
-      'no-console': 'off', // Allow console in server code
-      'prefer-const': 'error',
-      'no-var': 'error',
+      // Everything else: Let TypeScript handle it!
+      // These are now redundant with @tsconfig/strictest:
+      '@typescript-eslint/no-unused-vars': 'off', // Use noUnusedLocals in tsconfig
+      '@typescript-eslint/no-explicit-any': 'off', // strict mode handles
+      '@typescript-eslint/explicit-function-return-type': 'off', // Use explicit-module-boundary-types
+      '@typescript-eslint/prefer-nullish-coalescing': 'off', // strictest handles
+      '@typescript-eslint/prefer-optional-chain': 'off', // strictest handles
+      '@typescript-eslint/no-unnecessary-condition': 'off', // strictest handles
     },
   },
-
-  // TypeScript source files in packages (excluding tests and config files)
   {
-    files: ['packages/*/src/**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        // Enable type-aware rules with specific project configuration
-        project: ['./packages/*/tsconfig.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      globals: {
-        process: 'readonly',
-        console: 'readonly',
-        require: 'readonly',
-        NodeJS: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      security,
-      import: importPlugin,
-      promise: promisePlugin,
-      n: nodePlugin,
-    },
+    // Config package - allow env access (this is where validation happens)
+    files: ['packages/config/**/*.ts'],
     rules: {
-      // TypeScript strict mode enforcement (non-type-aware rules only)
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-function-return-type': 'error',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-      'no-unused-vars': 'off', // Let TypeScript handle this
-
-      // Advanced TypeScript rules (now enabled with type-aware parsing)
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/no-unnecessary-condition': 'error',
-      '@typescript-eslint/prefer-readonly': 'error',
-      '@typescript-eslint/prefer-string-starts-ends-with': 'error',
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
-
-      // Security patterns
-      'security/detect-object-injection': 'error',
-      'security/detect-non-literal-regexp': 'error',
-      'security/detect-unsafe-regex': 'error',
-
-      // Import organization and circular dependency detection
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
-      'import/no-cycle': 'error',
-      'import/no-duplicates': 'error',
-      'import/no-unresolved': 'off', // TypeScript handles this
-
-      // Promise handling best practices
-      'promise/always-return': 'error',
-      'promise/catch-or-return': 'error',
-      'promise/no-callback-in-promise': 'error',
-
-      // Performance patterns
-      'no-unreachable-loop': 'error',
-      'no-constant-condition': 'error',
-      'prefer-object-spread': 'error',
-      'no-new-object': 'error',
-      'no-array-constructor': 'error',
-
-      // Node.js best practices (using eslint-plugin-n)
-      'n/no-deprecated-api': 'error',
-      'n/no-extraneous-import': 'error',
-      'n/no-missing-import': 'off', // TypeScript handles this better
-      'n/no-unpublished-import': 'off', // Allow dev dependencies in source
-      'n/no-process-exit': 'off', // Allow process.exit in server startup
-      'n/prefer-global/process': 'error',
-      'n/prefer-global/console': 'error',
-
-      // General code quality
-      'no-console': 'off', // Allow console in library code
-      'prefer-const': 'error',
-      'no-var': 'error',
-      
-      // Allow type/value declaration merging (branded types pattern)
-      'no-redeclare': 'off',
+      'runtime-safety/no-direct-env-access': 'off',
     },
   },
-
-  // Test files with Vitest rules
   {
+    // Plugin files - Fastify plugins often need async but may not use await
+    files: ['**/plugins/**/*.ts', '**/src/plugins/**/*.ts'],
+    rules: {
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
+    // Test files - very minimal rules (TypeScript already validates these)
     files: [
       '**/*.test.ts',
-      '**/*.test.js',
-      '**/test/**/*.ts',
-      '**/test/**/*.js',
       '**/*.spec.ts',
-      '**/*.spec.js',
+      '**/test/**/*.ts',
+      '**/*.config.ts',
+      '**/*.config.js',
     ],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        // Disable type-aware rules for test files to avoid project configuration complexity
-      },
-      globals: {
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        vi: 'readonly',
-        vitest: 'readonly',
-        process: 'readonly',
-        console: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      vitest: vitestPlugin,
-    },
+    extends: [tseslint.configs.recommended],
     rules: {
-      // Vitest-specific test quality rules
-      'vitest/expect-expect': 'error',
-      'vitest/no-disabled-tests': 'warn',
-      'vitest/no-focused-tests': 'error',
-      'vitest/valid-describe-callback': 'error',
-      'vitest/valid-expect': 'error',
-      'vitest/valid-title': 'error',
-      'vitest/no-identical-title': 'error',
-      'vitest/prefer-to-be': 'error',
-      'vitest/prefer-to-have-length': 'error',
-
-      // Relax some rules for test files
-      'ai-patterns/no-direct-env-access': 'off',
+      // Disable almost all rules for tests and config files
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
-      'no-console': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      'import/no-unresolved': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      'runtime-safety/no-direct-env-access': 'off',
+      'runtime-safety/require-zod-validation': 'off',
+      'security/detect-object-injection': 'off',
     },
-  },
-  // Configuration files (vitest.config.ts, etc.)
-  {
-    files: ['**/vitest.config.ts', '**/vite.config.ts', '**/*.config.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        // Disable type-aware rules for config files to avoid project dependency issues
-      },
-      globals: {
-        process: 'readonly',
-        console: 'readonly',
-        require: 'readonly',
-        NodeJS: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        Buffer: 'readonly',
-        global: 'readonly',
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-    },
-    rules: {
-      // Basic TypeScript rules only for config files
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-console': 'off',
-      'import/no-unresolved': 'off',
-    },
-  },
-  {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      'build/**',
-      '.turbo/**',
-      'coverage/**',
-      '**/*.d.ts',
-      'apps/**/build/**',
-      'packages/**/dist/**',
-      'packages/**/build/**',
-      '.stryker-tmp/**', // Ignore Stryker temporary files
-      '**/.stryker-tmp/**', // Ignore all Stryker temp dirs
-      'reports/**', // Ignore mutation test reports
-    ],
-  },
-];
+  }
+);

@@ -50,17 +50,11 @@ if ! npx lint-staged; then
   exit 1
 fi
 
-# 5. Type Safety: TypeScript type checking
+# 5-6. Core Validation: Fast CI check (type-check + test + build)
 echo "🔷 [5/8] Type Safety: Running TypeScript validation..."
-if ! pnpm type-check; then
-  echo "❌ TypeScript type checking failed. Please fix type errors."
-  exit 1
-fi
-
-# 6. Test Suite: Run all tests for code confidence
 echo "🧪 [6/8] Test Suite: Running comprehensive test validation..."
-if ! pnpm test; then
-  echo "❌ Tests failed. Please fix failing tests before committing."
+if ! pnpm ci:check; then
+  echo "❌ Core validation failed. Please fix issues before committing."
   exit 1
 fi
 

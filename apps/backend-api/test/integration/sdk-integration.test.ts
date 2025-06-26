@@ -103,7 +103,6 @@ describe('SDK Integration', () => {
 
       // Mock SDK client structure (represents what Fern would generate)
       class MockAiFastifyTemplateAPI {
-        // eslint-disable-next-line no-unused-vars
         constructor(private readonly config: { environment: string }) {}
 
         async getRootMessage(): Promise<{ message: string }> {
@@ -170,7 +169,7 @@ describe('SDK Integration', () => {
         constructor(
           public statusCode: number,
           public statusText: string,
-          // eslint-disable-next-line no-unused-vars
+
           public readonly body: string
         ) {
           super(`HTTP ${statusCode}: ${statusText}`);

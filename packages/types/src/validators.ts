@@ -1,6 +1,6 @@
 /**
  * Common validation utilities for branded types.
- * 
+ *
  * These validators provide runtime safety for branded type constructors,
  * ensuring values meet the expected format and constraints.
  */
@@ -114,7 +114,7 @@ export function createRegexValidator(
  * Creates a composite validator that requires all validators to pass.
  */
 export function createAndValidator<T>(
-  ...validators: Array<(value: unknown) => value is T>
+  ...validators: ((value: unknown) => value is T)[]
 ): (value: unknown) => value is T {
   return (value: unknown): value is T =>
     validators.every(validator => validator(value));
@@ -124,7 +124,7 @@ export function createAndValidator<T>(
  * Creates a composite validator that requires any validator to pass.
  */
 export function createOrValidator<T>(
-  ...validators: Array<(value: unknown) => value is T>
+  ...validators: ((value: unknown) => value is T)[]
 ): (value: unknown) => value is T {
   return (value: unknown): value is T =>
     validators.some(validator => validator(value));
@@ -136,14 +136,10 @@ export function createOrValidator<T>(
 export const ValidationErrors = {
   NOT_STRING: (value: unknown) => `Expected string, got ${typeof value}`,
   EMPTY_STRING: () => 'String cannot be empty',
-  INVALID_UUID: (value: unknown) =>
-    `Invalid UUID format: ${String(value)}`,
-  INVALID_ULID: (value: unknown) =>
-    `Invalid ULID format: ${String(value)}`,
-  INVALID_NANOID: (value: unknown) =>
-    `Invalid Nanoid format: ${String(value)}`,
-  INVALID_EMAIL: (value: unknown) =>
-    `Invalid email format: ${String(value)}`,
+  INVALID_UUID: (value: unknown) => `Invalid UUID format: ${String(value)}`,
+  INVALID_ULID: (value: unknown) => `Invalid ULID format: ${String(value)}`,
+  INVALID_NANOID: (value: unknown) => `Invalid Nanoid format: ${String(value)}`,
+  INVALID_EMAIL: (value: unknown) => `Invalid email format: ${String(value)}`,
   INVALID_LENGTH: (value: unknown, min: number, max?: number) =>
     max
       ? `String length must be between ${min} and ${max}, got ${String(value).length}`

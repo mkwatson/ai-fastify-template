@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-undef */
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -22,7 +21,7 @@ async function generateOpenAPISpec() {
     }
 
     // Import the built app
-    const { default: App } = await import('../build/app.js');
+    const { default: App } = await import('../build/src/app.js');
 
     // Build the Fastify app
     const app = Fastify({

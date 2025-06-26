@@ -1,6 +1,6 @@
 /**
  * Tests for validation utilities.
- * 
+ *
  * Comprehensive tests for all validation functions used by
  * branded type constructors.
  */
@@ -60,7 +60,7 @@ describe('Validation Utilities', () => {
       expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
       expect(isValidUuid('6ba7b810-9dad-41d1-80b4-00c04fd430c8')).toBe(true);
       expect(isValidUuid('123e4567-e89b-42d3-a456-426614174000')).toBe(true);
-      
+
       // UUID v4 specifically (4 in third group)
       expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
     });
@@ -68,7 +68,9 @@ describe('Validation Utilities', () => {
     it('should reject invalid UUID formats', () => {
       expect(isValidUuid('not-a-uuid')).toBe(false);
       expect(isValidUuid('550e8400-e29b-41d4-a716')).toBe(false); // Too short
-      expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000-extra')).toBe(false); // Too long
+      expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000-extra')).toBe(
+        false
+      ); // Too long
       expect(isValidUuid('550e8400e29b41d4a716446655440000')).toBe(false); // No hyphens
       expect(isValidUuid('550e8400-e29b-41d4-a716-44665544000g')).toBe(false); // Invalid hex
       expect(isValidUuid('')).toBe(false);
@@ -175,7 +177,7 @@ describe('Validation Utilities', () => {
   describe('createStringLengthValidator', () => {
     it('should create validator with minimum length only', () => {
       const minLength5 = createStringLengthValidator(5);
-      
+
       expect(minLength5('hello')).toBe(true); // Exactly 5
       expect(minLength5('hello world')).toBe(true); // More than 5
       expect(minLength5('hi')).toBe(false); // Less than 5
@@ -185,7 +187,7 @@ describe('Validation Utilities', () => {
 
     it('should create validator with minimum and maximum length', () => {
       const length5to10 = createStringLengthValidator(5, 10);
-      
+
       expect(length5to10('hello')).toBe(true); // Exactly 5
       expect(length5to10('hello!')).toBe(true); // Between 5-10
       expect(length5to10('hello!!!!')).toBe(true); // Exactly 10
@@ -195,7 +197,7 @@ describe('Validation Utilities', () => {
 
     it('should handle edge cases', () => {
       const length0to5 = createStringLengthValidator(0, 5);
-      
+
       expect(length0to5('')).toBe(true); // Empty string with min 0
       expect(length0to5('hello')).toBe(true);
       expect(length0to5('toolong')).toBe(false);
@@ -205,7 +207,7 @@ describe('Validation Utilities', () => {
   describe('createRegexValidator', () => {
     it('should create validator with custom regex', () => {
       const hexValidator = createRegexValidator(/^[0-9a-fA-F]+$/);
-      
+
       expect(hexValidator('abc123')).toBe(true);
       expect(hexValidator('ABC123')).toBe(true);
       expect(hexValidator('0123456789abcdefABCDEF')).toBe(true);
@@ -216,7 +218,7 @@ describe('Validation Utilities', () => {
 
     it('should work with complex patterns', () => {
       const phoneValidator = createRegexValidator(/^\+?[1-9]\d{1,14}$/);
-      
+
       expect(phoneValidator('+1234567890')).toBe(true);
       expect(phoneValidator('1234567890')).toBe(true);
       expect(phoneValidator('+12345')).toBe(true);
@@ -231,7 +233,7 @@ describe('Validation Utilities', () => {
         isString,
         createStringLengthValidator(3, 10)
       );
-      
+
       expect(stringAndLength('hello')).toBe(true); // String and correct length
       expect(stringAndLength('hi')).toBe(false); // String but too short
       expect(stringAndLength(123)).toBe(false); // Not string
@@ -245,7 +247,7 @@ describe('Validation Utilities', () => {
         createStringLengthValidator(5, 20),
         createRegexValidator(/^[a-zA-Z]+$/)
       );
-      
+
       expect(strictValidator('hello')).toBe(true);
       expect(strictValidator('HelloWorld')).toBe(true);
       expect(strictValidator('hello123')).toBe(false); // Contains numbers
@@ -260,7 +262,7 @@ describe('Validation Utilities', () => {
         isString,
         (value): value is number => typeof value === 'number'
       );
-      
+
       expect(stringOrNumber('hello')).toBe(true);
       expect(stringOrNumber(123)).toBe(true);
       expect(stringOrNumber(null)).toBe(false);
@@ -273,7 +275,7 @@ describe('Validation Utilities', () => {
         isValidUlid,
         isValidNanoid
       );
-      
+
       expect(idValidator('550e8400-e29b-41d4-a716-446655440000')).toBe(true); // UUID
       expect(idValidator('01ARZ3NDEKTSV4RRFFQ69G5FAV')).toBe(true); // ULID
       expect(idValidator('V1StGXR8_Z5jdHi6B-myT')).toBe(true); // Nanoid
@@ -283,39 +285,59 @@ describe('Validation Utilities', () => {
 
   describe('ValidationErrors', () => {
     it('should provide meaningful error messages', () => {
-      expect(ValidationErrors.NOT_STRING(123)).toBe('Expected string, got number');
-      expect(ValidationErrors.NOT_STRING(null)).toBe('Expected string, got object');
-      
+      expect(ValidationErrors.NOT_STRING(123)).toBe(
+        'Expected string, got number'
+      );
+      expect(ValidationErrors.NOT_STRING(null)).toBe(
+        'Expected string, got object'
+      );
+
       expect(ValidationErrors.EMPTY_STRING()).toBe('String cannot be empty');
-      
-      expect(ValidationErrors.INVALID_UUID('not-uuid')).toBe('Invalid UUID format: not-uuid');
-      expect(ValidationErrors.INVALID_ULID('not-ulid')).toBe('Invalid ULID format: not-ulid');
-      expect(ValidationErrors.INVALID_NANOID('not-nanoid')).toBe('Invalid Nanoid format: not-nanoid');
-      expect(ValidationErrors.INVALID_EMAIL('not-email')).toBe('Invalid email format: not-email');
-      
-      expect(ValidationErrors.INVALID_LENGTH('short', 5)).toBe('String length must be at least 5, got 5');
-      expect(ValidationErrors.INVALID_LENGTH('short', 10, 20)).toBe('String length must be between 10 and 20, got 5');
-      
-      expect(ValidationErrors.NOT_POSITIVE_INTEGER(-1)).toBe('Expected positive integer, got -1');
-      expect(ValidationErrors.NOT_NON_NEGATIVE_NUMBER(-1)).toBe('Expected non-negative number, got -1');
+
+      expect(ValidationErrors.INVALID_UUID('not-uuid')).toBe(
+        'Invalid UUID format: not-uuid'
+      );
+      expect(ValidationErrors.INVALID_ULID('not-ulid')).toBe(
+        'Invalid ULID format: not-ulid'
+      );
+      expect(ValidationErrors.INVALID_NANOID('not-nanoid')).toBe(
+        'Invalid Nanoid format: not-nanoid'
+      );
+      expect(ValidationErrors.INVALID_EMAIL('not-email')).toBe(
+        'Invalid email format: not-email'
+      );
+
+      expect(ValidationErrors.INVALID_LENGTH('short', 5)).toBe(
+        'String length must be at least 5, got 5'
+      );
+      expect(ValidationErrors.INVALID_LENGTH('short', 10, 20)).toBe(
+        'String length must be between 10 and 20, got 5'
+      );
+
+      expect(ValidationErrors.NOT_POSITIVE_INTEGER(-1)).toBe(
+        'Expected positive integer, got -1'
+      );
+      expect(ValidationErrors.NOT_NON_NEGATIVE_NUMBER(-1)).toBe(
+        'Expected non-negative number, got -1'
+      );
     });
   });
 
   describe('Performance', () => {
     it('should validate efficiently', () => {
       const testData = Array.from({ length: 10000 }, (_, i) => `test-${i}`);
-      
+
       const start = performance.now();
-      
+
       for (const item of testData) {
         isString(item);
         isNonEmptyString(item);
         isValidEmail(`${item}@example.com`);
       }
-      
+
       const end = performance.now();
       const duration = end - start;
-      
+
       // Should complete quickly (under 50ms for 10k operations)
       expect(duration).toBeLessThan(50);
     });
@@ -341,11 +363,20 @@ describe('Validation Utilities', () => {
     });
 
     it('should handle special string values', () => {
-      const specialStrings = ['', ' ', '\n', '\t', '0', 'false', 'null', 'undefined'];
-      
+      const specialStrings = [
+        '',
+        ' ',
+        '\n',
+        '\t',
+        '0',
+        'false',
+        'null',
+        'undefined',
+      ];
+
       for (const str of specialStrings) {
         expect(isString(str)).toBe(true);
-        
+
         if (str === '') {
           expect(isNonEmptyString(str)).toBe(false);
         } else {
@@ -358,7 +389,7 @@ describe('Validation Utilities', () => {
       expect(isPositiveInteger(Number.MAX_SAFE_INTEGER)).toBe(true);
       expect(isNonNegativeNumber(Number.MIN_VALUE)).toBe(true);
       expect(isPositiveInteger(Number.MAX_VALUE)).toBe(true);
-      
+
       expect(isPositiveInteger(Number.POSITIVE_INFINITY)).toBe(false);
       expect(isNonNegativeNumber(Number.POSITIVE_INFINITY)).toBe(true);
       expect(isNonNegativeNumber(Number.NEGATIVE_INFINITY)).toBe(false);

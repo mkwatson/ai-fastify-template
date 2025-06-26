@@ -1,6 +1,6 @@
 /**
  * Tests for entity ID branded types.
- * 
+ *
  * Tests all entity ID constructors, validation, and type safety
  * to ensure proper compile-time and runtime behavior.
  */
@@ -18,7 +18,7 @@ import {
   type RoleId,
   RoleId,
   UnsafeRoleId,
-  
+
   // E-commerce Domain
   type ProductId,
   ProductId,
@@ -32,7 +32,7 @@ import {
   type CategoryId,
   CategoryId,
   UnsafeCategoryId,
-  
+
   // Content Management Domain
   type ArticleId,
   ArticleId,
@@ -43,7 +43,7 @@ import {
   type AuthorId,
   AuthorId,
   UnsafeAuthorId,
-  
+
   // System Resource Domain
   type RequestId,
   RequestId,
@@ -54,7 +54,7 @@ import {
   type LogId,
   LogId,
   UnsafeLogId,
-  
+
   // Alternative ID Types
   type EmailAddress,
   EmailAddress,
@@ -62,7 +62,7 @@ import {
   type Slug,
   Slug,
   UnsafeSlug,
-  
+
   // Utilities
   type AnyEntityId,
   isEntityId,
@@ -81,7 +81,7 @@ describe('Entity ID Types', () => {
     describe('UserId', () => {
       it('should create valid UserId from UUID', () => {
         const userId = UserId(VALID_UUID);
-        
+
         expectTypeOf(userId).toEqualTypeOf<UserId>();
         expect(unwrap(userId)).toBe(VALID_UUID);
       });
@@ -94,7 +94,7 @@ describe('Entity ID Types', () => {
 
       it('should create unsafe UserId without validation', () => {
         const userId = UnsafeUserId(INVALID_UUID);
-        
+
         expectTypeOf(userId).toEqualTypeOf<UserId>();
         expect(unwrap(userId)).toBe(INVALID_UUID);
       });
@@ -103,7 +103,7 @@ describe('Entity ID Types', () => {
     describe('SessionId', () => {
       it('should create valid SessionId from UUID', () => {
         const sessionId = SessionId(VALID_UUID);
-        
+
         expectTypeOf(sessionId).toEqualTypeOf<SessionId>();
         expect(unwrap(sessionId)).toBe(VALID_UUID);
       });
@@ -111,10 +111,10 @@ describe('Entity ID Types', () => {
       it('should be distinct from UserId at type level', () => {
         const userId = UserId(VALID_UUID);
         const sessionId = SessionId(ANOTHER_VALID_UUID);
-        
+
         expectTypeOf(userId).toEqualTypeOf<UserId>();
         expectTypeOf(sessionId).toEqualTypeOf<SessionId>();
-        
+
         // These would be compile errors in real code:
         // processUser(sessionId); // ❌ Type error
         // processSession(userId); // ❌ Type error
@@ -124,7 +124,7 @@ describe('Entity ID Types', () => {
     describe('RoleId', () => {
       it('should create valid RoleId from non-empty string', () => {
         const roleId = RoleId('admin');
-        
+
         expectTypeOf(roleId).toEqualTypeOf<RoleId>();
         expect(unwrap(roleId)).toBe('admin');
       });
@@ -146,7 +146,7 @@ describe('Entity ID Types', () => {
     describe('ProductId', () => {
       it('should create valid ProductId from UUID', () => {
         const productId = ProductId(VALID_UUID);
-        
+
         expectTypeOf(productId).toEqualTypeOf<ProductId>();
         expect(unwrap(productId)).toBe(VALID_UUID);
       });
@@ -154,10 +154,10 @@ describe('Entity ID Types', () => {
       it('should be distinct from other entity IDs', () => {
         const productId = ProductId(VALID_UUID);
         const orderId = OrderId(ANOTHER_VALID_UUID);
-        
+
         expectTypeOf(productId).toEqualTypeOf<ProductId>();
         expectTypeOf(orderId).toEqualTypeOf<OrderId>();
-        
+
         expect(unwrap(productId)).not.toBe(unwrap(orderId));
       });
     });
@@ -165,7 +165,7 @@ describe('Entity ID Types', () => {
     describe('OrderId', () => {
       it('should create valid OrderId from UUID', () => {
         const orderId = OrderId(VALID_UUID);
-        
+
         expectTypeOf(orderId).toEqualTypeOf<OrderId>();
         expect(unwrap(orderId)).toBe(VALID_UUID);
       });
@@ -174,7 +174,7 @@ describe('Entity ID Types', () => {
     describe('CustomerId', () => {
       it('should create valid CustomerId from UUID', () => {
         const customerId = CustomerId(VALID_UUID);
-        
+
         expectTypeOf(customerId).toEqualTypeOf<CustomerId>();
         expect(unwrap(customerId)).toBe(VALID_UUID);
       });
@@ -183,7 +183,7 @@ describe('Entity ID Types', () => {
     describe('CategoryId', () => {
       it('should create valid CategoryId from non-empty string', () => {
         const categoryId = CategoryId('electronics');
-        
+
         expectTypeOf(categoryId).toEqualTypeOf<CategoryId>();
         expect(unwrap(categoryId)).toBe('electronics');
       });
@@ -200,7 +200,7 @@ describe('Entity ID Types', () => {
     describe('ArticleId', () => {
       it('should create valid ArticleId from UUID', () => {
         const articleId = ArticleId(VALID_UUID);
-        
+
         expectTypeOf(articleId).toEqualTypeOf<ArticleId>();
         expect(unwrap(articleId)).toBe(VALID_UUID);
       });
@@ -209,7 +209,7 @@ describe('Entity ID Types', () => {
     describe('CommentId', () => {
       it('should create valid CommentId from UUID', () => {
         const commentId = CommentId(VALID_UUID);
-        
+
         expectTypeOf(commentId).toEqualTypeOf<CommentId>();
         expect(unwrap(commentId)).toBe(VALID_UUID);
       });
@@ -218,7 +218,7 @@ describe('Entity ID Types', () => {
     describe('AuthorId', () => {
       it('should create valid AuthorId from UUID', () => {
         const authorId = AuthorId(VALID_UUID);
-        
+
         expectTypeOf(authorId).toEqualTypeOf<AuthorId>();
         expect(unwrap(authorId)).toBe(VALID_UUID);
       });
@@ -229,7 +229,7 @@ describe('Entity ID Types', () => {
     describe('RequestId', () => {
       it('should create valid RequestId from UUID', () => {
         const requestId = RequestId(VALID_UUID);
-        
+
         expectTypeOf(requestId).toEqualTypeOf<RequestId>();
         expect(unwrap(requestId)).toBe(VALID_UUID);
       });
@@ -238,7 +238,7 @@ describe('Entity ID Types', () => {
     describe('TransactionId', () => {
       it('should create valid TransactionId from UUID', () => {
         const transactionId = TransactionId(VALID_UUID);
-        
+
         expectTypeOf(transactionId).toEqualTypeOf<TransactionId>();
         expect(unwrap(transactionId)).toBe(VALID_UUID);
       });
@@ -247,7 +247,7 @@ describe('Entity ID Types', () => {
     describe('LogId', () => {
       it('should create valid LogId from UUID', () => {
         const logId = LogId(VALID_UUID);
-        
+
         expectTypeOf(logId).toEqualTypeOf<LogId>();
         expect(unwrap(logId)).toBe(VALID_UUID);
       });
@@ -258,28 +258,38 @@ describe('Entity ID Types', () => {
     describe('EmailAddress', () => {
       it('should create valid EmailAddress from email string', () => {
         const email = EmailAddress('user@example.com');
-        
+
         expectTypeOf(email).toEqualTypeOf<EmailAddress>();
         expect(unwrap(email)).toBe('user@example.com');
       });
 
       it('should validate email format', () => {
-        expect(unwrap(EmailAddress('test@example.com'))).toBe('test@example.com');
-        expect(unwrap(EmailAddress('user.name@domain.co.uk'))).toBe('user.name@domain.co.uk');
-        expect(unwrap(EmailAddress('test+tag@example.org'))).toBe('test+tag@example.org');
+        expect(unwrap(EmailAddress('test@example.com'))).toBe(
+          'test@example.com'
+        );
+        expect(unwrap(EmailAddress('user.name@domain.co.uk'))).toBe(
+          'user.name@domain.co.uk'
+        );
+        expect(unwrap(EmailAddress('test+tag@example.org'))).toBe(
+          'test+tag@example.org'
+        );
       });
 
       it('should reject invalid email formats', () => {
-        expect(() => EmailAddress('not-an-email')).toThrow(BrandValidationError);
+        expect(() => EmailAddress('not-an-email')).toThrow(
+          BrandValidationError
+        );
         expect(() => EmailAddress('test@')).toThrow(BrandValidationError);
-        expect(() => EmailAddress('@example.com')).toThrow(BrandValidationError);
+        expect(() => EmailAddress('@example.com')).toThrow(
+          BrandValidationError
+        );
       });
     });
 
     describe('Slug', () => {
       it('should create valid Slug from slug string', () => {
         const slug = Slug('my-article-slug');
-        
+
         expectTypeOf(slug).toEqualTypeOf<Slug>();
         expect(unwrap(slug)).toBe('my-article-slug');
       });
@@ -303,19 +313,19 @@ describe('Entity ID Types', () => {
   describe('Unsafe Constructors', () => {
     it('should create all entity types without validation', () => {
       const invalidValue = 'definitely-not-valid';
-      
+
       // UUID-based IDs with invalid values
       expect(unwrap(UnsafeUserId(invalidValue))).toBe(invalidValue);
       expect(unwrap(UnsafeProductId(invalidValue))).toBe(invalidValue);
       expect(unwrap(UnsafeOrderId(invalidValue))).toBe(invalidValue);
-      
+
       // String-based IDs with empty values
       expect(unwrap(UnsafeRoleId(''))).toBe('');
       expect(unwrap(UnsafeCategoryId(''))).toBe('');
-      
+
       // Email with invalid format
       expect(unwrap(UnsafeEmailAddress('not-email'))).toBe('not-email');
-      
+
       // Slug with invalid format
       expect(unwrap(UnsafeSlug('Invalid Slug!'))).toBe('Invalid Slug!');
     });
@@ -323,10 +333,10 @@ describe('Entity ID Types', () => {
     it('should maintain type safety even without validation', () => {
       const unsafeUserId = UnsafeUserId('invalid');
       const unsafeOrderId = UnsafeOrderId('invalid');
-      
+
       expectTypeOf(unsafeUserId).toEqualTypeOf<UserId>();
       expectTypeOf(unsafeOrderId).toEqualTypeOf<OrderId>();
-      
+
       // Still type-safe at compile time
       expect(typeof unsafeUserId).toBe('string');
       expect(typeof unsafeOrderId).toBe('string');
@@ -338,12 +348,12 @@ describe('Entity ID Types', () => {
       const userId = UserId(VALID_UUID);
       const orderId = OrderId(ANOTHER_VALID_UUID);
       const productId = ProductId(VALID_UUID);
-      
+
       // These are all different types at compile time
       expectTypeOf(userId).toEqualTypeOf<UserId>();
       expectTypeOf(orderId).toEqualTypeOf<OrderId>();
       expectTypeOf(productId).toEqualTypeOf<ProductId>();
-      
+
       // But same runtime representation
       expect(typeof userId).toBe('string');
       expect(typeof orderId).toBe('string');
@@ -354,7 +364,7 @@ describe('Entity ID Types', () => {
       const userId1 = UserId(VALID_UUID);
       const userId2 = UserId(ANOTHER_VALID_UUID);
       const userId3 = UserId(VALID_UUID);
-      
+
       // Can compare same types
       expect(unwrap(userId1)).not.toBe(unwrap(userId2));
       expect(unwrap(userId1)).toBe(unwrap(userId3));
@@ -388,7 +398,7 @@ describe('Entity ID Types', () => {
       it('should create valid IDs using constructor references', () => {
         const userId = EntityIdConstructors.UserId(VALID_UUID);
         const email = EntityIdConstructors.EmailAddress('test@example.com');
-        
+
         expectTypeOf(userId).toEqualTypeOf<UserId>();
         expectTypeOf(email).toEqualTypeOf<EmailAddress>();
       });
@@ -397,8 +407,12 @@ describe('Entity ID Types', () => {
     describe('UnsafeEntityIdConstructors', () => {
       it('should contain all unsafe constructors', () => {
         expect(UnsafeEntityIdConstructors.UnsafeUserId).toBe(UnsafeUserId);
-        expect(UnsafeEntityIdConstructors.UnsafeProductId).toBe(UnsafeProductId);
-        expect(UnsafeEntityIdConstructors.UnsafeEmailAddress).toBe(UnsafeEmailAddress);
+        expect(UnsafeEntityIdConstructors.UnsafeProductId).toBe(
+          UnsafeProductId
+        );
+        expect(UnsafeEntityIdConstructors.UnsafeEmailAddress).toBe(
+          UnsafeEmailAddress
+        );
         expect(UnsafeEntityIdConstructors.UnsafeSlug).toBe(UnsafeSlug);
       });
     });
@@ -409,10 +423,10 @@ describe('Entity ID Types', () => {
         const productId = ProductId(VALID_UUID);
         const email = EmailAddress('test@example.com');
         const slug = Slug('test-slug');
-        
+
         // All should be assignable to AnyEntityId
         const ids: AnyEntityId[] = [userId, productId, email, slug];
-        
+
         expect(ids).toHaveLength(4);
         expect(ids.every(id => typeof id === 'string')).toBe(true);
       });
@@ -422,42 +436,48 @@ describe('Entity ID Types', () => {
   describe('Performance', () => {
     it('should create entity IDs efficiently', () => {
       const start = performance.now();
-      
+
       for (let i = 0; i < 10000; i++) {
         const uuid = `550e8400-e29b-41d4-a716-${i.toString().padStart(12, '0')}`;
         const userId = UserId(uuid);
         const productId = ProductId(uuid);
-        
+
         // Use the values to prevent optimization
-        if (unwrap(userId) === 'impossible' || unwrap(productId) === 'impossible') {
+        if (
+          unwrap(userId) === 'impossible' ||
+          unwrap(productId) === 'impossible'
+        ) {
           break;
         }
       }
-      
+
       const end = performance.now();
       const duration = end - start;
-      
+
       // Should complete quickly (under 200ms for 20k operations)
       expect(duration).toBeLessThan(200);
     });
 
     it('should create unsafe entity IDs with minimal overhead', () => {
       const start = performance.now();
-      
+
       for (let i = 0; i < 10000; i++) {
         const value = `test-${i}`;
         const userId = UnsafeUserId(value);
         const productId = UnsafeProductId(value);
-        
+
         // Use the values to prevent optimization
-        if (unwrap(userId) === 'impossible' || unwrap(productId) === 'impossible') {
+        if (
+          unwrap(userId) === 'impossible' ||
+          unwrap(productId) === 'impossible'
+        ) {
           break;
         }
       }
-      
+
       const end = performance.now();
       const duration = end - start;
-      
+
       // Should be very fast (under 20ms for 20k operations)
       expect(duration).toBeLessThan(20);
     });
@@ -470,7 +490,7 @@ describe('Entity ID Types', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(BrandValidationError);
-        
+
         if (error instanceof BrandValidationError) {
           expect(error.code).toBe('BRAND_VALIDATION_ERROR');
           expect(error.brandType).toBe('UserId');
@@ -482,10 +502,26 @@ describe('Entity ID Types', () => {
 
     it('should provide specific error messages for different types', () => {
       const testCases = [
-        { constructor: UserId, invalid: 'not-uuid', expectedMessage: 'Invalid UUID format' },
-        { constructor: EmailAddress, invalid: 'not-email', expectedMessage: 'Invalid email format' },
-        { constructor: Slug, invalid: 'Invalid Slug!', expectedMessage: 'Invalid slug format' },
-        { constructor: RoleId, invalid: '', expectedMessage: 'String cannot be empty' },
+        {
+          constructor: UserId,
+          invalid: 'not-uuid',
+          expectedMessage: 'Invalid UUID format',
+        },
+        {
+          constructor: EmailAddress,
+          invalid: 'not-email',
+          expectedMessage: 'Invalid email format',
+        },
+        {
+          constructor: Slug,
+          invalid: 'Invalid Slug!',
+          expectedMessage: 'Invalid slug format',
+        },
+        {
+          constructor: RoleId,
+          invalid: '',
+          expectedMessage: 'String cannot be empty',
+        },
       ];
 
       for (const { constructor, invalid, expectedMessage } of testCases) {

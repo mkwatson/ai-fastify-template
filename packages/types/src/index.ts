@@ -1,26 +1,26 @@
 /**
  * @repo/types - Branded types for compile-time ID safety
- * 
+ *
  * This package provides TypeScript branded types to prevent ID confusion
  * at compile time while maintaining runtime validation for safety.
- * 
+ *
  * Key Features:
  * - Compile-time type safety prevents ID mixups
  * - Runtime validation ensures data integrity
  * - Zod integration for seamless API validation
  * - Enterprise-grade error handling
  * - Minimal performance overhead
- * 
+ *
  * @example Basic Usage
  * ```typescript
  * import { UserId, OrderId } from '@repo/types';
- * 
+ *
  * const userId = UserId('550e8400-e29b-41d4-a716-446655440000');
  * const orderId = OrderId('660e8400-e29b-41d4-a716-446655440000');
- * 
+ *
  * // This will cause a compile error:
  * processOrder(userId); // ❌ Type error: UserId is not assignable to OrderId
- * 
+ *
  * // This is type-safe:
  * processOrder(orderId); // ✅ Correct type
  * ```

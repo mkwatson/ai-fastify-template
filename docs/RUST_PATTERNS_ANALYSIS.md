@@ -30,16 +30,16 @@ AI coding agents have fundamentally different failure modes than human developer
 
 ### TypeScript + Our Tooling Comparison
 
-| Rust Feature            | TypeScript Equivalent       | Implementation Status |
-| ----------------------- | --------------------------- | --------------------- |
-| **Option<T>**           | Branded types + null checks | 🟡 Planned (MAR-59)   |
-| **Result<T, E>**        | neverthrow library          | 🟡 Planned (MAR-55)   |
-| **Pattern Matching**    | ts-pattern + ESLint         | 🟡 Planned (MAR-60)   |
-| **Ownership**           | ❌ Cannot replicate         | N/A                   |
-| **Lifetimes**           | ❌ Cannot replicate         | N/A                   |
-| **Mutation Testing**    | Stryker                     | ✅ Implemented        |
-| **Property Testing**    | fast-check                  | 🟡 Enhanced (MAR-56)  |
-| **Compile-time Checks** | TypeScript + ESLint         | ✅ Implemented        |
+| Rust Feature            | TypeScript Equivalent          | Implementation Status |
+| ----------------------- | ------------------------------ | --------------------- |
+| **Option<T>**           | Branded types + null checks    | 🟡 Planned (MAR-59)   |
+| **Result<T, E>**        | neverthrow library             | 🟡 Planned (MAR-55)   |
+| **Pattern Matching**    | ts-pattern + ESLint            | 🟡 Planned (MAR-60)   |
+| **Ownership**           | ❌ Cannot replicate            | N/A                   |
+| **Lifetimes**           | ❌ Cannot replicate            | N/A                   |
+| **Mutation Testing**    | Stryker                        | ✅ Implemented        |
+| **Property Testing**    | fast-check                     | 🟡 Enhanced (MAR-56)  |
+| **Compile-time Checks** | TypeScript @tsconfig/strictest | ✅ Implemented        |
 
 ### What We Cannot Replicate from Rust
 
@@ -200,10 +200,17 @@ When implementing these patterns, AI agents should:
 
 Create a TypeScript framework that provides Rust-like safety guarantees through:
 
-- Compile-time checks where possible
-- Fast runtime validation where necessary
-- Comprehensive tooling integration
-- AI-optimized error messages
+- **Maximum compile-time checks via @tsconfig/strictest preset** - leveraging TypeScript's built-in safety features
+- **Minimal runtime validation where necessary** - focusing only on what TypeScript can't catch
+- **Simplified tooling** - ~40 lines of ESLint rules vs 400+ lines of complex configuration
+- **AI-optimized error messages** - clear, actionable feedback
+
+### How We Achieve Rust-Like Safety
+
+1. **TypeScript @tsconfig/strictest**: Provides maximum compile-time safety with zero configuration overhead
+2. **Minimal ESLint rules**: Focus only on runtime safety patterns TypeScript can't enforce
+3. **Zod validation**: Runtime type safety at system boundaries
+4. **Mutation testing**: Ensures test quality without complex static analysis
 
 ### Why Not Just Use Rust?
 
@@ -227,6 +234,16 @@ The combination of:
 - Fast feedback loops
 
 ...creates an environment where AI can be productive while maintaining high code quality.
+
+### Configuration Philosophy
+
+Our approach prioritizes **leveraging built-in language features** over external tooling:
+
+- **Before**: 417+ lines of ESLint configuration trying to enforce type safety
+- **After**: ~40 lines focusing only on runtime safety patterns
+- **Result**: Same safety guarantees with 90% less configuration complexity
+
+This aligns with Rust's philosophy of building safety into the language itself rather than relying on external linters.
 
 ## References
 

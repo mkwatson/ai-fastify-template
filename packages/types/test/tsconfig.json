@@ -8,9 +8,5 @@
     },
     "noEmit": true
   },
-  "include": ["../src/**/*.ts", "**/*.ts"],
-  "references": [
-    { "path": "../../../packages/config" },
-    { "path": "../../../packages/types" }
-  ]
+  "include": ["../src/**/*.ts", "**/*.ts", "../vitest.config.ts"]
 }

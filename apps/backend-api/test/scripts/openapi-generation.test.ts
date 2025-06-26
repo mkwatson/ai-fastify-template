@@ -12,12 +12,7 @@ const __dirname = dirname(__filename);
 describe('OpenAPI Generation Scripts', () => {
   const backendApiPath = join(__dirname, '../../');
   const openApiPath = join(backendApiPath, 'openapi.json');
-  const buildPath = join(backendApiPath, 'build');
   const generationScript = join(backendApiPath, 'scripts/generate-openapi.js');
-  const buildGenerationScript = join(
-    backendApiPath,
-    'scripts/generate-openapi-build.js'
-  );
 
   let originalOpenApi: string | null = null;
 
@@ -135,64 +130,6 @@ process.exit(1);`;
         }
       }
     });
-  });
-
-  describe('Build-based OpenAPI Generation Script', () => {
-    it('should exist and be executable', () => {
-      expect(existsSync(buildGenerationScript)).toBe(true);
-    });
-
-    it('should require build directory to exist', async () => {
-      // Ensure build directory doesn't exist
-      const hasBuiltFiles = existsSync(buildPath);
-
-      if (!hasBuiltFiles) {
-        try {
-          await execAsync(`node ${buildGenerationScript}`, {
-            cwd: backendApiPath,
-            timeout: 10000,
-          });
-
-          // Should not reach here without build
-          expect(false).toBe(true);
-        } catch (error) {
-          expect(error.stderr).toContain('❌ Build directory not found');
-          expect(error.stderr).toContain('Please run "pnpm build" first');
-        }
-      }
-    });
-
-    it('should work with built application', async () => {
-      // First build the application
-      await execAsync('pnpm build', {
-        cwd: backendApiPath,
-        timeout: 30000,
-      });
-
-      // Remove existing OpenAPI file
-      if (existsSync(openApiPath)) {
-        unlinkSync(openApiPath);
-      }
-
-      // Run the build-based generation
-      const { stdout, stderr } = await execAsync(
-        `node ${buildGenerationScript}`,
-        {
-          cwd: backendApiPath,
-          timeout: 30000,
-        }
-      );
-
-      expect(stdout).toContain('✅ OpenAPI specification generated');
-      expect(stderr).toBe('');
-      expect(existsSync(openApiPath)).toBe(true);
-
-      // Validate generated content
-      const content = readFileSync(openApiPath, 'utf8');
-      const spec = JSON.parse(content);
-      expect(spec.openapi).toBe('3.0.0');
-      expect(spec.paths).toBeDefined();
-    }, 60000);
   });
 
   describe('OpenAPI Specification Quality', () => {

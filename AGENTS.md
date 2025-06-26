@@ -70,10 +70,15 @@ pnpm ai:compliance     # Full quality pipeline
 
 ### TypeScript Strict Mode Requirements
 
+We use the **@tsconfig/strictest** preset which enforces:
+
 - **No `any` types**: Use specific types or `unknown` with type guards
 - **Explicit return types**: For all public functions and methods
 - **Strict null checks**: Handle `null` and `undefined` explicitly
 - **No implicit returns**: All code paths must return values
+- **All strict flags enabled**: Including `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and more
+
+This preset provides Rust-like safety through TypeScript's built-in features rather than complex external tooling.
 
 ```typescript
 // ✅ Good: Explicit types and proper handling
@@ -146,7 +151,9 @@ const userId = UserId('550e8400-e29b-41d4-a716-446655440000');
 const orderId = OrderId('660e8400-e29b-41d4-a716-446655440000');
 
 // ❌ Compile error: Cannot mix ID types
-function processOrder(orderId: OrderId) { /* ... */ }
+function processOrder(orderId: OrderId) {
+  /* ... */
+}
 processOrder(userId); // TypeScript Error: UserId is not assignable to OrderId
 
 // ✅ Type-safe operations
@@ -169,42 +176,53 @@ const GetUserParams = z.object({
 
 const CreateOrderBody = z.object({
   customerId: ZodBrandedSchemas.CustomerId,
-  items: z.array(z.object({
-    productId: ZodBrandedSchemas.ProductId,
-    quantity: z.number().int().positive(),
-  })),
+  items: z.array(
+    z.object({
+      productId: ZodBrandedSchemas.ProductId,
+      quantity: z.number().int().positive(),
+    })
+  ),
 });
 
 // ✅ Fastify route with branded type safety
-fastify.post('/orders', {
-  schema: {
-    body: CreateOrderBody,
-    response: { 201: OrderResponseSchema },
+fastify.post(
+  '/orders',
+  {
+    schema: {
+      body: CreateOrderBody,
+      response: { 201: OrderResponseSchema },
+    },
   },
-}, async (request, reply) => {
-  // request.body.customerId is typed as CustomerId (branded)
-  // request.body.items[0].productId is typed as ProductId (branded)
-  
-  const order = await orderService.createOrder(request.body);
-  return reply.code(201).send(order);
-});
+  async (request, reply) => {
+    // request.body.customerId is typed as CustomerId (branded)
+    // request.body.items[0].productId is typed as ProductId (branded)
+
+    const order = await orderService.createOrder(request.body);
+    return reply.code(201).send(order);
+  }
+);
 ```
 
 #### Available Entity Types
 
 **User Management Domain:**
+
 - `UserId`, `SessionId`, `RoleId`
 
 **E-commerce Domain:**
+
 - `ProductId`, `OrderId`, `CustomerId`, `CategoryId`
 
 **Content Management:**
+
 - `ArticleId`, `CommentId`, `AuthorId`
 
 **System Resources:**
+
 - `RequestId`, `TransactionId`, `LogId`
 
 **Alternative Types:**
+
 - `EmailAddress` (email validation)
 - `Slug` (URL-friendly strings)
 
@@ -222,14 +240,14 @@ export class OrderService {
     const products = await this.productRepo.findByIds(
       data.items.map(item => item.productId)
     );
-    
+
     // Business logic with type safety
     return this.orderRepo.create({
       customerId: data.customerId,
       items: data.items,
     });
   }
-  
+
   // ❌ This would be a compile error:
   async getOrdersByUser(orderId: OrderId): Promise<Order[]> {
     // return this.orderRepo.findByCustomerId(orderId); // Error!
@@ -256,10 +274,14 @@ function transferOrder(fromUser: UserId, toUser: UserId, order: OrderId) {
 }
 
 // ❌ Database query mixups (dangerous):
-const orders = await db.query('SELECT * FROM orders WHERE customer_id = ?', [productId]); // Bug!
+const orders = await db.query('SELECT * FROM orders WHERE customer_id = ?', [
+  productId,
+]); // Bug!
 
 // ✅ Type-safe queries (safe):
-const orders = await db.query('SELECT * FROM orders WHERE customer_id = ?', [customerId]); // ✅ Correct
+const orders = await db.query('SELECT * FROM orders WHERE customer_id = ?', [
+  customerId,
+]); // ✅ Correct
 ```
 
 #### Testing with Branded Types
@@ -270,15 +292,15 @@ describe('OrderService', () => {
   it('should create order with valid IDs', () => {
     const customerId = CustomerId('550e8400-e29b-41d4-a716-446655440000');
     const productId = ProductId('660e8400-e29b-41d4-a716-446655440000');
-    
+
     const order = orderService.createOrder({
       customerId,
       items: [{ productId, quantity: 2 }],
     });
-    
+
     expect(order.customerId).toBe(customerId);
   });
-  
+
   it('should reject invalid UUID format', () => {
     expect(() => UserId('invalid-uuid')).toThrow('Invalid UUID format');
   });
@@ -301,7 +323,9 @@ const userId = UnsafeUserId(dbRecord.user_id); // Skips validation
 type UserId = Brand<string, 'UserId'>;
 
 // Step 2: Update function signatures
-function getUser(id: UserId): Promise<User> { /* ... */ }
+function getUser(id: UserId): Promise<User> {
+  /* ... */
+}
 
 // Step 3: Update call sites
 const userId = UserId(request.params.id);
@@ -444,7 +468,7 @@ pnpm ai:check          # ai:quick + graph validation
 pnpm ai:compliance     # ai:check + tests + mutation testing + build
 
 # Individual checks
-pnpm lint              # ESLint + Prettier with comprehensive AI-safety rules
+pnpm lint              # ESLint + Prettier with minimal runtime-safety rules
 pnpm type-check        # TypeScript compilation
 pnpm test              # Unit and integration tests (Vitest)
 pnpm test:watch        # Run tests in watch mode
@@ -453,55 +477,48 @@ pnpm test:mutation     # Mutation testing (Stryker) - enterprise-grade quality s
 pnpm build             # Production build verification
 ```
 
-### Enhanced Linting Rules (ESLint + Prettier)
+### Minimal ESLint Configuration (Runtime Safety Focus)
 
-Our ESLint configuration includes comprehensive rules specifically designed for AI coding agents:
+Our ESLint configuration is **minimal and focused** on catching runtime issues that TypeScript cannot detect:
 
-**Advanced TypeScript Rules (Type-Aware):**
+**Runtime Safety Rules (~40 lines total):**
 
-- Nullish coalescing enforcement (`@typescript-eslint/prefer-nullish-coalescing`)
-- Optional chaining patterns (`@typescript-eslint/prefer-optional-chain`)
-- Unnecessary condition detection (`@typescript-eslint/no-unnecessary-condition`)
-- Floating promise prevention (`@typescript-eslint/no-floating-promises`)
-- Readonly property enforcement (`@typescript-eslint/prefer-readonly`)
+- **Environment validation**: No direct `process.env` access - must use Zod schemas
+- **Request validation**: All route handlers must validate request bodies with Zod
+- **Error handling**: Fastify-specific error patterns (no generic Error throws)
+- **Async safety**: Floating promise prevention
+- **Import hygiene**: Circular dependency detection
 
-**Import Organization & Dependencies:**
+**Why Minimal?**
 
-- Import grouping and alphabetization
-- Circular dependency detection (`import/no-cycle`)
-- Duplicate import prevention (`import/no-duplicates`)
+- TypeScript's @tsconfig/strictest preset handles most type safety
+- Prettier handles all formatting automatically
+- Focus on **runtime safety** that compile-time checks miss
+- Easier to understand and maintain (~40 lines vs 400+)
 
-**Node.js Best Practices (eslint-plugin-n):**
+**Key Architectural Rules:**
 
-- Deprecated API detection (`n/no-deprecated-api`)
-- Extraneous import prevention (`n/no-extraneous-import`)
-- Global preference enforcement (`n/prefer-global/process`, `n/prefer-global/console`)
+```typescript
+// ✅ Environment validation required
+const env = EnvSchema.parse(process.env);
 
-**Async/Await Best Practices:**
+// ❌ Direct access forbidden
+const port = process.env.PORT; // ESLint error
 
-- Promise executor validation
-- Proper async/await usage patterns
-- Promise handling enforcement (`promise/always-return`, `promise/catch-or-return`)
+// ✅ Request validation required
+fastify.post(
+  '/users',
+  {
+    schema: { body: CreateUserSchema },
+  },
+  handler
+);
 
-**Performance & Security:**
-
-- Object spread over `Object.assign`
-- Prevention of unsafe regex patterns
-- Detection of potential object injection vulnerabilities
-
-**Test Quality (Vitest Integration):**
-
-- Test structure validation (`vitest/expect-expect`)
-- Prevention of disabled/focused tests in CI
-- Consistent test naming patterns
-
-**Custom AI Architectural Rules:**
-
-- No direct `process.env` access
-- Required Zod validation for request bodies
-- Fastify error handling patterns
-- Service dependency injection enforcement
-- Plugin wrapper requirements
+// ❌ Unvalidated requests forbidden
+fastify.post('/users', async req => {
+  const data = req.body; // ESLint error
+});
+```
 
 ### Testing Requirements (Vitest Framework)
 
@@ -989,18 +1006,18 @@ gh pr create --title "feat(auth): implement user authentication (LIN-123)" \
 
 ## Quality Pipeline Integration
 
-### ESLint + Prettier (Formatting & Comprehensive Linting)
+### ESLint + Prettier (Formatting & Runtime Safety)
 
 - **Automatic formatting**: 2-space indentation, consistent style via Prettier
-- **TypeScript enforcement**: No `any` types, explicit return types, strict mode
-- **Security patterns**: Comprehensive security rule enforcement
-- **Custom architectural rules**: Environment access, Fastify patterns, input validation
+- **Runtime safety focus**: ~40 lines of rules for what TypeScript can't catch
+- **Architectural patterns**: Environment validation, request validation, error handling
+- **Minimal configuration**: Leverages TypeScript's built-in safety features
 
-### TypeScript (Type Safety)
+### TypeScript (Maximum Safety via @tsconfig/strictest)
 
-- **Strict mode**: All strict TypeScript options enabled
-- **No implicit any**: All types must be explicit
-- **Return type enforcement**: Public functions must declare return types
+- **@tsconfig/strictest preset**: Community-maintained preset with all safety flags
+- **Beyond strict mode**: Includes `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, etc.
+- **Zero configuration**: Inherit from preset, add only project-specific paths
 
 ### Architectural Pattern Enforcement (via ESLint)
 

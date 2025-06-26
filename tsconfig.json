@@ -1,36 +1,17 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "moduleResolution": "node",
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022"],
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
-  },
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
   "files": [],
   "references": [
     {
       "path": "./apps/backend-api"
+    },
+    {
+      "path": "./packages/config"
+    },
+    {
+      "path": "./packages/types"
     }
   ],
-  "include": [],
   "exclude": ["node_modules", "dist", "build", ".turbo"]
 }

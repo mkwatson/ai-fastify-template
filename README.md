@@ -155,8 +155,8 @@ ai-fastify-template/
 | Category                    | Tool                                 | Why Critical for AI                                                                                                   | Traditional Projects      |
 | --------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | **Fast streaming API**      | Fastify + fastify-sse                | AI needs real-time responses                                                                                          | Standard in many projects |
-| **Linting + Formatting**    | ESLint + Prettier + **Custom Rules** | **AI-specific rules prevent common mistakes**                                                                         | Usually just formatting   |
-| **Early type safety**       | TypeScript (strict)                  | AI can't use escape hatches like `any`                                                                                | Often allows `any` types  |
+| **Linting + Formatting**    | ESLint + Prettier (minimal config)   | **Runtime safety rules only** - focusing on what TypeScript can't catch                                               | Complex rulesets          |
+| **Early type safety**       | TypeScript (@tsconfig/strictest)     | AI can't use escape hatches like `any` - enforced by strictest preset                                                 | Often allows `any` types  |
 | **Schema validation**       | Zod (bodies & env)                   | **Mandatory** - AI doesn't know trust boundaries                                                                      | Often optional/selective  |
 | **Security scanning**       | GitLeaks + audit-ci                  | AI might commit secrets without realizing                                                                             | Manual review sufficient  |
 | **Guard against spaghetti** | dependency-cruiser                   | AI creates circular dependencies without understanding                                                                | Relies on code review     |
@@ -269,7 +269,7 @@ pnpm install
 
 ### Quality Gates (Implemented)
 
-- **Strict TypeScript** - No `any` types, comprehensive checking with type-aware ESLint rules
+- **Strict TypeScript** - Using @tsconfig/strictest preset for maximum safety with minimal configuration
 - **Runtime Validation** - Zod schemas for all environment variables and request inputs
 - **Import Graph Validation** - dependency-cruiser prevents circular dependencies and enforces architecture
 - **Comprehensive Testing** - Unit, integration tests with enterprise-grade mutation testing standards that catch logic errors traditional coverage metrics miss

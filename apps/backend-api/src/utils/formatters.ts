@@ -12,7 +12,7 @@ export type Currency = z.infer<typeof CurrencySchema>;
 export function formatCurrency(
   amount: number,
   currency: Currency = 'USD',
-  locale: string = 'en-US'
+  locale = 'en-US'
 ): string {
   // Validate inputs
   CurrencySchema.parse(currency);
@@ -31,7 +31,7 @@ export function formatCurrency(
 /**
  * Format percentage with specified decimal places
  */
-export function formatPercentage(value: number, decimals: number = 2): string {
+export function formatPercentage(value: number, decimals = 2): string {
   if (!Number.isFinite(value)) {
     throw new Error('Value must be a finite number');
   }

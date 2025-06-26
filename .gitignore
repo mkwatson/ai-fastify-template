@@ -35,6 +35,10 @@ coverage/
 # TurboRepo
 .turbo/
 
+# TypeScript build cache
+*.tsbuildinfo
+.tsbuildinfo
+
 # IDE
 .vscode/
 .idea/
