@@ -1,6 +1,6 @@
 /**
  * Zod integration for branded types.
- * 
+ *
  * Provides seamless integration between branded types and Zod schemas
  * for API boundary validation. This ensures type safety from request
  * parsing to business logic execution.
@@ -47,13 +47,13 @@ export type BrandedZodType<T, BrandName extends string> = z.ZodType<
 
 /**
  * Creates a Zod schema that validates and transforms to a branded type.
- * 
+ *
  * @template T - The underlying type
  * @template BrandName - The brand identifier
  * @param baseSchema - Base Zod schema for the underlying type
  * @param options - Branded type constructor options
  * @returns Zod schema that produces branded values
- * 
+ *
  * @example
  * ```typescript
  * const UserIdSchema = createBrandedZodSchema(
@@ -64,7 +64,7 @@ export type BrandedZodType<T, BrandName extends string> = z.ZodType<
  *     errorMessage: ValidationErrors.INVALID_UUID,
  *   }
  * );
- * 
+ *
  * // Usage in API routes
  * const CreateUserSchema = z.object({
  *   id: UserIdSchema,
@@ -77,8 +77,8 @@ export function createBrandedZodSchema<T, BrandName extends string>(
   options: BrandConstructorOptions<T>
 ): BrandedZodType<T, BrandName> {
   const constructor = createBrandConstructor<T, BrandName>(options);
-  
-  return baseSchema.transform((value) => constructor(value));
+
+  return baseSchema.transform((value: T) => constructor(value));
 }
 
 /**
@@ -172,11 +172,15 @@ export const ZodBrandedSchemas = {
 
   // System Resource Domain
   RequestId: brandedUuid<'RequestId'>('RequestId') as z.ZodType<RequestId>,
-  TransactionId: brandedUuid<'TransactionId'>('TransactionId') as z.ZodType<TransactionId>,
+  TransactionId: brandedUuid<'TransactionId'>(
+    'TransactionId'
+  ) as z.ZodType<TransactionId>,
   LogId: brandedUuid<'LogId'>('LogId') as z.ZodType<LogId>,
 
   // Alternative ID Types
-  EmailAddress: brandedEmail<'EmailAddress'>('EmailAddress') as z.ZodType<EmailAddress>,
+  EmailAddress: brandedEmail<'EmailAddress'>(
+    'EmailAddress'
+  ) as z.ZodType<EmailAddress>,
   Slug: brandedSlug<'Slug'>('Slug') as z.ZodType<Slug>,
 } as const;
 
@@ -186,7 +190,7 @@ export const ZodBrandedSchemas = {
 
 /**
  * Schema for route parameters with a single ID.
- * 
+ *
  * @example
  * ```typescript
  * const GetUserParams = createIdParamSchema('userId', ZodBrandedSchemas.UserId);
@@ -276,7 +280,10 @@ export const ExampleApiSchemas = {
   }),
 
   // E-commerce
-  GetProductParams: createIdParamSchema('productId', ZodBrandedSchemas.ProductId),
+  GetProductParams: createIdParamSchema(
+    'productId',
+    ZodBrandedSchemas.ProductId
+  ),
   CreateOrderBody: z.object({
     customerId: ZodBrandedSchemas.CustomerId,
     items: z.array(
@@ -322,7 +329,7 @@ export function createFastifySchema<
   TParams = unknown,
   TQuerystring = unknown,
   TBody = unknown,
-  TResponse = unknown
+  TResponse = unknown,
 >(schema: {
   params?: z.ZodType<TParams>;
   querystring?: z.ZodType<TQuerystring>;
@@ -349,7 +356,7 @@ export type BrandedFastifyHandler<
   TParams = unknown,
   TQuerystring = unknown,
   TBody = unknown,
-  TResponse = unknown
+  TResponse = unknown,
 > = (
   request: {
     params: TParams;
@@ -381,13 +388,16 @@ export const ExampleTypeSafeRoute = {
     },
   }),
   // Simplified handler without complex type assertions
-  handler: async (request: { params: { userId: UserId } }, reply: { code: (status: number) => { send: (data: unknown) => void } }) => {
+  handler: async (
+    request: { params: { userId: UserId } },
+    reply: { code: (status: number) => { send: (data: unknown) => void } }
+  ) => {
     // request.params.userId is typed as UserId through schema validation
     const { userId } = request.params;
-    
+
     // Business logic here...
     // The userId is guaranteed to be a valid branded UserId
-    
+
     // Note: In real implementation, you would construct branded types properly
     return reply.code(200).send({
       id: userId,

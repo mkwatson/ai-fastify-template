@@ -134,15 +134,15 @@ Each package should have:
 
 ### Core Stack Rationale
 
-| Technology            | Purpose            | Why Chosen                                                 |
-| --------------------- | ------------------ | ---------------------------------------------------------- |
-| **Fastify**           | Web framework      | High performance, TypeScript-first, extensive plugins      |
-| **TypeScript**        | Language           | Type safety, excellent tooling, catches errors early       |
-| **pnpm**              | Package manager    | Fast, efficient, excellent monorepo support                |
-| **TurboRepo**         | Build system       | Intelligent caching, parallel execution                    |
-| **ESLint + Prettier** | Linting/Formatting | Industry standard, extensive plugins, custom rules support |
-| **Zod**               | Validation         | Runtime type validation, excellent TS integration          |
-| **Vitest**            | Testing            | Fast, modern, great TypeScript support                     |
+| Technology            | Purpose            | Why Chosen                                               |
+| --------------------- | ------------------ | -------------------------------------------------------- |
+| **Fastify**           | Web framework      | High performance, TypeScript-first, extensive plugins    |
+| **TypeScript**        | Language           | Type safety via @tsconfig/strictest, excellent tooling   |
+| **pnpm**              | Package manager    | Fast, efficient, excellent monorepo support              |
+| **TurboRepo**         | Build system       | Intelligent caching, parallel execution                  |
+| **ESLint + Prettier** | Linting/Formatting | Minimal config (~40 lines), focus on runtime safety only |
+| **Zod**               | Validation         | Runtime type validation, excellent TS integration        |
+| **Vitest**            | Testing            | Fast, modern, great TypeScript support                   |
 
 ### Quality Tools
 
@@ -159,13 +159,13 @@ Each package should have:
 
 **Why we reverted**:
 
-1. **Limited extensibility** - Couldn't enforce custom architectural patterns (env validation, Fastify error handling, etc.)
-2. **Forced custom scripts** - Had to write `validate-ai-patterns.cjs` to fill gaps, defeating the "fewer tools" goal
-3. **Ecosystem maturity** - ESLint's plugin ecosystem is vastly more mature for TypeScript + Fastify patterns
+1. **Runtime safety focus** - Need to enforce patterns TypeScript can't catch (env validation, request validation)
+2. **Simplified approach** - Now only ~40 lines of ESLint config vs 400+ lines previously
+3. **Clear separation** - TypeScript (@tsconfig/strictest) handles type safety, ESLint handles runtime safety
 4. **IDE integration** - Better editor support and real-time feedback with ESLint
-5. **Team familiarity** - Industry standard tooling reduces onboarding friction
+5. **Maintainability** - Minimal config is easier to understand and maintain
 
-**Result**: ESLint + Prettier + custom rules = enterprise-grade enforcement without custom scripts. Better developer experience, more maintainable, industry standard.
+**Result**: TypeScript @tsconfig/strictest + minimal ESLint = same safety with 90% less configuration. We leverage TypeScript's built-in safety features instead of trying to replicate them in ESLint.
 
 ## Quality Gates
 
@@ -186,7 +186,7 @@ Each stage must pass before proceeding:
 
 ### Quality Metrics
 
-- **Type Coverage**: 100% (strict TypeScript)
+- **Type Coverage**: 100% (@tsconfig/strictest preset)
 - **Test Coverage**: >90% line coverage
 - **Mutation Score**: >90% (when available)
 - **Dependency Health**: No circular dependencies
@@ -198,10 +198,11 @@ Each stage must pass before proceeding:
 
 The architecture uses constraints to guide AI agents:
 
-1. **TypeScript Strict Mode**: Prevents type errors
-2. **Zod Validation**: Ensures runtime safety
-3. **Dependency Rules**: Maintains clean architecture
-4. **Testing Requirements**: Validates behavior
+1. **TypeScript @tsconfig/strictest**: Maximum compile-time safety with zero config
+2. **Minimal ESLint Rules**: Runtime safety for what TypeScript can't catch (~40 lines)
+3. **Zod Validation**: Runtime type safety at system boundaries
+4. **Dependency Rules**: Maintains clean architecture
+5. **Testing Requirements**: Validates behavior with mutation testing
 
 ### AI-Friendly Patterns
 

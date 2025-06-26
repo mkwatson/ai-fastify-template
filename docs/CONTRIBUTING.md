@@ -139,13 +139,16 @@ See [ARCHITECTURE.md](ARCHITECTURE.md#monorepo-structure) for detailed architect
 
 ### Quality Standards Philosophy
 
-We maintain enterprise-grade quality thresholds across all metrics:
+We maintain enterprise-grade quality through **simplified, focused tooling**:
 
-- **Mutation testing configured to catch even subtle logic errors** - Our Stryker configuration ensures tests actually validate business logic, not just achieve coverage
-- **Test coverage that ensures meaningful validation** - Focus on testing behavior and edge cases, not just hitting coverage numbers
-- **Performance optimized for rapid AI-assisted development cycles** - Near-instant feedback loops enable AI agents to iterate quickly while maintaining quality
-- **Architecture validation prevents technical debt** - dependency-cruiser enforces clean boundaries and prevents circular dependencies
-- **Security-first approach** - GitLeaks, audit-ci, and ESLint security rules catch vulnerabilities before they reach production
+- **TypeScript @tsconfig/strictest preset** - Maximum compile-time safety with zero custom configuration
+- **Minimal ESLint rules (~40 lines)** - Focus only on runtime safety patterns TypeScript can't catch
+- **Mutation testing for test quality** - Stryker ensures tests actually validate business logic
+- **Performance optimized for rapid development** - Simplified config means faster builds and near-instant feedback
+- **Architecture validation** - dependency-cruiser enforces clean boundaries
+- **Security-first approach** - GitLeaks, audit-ci, and focused security rules
+
+**Key insight**: We achieve the same safety guarantees with 90% less configuration by leveraging TypeScript's built-in features rather than trying to replicate them in external tools.
 
 Our quality gates are designed to catch the specific failure modes of AI-generated code while enabling rapid iteration. Specific thresholds are configured in tool configuration files rather than documented, ensuring they remain accurate and maintainable.
 
@@ -166,8 +169,8 @@ pnpm ai:check       # Standard validation (+ graph validation)
 pnpm ai:compliance  # Full quality pipeline (required before PR)
 
 # Individual quality checks
-pnpm lint           # ESLint + Prettier formatting
-pnpm type-check     # TypeScript strict compilation
+pnpm lint           # ESLint + Prettier (minimal runtime-safety focus)
+pnpm type-check     # TypeScript with @tsconfig/strictest preset
 pnpm test           # Unit and integration tests (Vitest)
 pnpm test:mutation  # Mutation testing (Stryker) - enterprise-grade quality standards
 pnpm graph:validate # Architecture dependency validation
@@ -176,7 +179,7 @@ pnpm build          # Production build verification
 
 ### TypeScript Standards
 
-- **Strict mode**: All TypeScript must compile in strict mode
+- **@tsconfig/strictest**: All TypeScript uses the strictest community preset
 - **No `any` types**: Use proper typing or `unknown` with type guards
 - **Explicit return types**: For public functions and methods
 - **Proper imports**: Use explicit imports, avoid barrel exports
