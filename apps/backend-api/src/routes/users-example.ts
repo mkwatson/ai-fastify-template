@@ -11,7 +11,11 @@ import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 
 import { UserService } from '../services/user-service-example.js';
-import { FastifyResultUtils } from '../utils/result.js';
+import {
+  FastifyResultUtils,
+  Result,
+  type ApplicationError,
+} from '../utils/result.js';
 
 /**
  * Zod schemas for request/response validation
@@ -133,7 +137,7 @@ const userRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      const { id } = request.params;
+      const { id } = request.params as { id: string };
       fastify.log.debug({ userId: id }, 'Getting user by ID');
 
       const result = await fastify.userService.findUserById(id);
@@ -167,7 +171,7 @@ const userRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      const { id } = request.params;
+      const { id } = request.params as { id: string };
       fastify.log.info({ userId: id, body: request.body }, 'Updating user');
 
       const result = await fastify.userService.updateUser(id, request.body);
@@ -198,7 +202,7 @@ const userRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      const { id } = request.params;
+      const { id } = request.params as { id: string };
       fastify.log.info({ userId: id }, 'Deactivating user');
 
       const result = await fastify.userService.deactivateUser(id);
@@ -229,7 +233,7 @@ const userRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      const { id } = request.params;
+      const { id } = request.params as { id: string };
       fastify.log.info({ userId: id }, 'Deleting user permanently');
 
       const result = await fastify.userService.deleteUser(id);
@@ -255,7 +259,10 @@ const userRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      const { limit, offset } = request.query;
+      const { limit, offset } = request.query as {
+        limit: number;
+        offset: number;
+      };
       fastify.log.debug({ limit, offset }, 'Listing users');
 
       const [usersResult, countResult] = await Promise.all([
@@ -305,7 +312,7 @@ const userRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, reply) => {
-      const { users: usersData } = request.body;
+      const { users: usersData } = request.body as { users: unknown[] };
       fastify.log.info({ userCount: usersData.length }, 'Batch creating users');
 
       const result = await fastify.userService.createMultipleUsers(usersData);
@@ -373,7 +380,7 @@ export const RoutePatterns = {
    */
   manual: async <T>(
     fastify: FastifyInstance,
-    serviceCall: () => Promise<T>
+    serviceCall: () => Promise<Result<T, ApplicationError>>
   ): Promise<T> => {
     const result = await serviceCall();
     return FastifyResultUtils.handleResult(fastify, result);
@@ -384,7 +391,9 @@ export const RoutePatterns = {
    */
   wrapped: <TArgs extends unknown[], TReturn>(
     fastify: FastifyInstance,
-    serviceMethod: (...args: TArgs) => Promise<TReturn>
+    serviceMethod: (
+      ...args: TArgs
+    ) => Promise<Result<TReturn, ApplicationError>>
   ): ((...args: TArgs) => Promise<TReturn>) => {
     return FastifyResultUtils.wrapHandler(fastify, serviceMethod);
   },
@@ -394,7 +403,7 @@ export const RoutePatterns = {
    */
   batch: async <T>(
     fastify: FastifyInstance,
-    serviceCalls: Array<() => Promise<T>>
+    serviceCalls: Array<() => Promise<Result<T, ApplicationError>>>
   ): Promise<T[]> => {
     const results = await Promise.all(serviceCalls.map(call => call()));
     return Promise.all(

@@ -261,7 +261,9 @@ export const ResultUtils = {
     const values: unknown[] = [];
     for (const result of results) {
       if (result.isErr()) {
-        return err(result.error);
+        return err(
+          result.error as T[number] extends Result<unknown, infer E> ? E : never
+        );
       }
       values.push(result.value);
     }

@@ -16,6 +16,7 @@ import {
   ResultUtils,
   ValidationError,
   type ServiceResult,
+  type ApplicationError,
 } from './result.js';
 // Import original schemas for consistency
 import {
@@ -182,7 +183,7 @@ export const ValidationUtils = {
     const errors = ResultUtils.collectErrors(results);
 
     if (errors.length > 0) {
-      return err(errors);
+      return err(errors as ValidationError[]);
     }
 
     return ok(ResultUtils.collectSuccesses(results));
@@ -208,7 +209,7 @@ export const ValidationUtils = {
   chainValidation: <T, U>(
     firstValidator: ServiceResult<T>,
     secondValidator: (firstResult: T) => ServiceResult<U>
-  ): Result<{ first: T; second: U }, ValidationError> => {
+  ): Result<{ first: T; second: U }, ApplicationError> => {
     return ResultUtils.chain(firstValidator, firstResult => {
       return ResultUtils.chain(secondValidator(firstResult), secondResult => {
         return ok({ first: firstResult, second: secondResult });
@@ -297,7 +298,13 @@ export const CommonValidations = {
     }
 
     if (itemValidator) {
-      return ValidationUtils.validateArray(itemValidator, value);
+      const arrayResult = ValidationUtils.validateArray(itemValidator, value);
+      if (arrayResult.isErr()) {
+        return err(
+          arrayResult.error[0] ?? new ValidationError('Validation failed')
+        ); // Return first error
+      }
+      return ok(arrayResult.value);
     }
 
     return ok(value as T[]);

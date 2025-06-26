@@ -40,7 +40,13 @@ export interface User {
 /**
  * User creation input (without generated fields)
  */
-export type CreateUserInput = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateUserInput = {
+  email: string;
+  name: string;
+  phone?: string;
+  password?: string;
+  isActive?: boolean;
+};
 
 /**
  * User repository interface (would be implemented by database layer)
@@ -80,6 +86,7 @@ class MockUserRepository implements UserRepository {
       id: `user_${this.nextId++}`,
       createdAt: new Date(),
       updatedAt: new Date(),
+      isActive: userData.isActive ?? true,
     };
     this.users.set(user.id, user);
     return Promise.resolve(user);
@@ -155,9 +162,17 @@ export class UserService {
     }
 
     // Create user (wrap potential database errors)
+    // Filter out undefined values
+    const cleanUserData: CreateUserInput = {
+      email: userData.email,
+      name: userData.name,
+      ...(userData.phone ? { phone: userData.phone } : {}),
+      ...(userData.password ? { password: userData.password } : {}),
+    };
+
     const createResult = await ResultUtils.fromPromise(
       this.repository.create({
-        ...userData,
+        ...cleanUserData,
         isActive: true,
       }),
       error =>
@@ -289,9 +304,14 @@ export class UserService {
       }
     }
 
+    // Filter out undefined values
+    const filteredData = Object.fromEntries(
+      Object.entries(validatedData).filter(([, value]) => value !== undefined)
+    ) as Partial<CreateUserInput>;
+
     // Perform update
     const updateResult = await ResultUtils.fromPromise(
-      this.repository.update(id, validatedData),
+      this.repository.update(id, filteredData),
       error =>
         new InternalError('Failed to update user', { originalError: error })
     );
@@ -424,7 +444,8 @@ export class UserService {
         { errorCount: validationErrors.length },
         'Batch user creation failed: validation errors'
       );
-      return err(validationErrors[0]); // Return first error for simplicity
+      // We know the array has at least one error since length > 0
+      return err(validationErrors[0]!); // Return first error for simplicity
     }
 
     const validatedUsers = ResultUtils.collectSuccesses(validationResults);
@@ -477,14 +498,20 @@ export function createMockUserService(
 
 /**
  * Type-safe service creation helper
+ * This demonstrates how to create strongly typed service interfaces
  */
 export const userServiceMethods = createService({
-  createUser: async (_data: unknown) => {
+  createUser: (..._args: unknown[]) => {
     // This would be implemented with actual service instance
-    throw new Error('Not implemented - use actual service instance');
+    return Promise.reject(
+      new Error('Not implemented - use actual service instance')
+    );
   },
-  findUserById: async (_id: string) => {
-    throw new Error('Not implemented - use actual service instance');
+  findUserById: (..._args: unknown[]) => {
+    // This would be implemented with actual service instance
+    return Promise.reject(
+      new Error('Not implemented - use actual service instance')
+    );
   },
   // ... other methods
 });
