@@ -94,8 +94,13 @@ export default tseslint.config(
     },
   },
   {
-    // Plugin files - Fastify plugins often need async but may not use await
-    files: ['**/plugins/**/*.ts', '**/src/plugins/**/*.ts'],
+    // Plugin and route files - Fastify plugins/routes often need async but may not use await
+    files: [
+      '**/plugins/**/*.ts',
+      '**/src/plugins/**/*.ts',
+      '**/routes/**/*.ts',
+      '**/src/routes/**/*.ts',
+    ],
     rules: {
       '@typescript-eslint/require-await': 'off',
     },

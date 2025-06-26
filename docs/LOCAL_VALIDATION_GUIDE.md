@@ -100,6 +100,25 @@ pnpm clean && pnpm build
 pnpm graph
 ```
 
+### **Cache Issues (Critical for CI Parity)**
+
+If you see different results between local and CI, it's often a cache issue:
+
+```bash
+# Clear all caches and re-run validation
+rm -rf .turbo && pnpm clean && pnpm ci:check
+
+# Clear specific package cache
+rm -rf .turbo && pnpm --filter <package-name> lint
+
+# Force all commands to bypass cache
+pnpm lint --force
+```
+
+**Why this matters**: Turbo cache can replay old logs with warnings/errors that are actually fixed. Always clear cache when debugging CI differences.
+
+**Common scenario**: You fix ESLint warnings locally, but `pnpm ci:check` still shows them due to cached results. Clear cache and re-run.
+
 ## 🚀 **Pre-Commit Hook Integration**
 
 The pre-commit hooks automatically run comprehensive validation:
