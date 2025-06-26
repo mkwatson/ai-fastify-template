@@ -1,9 +1,9 @@
 /**
  * Result/Option types and utilities for explicit error handling
- * 
+ *
  * This module provides enterprise-grade error handling patterns using neverthrow
  * to replace throw/catch patterns with explicit Result<T, E> types.
- * 
+ *
  * @module result
  */
 
@@ -28,7 +28,7 @@ export abstract class AppError extends Error {
   ) {
     super(message);
     this.name = this.constructor.name;
-    
+
     // Ensure proper prototype chain for instanceof checks
     Object.setPrototypeOf(this, new.target.prototype);
   }
@@ -64,11 +64,14 @@ export class ValidationError extends AppError {
     super(message, context);
   }
 
-  static fromZodError(error: z.ZodError, context?: Record<string, unknown>): ValidationError {
+  static fromZodError(
+    error: z.ZodError,
+    context?: Record<string, unknown>
+  ): ValidationError {
     const firstIssue = error.issues[0];
     const field = firstIssue?.path.join('.') ?? 'unknown';
     const message = firstIssue?.message ?? 'Validation failed';
-    
+
     return new ValidationError(message, field, error, context);
   }
 }
@@ -81,8 +84,12 @@ export class NotFoundError extends AppError {
   readonly statusCode = 404;
   readonly isOperational = true;
 
-  constructor(resource: string, id?: string, context?: Record<string, unknown>) {
-    const message = id 
+  constructor(
+    resource: string,
+    id?: string,
+    context?: Record<string, unknown>
+  ) {
+    const message = id
       ? `${resource} with id '${id}' not found`
       : `${resource} not found`;
     super(message, { resource, id, ...context });
@@ -123,7 +130,11 @@ export class ConflictError extends AppError {
   readonly statusCode = 409;
   readonly isOperational = true;
 
-  constructor(resource: string, message?: string, context?: Record<string, unknown>) {
+  constructor(
+    resource: string,
+    message?: string,
+    context?: Record<string, unknown>
+  ) {
     super(message ?? `${resource} already exists`, { resource, ...context });
   }
 }
@@ -136,7 +147,10 @@ export class InternalError extends AppError {
   readonly statusCode = 500;
   readonly isOperational = false;
 
-  constructor(message = 'Internal server error', context?: Record<string, unknown>) {
+  constructor(
+    message = 'Internal server error',
+    context?: Record<string, unknown>
+  ) {
     super(message, context);
   }
 }
@@ -157,7 +171,7 @@ export class ServiceUnavailableError extends AppError {
 /**
  * Union type of all application errors
  */
-export type ApplicationError = 
+export type ApplicationError =
   | ValidationError
   | NotFoundError
   | UnauthorizedError
@@ -187,7 +201,10 @@ export const ResultUtils = {
   /**
    * Safely parse with Zod, returning Result instead of throwing
    */
-  parseZod: <T>(schema: z.ZodSchema<T>, data: unknown): Result<T, ValidationError> => {
+  parseZod: <T>(
+    schema: z.ZodSchema<T>,
+    data: unknown
+  ): Result<T, ValidationError> => {
     const result = schema.safeParse(data);
     if (result.success) {
       return ok(result.data);
@@ -379,7 +396,10 @@ export const CommonResults = {
   /**
    * Create a validation error result
    */
-  validationError: (message: string, field?: string): Result<never, ValidationError> => {
+  validationError: (
+    message: string,
+    field?: string
+  ): Result<never, ValidationError> => {
     return err(new ValidationError(message, field));
   },
 
@@ -400,7 +420,10 @@ export const CommonResults = {
   /**
    * Create a conflict error result
    */
-  conflict: (resource: string, message?: string): Result<never, ConflictError> => {
+  conflict: (
+    resource: string,
+    message?: string
+  ): Result<never, ConflictError> => {
     return err(new ConflictError(resource, message));
   },
 
@@ -450,13 +473,23 @@ export const AsyncResultUtils = {
    */
   all: async <T extends readonly Promise<Result<unknown, unknown>>[]>(
     results: T
-  ): Promise<Result<
-    { [K in keyof T]: T[K] extends Promise<Result<infer U, unknown>> ? U : never },
-    T[number] extends Promise<Result<unknown, infer E>> ? E : never
-  >> => {
+  ): Promise<
+    Result<
+      {
+        [K in keyof T]: T[K] extends Promise<Result<infer U, unknown>>
+          ? U
+          : never;
+      },
+      T[number] extends Promise<Result<unknown, infer E>> ? E : never
+    >
+  > => {
     const resolvedResults = await Promise.all(results);
     return ResultUtils.combine(resolvedResults) as Result<
-      { [K in keyof T]: T[K] extends Promise<Result<infer U, unknown>> ? U : never },
+      {
+        [K in keyof T]: T[K] extends Promise<Result<infer U, unknown>>
+          ? U
+          : never;
+      },
       T[number] extends Promise<Result<unknown, infer E>> ? E : never
     >;
   },
@@ -472,6 +505,8 @@ export type AsyncServiceResult<T> = AsyncResult<T, ApplicationError>;
 /**
  * Helper to create strongly-typed service methods
  */
-export const createService = <T extends Record<string, (...args: unknown[]) => AsyncServiceResult<unknown>>>(
+export const createService = <
+  T extends Record<string, (...args: unknown[]) => AsyncServiceResult<unknown>>,
+>(
   methods: T
 ): T => methods;

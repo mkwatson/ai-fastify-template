@@ -1,14 +1,13 @@
 /**
  * Example user routes demonstrating Result-based error handling integration with Fastify
- * 
+ *
  * This module shows how to integrate Result types with Fastify routes,
  * automatically converting service errors to proper HTTP responses.
- * 
+ *
  * @module users-example
  */
 
-import type { FastifyInstance } from 'fastify';
-import { FastifyPluginAsync } from 'fastify';
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 
 import { UserService } from '../services/user-service-example.js';
@@ -25,7 +24,11 @@ const CreateUserRequestSchema = z.object({
 
 const UpdateUserRequestSchema = z.object({
   email: z.string().email('Invalid email format').optional(),
-  name: z.string().min(1, 'Name cannot be empty').max(100, 'Name too long').optional(),
+  name: z
+    .string()
+    .min(1, 'Name cannot be empty')
+    .max(100, 'Name too long')
+    .optional(),
   phone: z.string().optional(),
 });
 
@@ -80,7 +83,7 @@ declare module 'fastify' {
 /**
  * User routes with Result-based error handling
  */
-const userRoutes: FastifyPluginAsync = async (fastify) => {
+const userRoutes: FastifyPluginAsync = async fastify => {
   /**
    * Create a new user
    * POST /users
@@ -286,7 +289,9 @@ const userRoutes: FastifyPluginAsync = async (fastify) => {
     {
       schema: {
         body: z.object({
-          users: z.array(CreateUserRequestSchema).min(1, 'At least one user required'),
+          users: z
+            .array(CreateUserRequestSchema)
+            .min(1, 'At least one user required'),
         }),
         response: {
           201: z.object({
@@ -366,7 +371,10 @@ export const RoutePatterns = {
   /**
    * Standard pattern: Manual Result handling
    */
-  manual: async <T>(fastify: FastifyInstance, serviceCall: () => Promise<T>): Promise<T> => {
+  manual: async <T>(
+    fastify: FastifyInstance,
+    serviceCall: () => Promise<T>
+  ): Promise<T> => {
     const result = await serviceCall();
     return FastifyResultUtils.handleResult(fastify, result);
   },
@@ -375,7 +383,7 @@ export const RoutePatterns = {
    * Wrapped pattern: Automatic Result handling
    */
   wrapped: <TArgs extends unknown[], TReturn>(
-    fastify: FastifyInstance, 
+    fastify: FastifyInstance,
     serviceMethod: (...args: TArgs) => Promise<TReturn>
   ): ((...args: TArgs) => Promise<TReturn>) => {
     return FastifyResultUtils.wrapHandler(fastify, serviceMethod);
@@ -385,7 +393,7 @@ export const RoutePatterns = {
    * Batch pattern: Handle multiple Results
    */
   batch: async <T>(
-    fastify: FastifyInstance, 
+    fastify: FastifyInstance,
     serviceCalls: Array<() => Promise<T>>
   ): Promise<T[]> => {
     const results = await Promise.all(serviceCalls.map(call => call()));

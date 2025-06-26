@@ -119,6 +119,9 @@ importers:
       fastify-plugin:
         specifier: ^5.0.0
         version: 5.0.1
+      neverthrow:
+        specifier: ^8.2.0
+        version: 8.2.0
       zod:
         specifier: ^3.25.67
         version: 3.25.67
@@ -183,6 +186,8 @@ importers:
       vitest:
         specifier: ^3.2.3
         version: 3.2.3(@types/node@22.15.31)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
+
+  packages/sdk: {}
 
 packages:
 
@@ -2671,6 +2676,10 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+
+  neverthrow@8.2.0:
+    resolution: {integrity: sha512-kOCT/1MCPAxY5iUV3wytNFUMUolzuwd/VF/1KCx7kf6CutrOsTie+84zTGTpgQycjvfLdBBdvBvFLqFD2c0wkQ==}
+    engines: {node: '>=18'}
 
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
@@ -6453,6 +6462,10 @@ snapshots:
   nanoid@3.3.11: {}
 
   natural-compare@1.4.0: {}
+
+  neverthrow@8.2.0:
+    optionalDependencies:
+      '@rollup/rollup-linux-x64-gnu': 4.43.0
 
   node-releases@2.0.19: {}
 

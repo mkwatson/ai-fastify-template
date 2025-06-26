@@ -1,33 +1,33 @@
 /**
  * Result-based validators demonstrating migration from throw/catch to explicit error handling
- * 
+ *
  * This module shows how to refactor existing validators to use Result types
  * for explicit error handling instead of try/catch patterns.
- * 
+ *
  * @module validators-result
  */
 
 import { z } from 'zod';
 
-import { 
-  Result, 
-  ok, 
-  err, 
-  ResultUtils, 
-  ValidationError, 
-  type ServiceResult 
+import {
+  Result,
+  ok,
+  err,
+  ResultUtils,
+  ValidationError,
+  type ServiceResult,
 } from './result.js';
 // Import original schemas for consistency
-import { 
-  EmailSchema, 
-  UrlSchema, 
-  PhoneSchema, 
-  PasswordSchema 
+import {
+  EmailSchema,
+  UrlSchema,
+  PhoneSchema,
+  PasswordSchema,
 } from './validators.js';
 
 /**
  * Result-based email validation
- * 
+ *
  * @example
  * ```typescript
  * const result = validateEmail('user@example.com');
@@ -70,7 +70,7 @@ export function validatePasswordWithDetails(
   password: string
 ): Result<string, ValidationError> {
   const result = PasswordSchema.safeParse(password);
-  
+
   if (result.success) {
     return ok(result.data);
   }
@@ -86,7 +86,7 @@ export function validatePasswordWithDetails(
         'One uppercase letter',
         'One lowercase letter',
         'One number',
-        'One special character'
+        'One special character',
       ],
       failedCount: result.error.issues.length,
     }
@@ -121,7 +121,11 @@ export function validateUserRegistration(
  */
 export const UserProfileUpdateSchema = z.object({
   email: EmailSchema.optional(),
-  name: z.string().min(1, 'Name cannot be empty').max(100, 'Name too long').optional(),
+  name: z
+    .string()
+    .min(1, 'Name cannot be empty')
+    .max(100, 'Name too long')
+    .optional(),
   phone: PhoneSchema.optional(),
 });
 
@@ -153,7 +157,7 @@ export const ValidationUtils = {
     for (const [key, validator] of Object.entries(fields)) {
       const result = validator(data[key as keyof T]);
       results.push(result);
-      
+
       if (result.isOk()) {
         validatedData[key as keyof T] = result.value as T[keyof T];
       }
@@ -176,7 +180,7 @@ export const ValidationUtils = {
   ): Result<T[], ValidationError[]> => {
     const results = items.map(validator);
     const errors = ResultUtils.collectErrors(results);
-    
+
     if (errors.length > 0) {
       return err(errors);
     }
@@ -205,8 +209,8 @@ export const ValidationUtils = {
     firstValidator: ServiceResult<T>,
     secondValidator: (firstResult: T) => ServiceResult<U>
   ): Result<{ first: T; second: U }, ValidationError> => {
-    return ResultUtils.chain(firstValidator, (firstResult) => {
-      return ResultUtils.chain(secondValidator(firstResult), (secondResult) => {
+    return ResultUtils.chain(firstValidator, firstResult => {
+      return ResultUtils.chain(secondValidator(firstResult), secondResult => {
         return ok({ first: firstResult, second: secondResult });
       });
     });
@@ -220,9 +224,14 @@ export const CommonValidations = {
   /**
    * Validate required string field
    */
-  requiredString: (value: unknown, fieldName: string): ServiceResult<string> => {
+  requiredString: (
+    value: unknown,
+    fieldName: string
+  ): ServiceResult<string> => {
     if (typeof value !== 'string') {
-      return err(new ValidationError(`${fieldName} must be a string`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} must be a string`, fieldName)
+      );
     }
     if (value.trim().length === 0) {
       return err(new ValidationError(`${fieldName} is required`, fieldName));
@@ -233,12 +242,17 @@ export const CommonValidations = {
   /**
    * Validate optional string field
    */
-  optionalString: (value: unknown, fieldName: string): ServiceResult<string | undefined> => {
+  optionalString: (
+    value: unknown,
+    fieldName: string
+  ): ServiceResult<string | undefined> => {
     if (value === undefined || value === null) {
       return ok(undefined);
     }
     if (typeof value !== 'string') {
-      return err(new ValidationError(`${fieldName} must be a string`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} must be a string`, fieldName)
+      );
     }
     return ok(value.trim() || undefined);
   },
@@ -246,12 +260,19 @@ export const CommonValidations = {
   /**
    * Validate positive number
    */
-  positiveNumber: (value: unknown, fieldName: string): ServiceResult<number> => {
+  positiveNumber: (
+    value: unknown,
+    fieldName: string
+  ): ServiceResult<number> => {
     if (typeof value !== 'number') {
-      return err(new ValidationError(`${fieldName} must be a number`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} must be a number`, fieldName)
+      );
     }
     if (value <= 0) {
-      return err(new ValidationError(`${fieldName} must be positive`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} must be positive`, fieldName)
+      );
     }
     return ok(value);
   },
@@ -265,10 +286,14 @@ export const CommonValidations = {
     itemValidator?: (item: unknown) => ServiceResult<T>
   ): ServiceResult<T[]> => {
     if (!Array.isArray(value)) {
-      return err(new ValidationError(`${fieldName} must be an array`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} must be an array`, fieldName)
+      );
     }
     if (value.length === 0) {
-      return err(new ValidationError(`${fieldName} cannot be empty`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} cannot be empty`, fieldName)
+      );
     }
 
     if (itemValidator) {
@@ -287,7 +312,9 @@ export const CommonValidations = {
     allowedValues: readonly T[]
   ): ServiceResult<T> => {
     if (typeof value !== 'string') {
-      return err(new ValidationError(`${fieldName} must be a string`, fieldName));
+      return err(
+        new ValidationError(`${fieldName} must be a string`, fieldName)
+      );
     }
     if (!allowedValues.includes(value as T)) {
       return err(
@@ -330,20 +357,17 @@ export const MigrationHelpers = {
     errorMessage?: string,
     fieldName?: string
   ): ServiceResult<T> => {
-    return ResultUtils.fromThrowable(
-      fn,
-      (error) => {
-        if (error instanceof z.ZodError) {
-          return ValidationError.fromZodError(error);
-        }
-        return new ValidationError(
-          errorMessage || 'Validation failed',
-          fieldName,
-          undefined,
-          { originalError: error }
-        );
+    return ResultUtils.fromThrowable(fn, error => {
+      if (error instanceof z.ZodError) {
+        return ValidationError.fromZodError(error);
       }
-    );
+      return new ValidationError(
+        errorMessage ?? 'Validation failed',
+        fieldName,
+        undefined,
+        { originalError: error }
+      );
+    });
   },
 
   /**
@@ -356,8 +380,9 @@ export const MigrationHelpers = {
     if (validatorResult.isValid && validatorResult.data !== undefined) {
       return ok(validatorResult.data);
     }
-    
-    const errorMessage = validatorResult.errors.join('; ') || 'Validation failed';
+
+    const errorMessage =
+      validatorResult.errors.join('; ') || 'Validation failed';
     return err(new ValidationError(errorMessage, fieldName));
   },
 };

@@ -254,8 +254,8 @@ module.exports = {
       },
       create(context) {
         const options = context.options[0] || {};
-        const enforceInServices = options.enforceInServices !== false;
-        const enforceInUtils = options.enforceInUtils !== false;
+        // const enforceInServices = options.enforceInServices !== false;
+        // const enforceInUtils = options.enforceInUtils !== false;
         const allowThrowInTests = options.allowThrowInTests !== false;
 
         function isServiceFile(filename) {

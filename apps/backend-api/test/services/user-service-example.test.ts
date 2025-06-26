@@ -69,7 +69,9 @@ describe('UserService (Result-based)', () => {
         expect(result.value).toEqual(createdUser);
       }
 
-      expect(mockRepository.findByEmail).toHaveBeenCalledWith('user@example.com');
+      expect(mockRepository.findByEmail).toHaveBeenCalledWith(
+        'user@example.com'
+      );
       expect(mockRepository.create).toHaveBeenCalledWith({
         ...validUserData,
         isActive: true,
@@ -126,7 +128,9 @@ describe('UserService (Result-based)', () => {
 
     it('should return internal error when database fails', async () => {
       vi.mocked(mockRepository.findByEmail).mockResolvedValue(null);
-      vi.mocked(mockRepository.create).mockRejectedValue(new Error('Database error'));
+      vi.mocked(mockRepository.create).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await userService.createUser(validUserData);
 
@@ -140,7 +144,9 @@ describe('UserService (Result-based)', () => {
     });
 
     it('should handle email check database error', async () => {
-      vi.mocked(mockRepository.findByEmail).mockRejectedValue(new Error('DB connection failed'));
+      vi.mocked(mockRepository.findByEmail).mockRejectedValue(
+        new Error('DB connection failed')
+      );
 
       const result = await userService.createUser(validUserData);
 
@@ -194,7 +200,9 @@ describe('UserService (Result-based)', () => {
     });
 
     it('should return internal error when database fails', async () => {
-      vi.mocked(mockRepository.findById).mockRejectedValue(new Error('Database error'));
+      vi.mocked(mockRepository.findById).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await userService.findUserById('user_1');
 
@@ -257,7 +265,9 @@ describe('UserService (Result-based)', () => {
     it('should return not found error when user does not exist', async () => {
       vi.mocked(mockRepository.findById).mockResolvedValue(null);
 
-      const result = await userService.updateUser('nonexistent', { name: 'New Name' });
+      const result = await userService.updateUser('nonexistent', {
+        name: 'New Name',
+      });
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
@@ -280,7 +290,9 @@ describe('UserService (Result-based)', () => {
       vi.mocked(mockRepository.findById).mockResolvedValue(existingUser);
       vi.mocked(mockRepository.findByEmail).mockResolvedValue(anotherUser);
 
-      const result = await userService.updateUser('user_1', { email: 'another@example.com' });
+      const result = await userService.updateUser('user_1', {
+        email: 'another@example.com',
+      });
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
@@ -353,7 +365,9 @@ describe('UserService (Result-based)', () => {
 
     it('should return internal error when deletion fails', async () => {
       vi.mocked(mockRepository.findById).mockResolvedValue(existingUser);
-      vi.mocked(mockRepository.delete).mockRejectedValue(new Error('Database error'));
+      vi.mocked(mockRepository.delete).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await userService.deleteUser('user_1');
 
@@ -395,7 +409,10 @@ describe('UserService (Result-based)', () => {
         expect(result.value).toEqual(users);
       }
 
-      expect(mockRepository.list).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+      expect(mockRepository.list).toHaveBeenCalledWith({
+        limit: 10,
+        offset: 0,
+      });
       expect(mockLogger.debug).toHaveBeenCalledWith(
         { userCount: 2 },
         'Users retrieved successfully'
@@ -403,7 +420,9 @@ describe('UserService (Result-based)', () => {
     });
 
     it('should return internal error when listing fails', async () => {
-      vi.mocked(mockRepository.list).mockRejectedValue(new Error('Database error'));
+      vi.mocked(mockRepository.list).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const result = await userService.listUsers();
 
@@ -452,8 +471,14 @@ describe('UserService (Result-based)', () => {
       // Mock individual createUser calls
       const createUserSpy = vi.spyOn(userService, 'createUser');
       createUserSpy
-        .mockResolvedValueOnce({ isOk: () => true, value: createdUsers[0] } as any)
-        .mockResolvedValueOnce({ isOk: () => true, value: createdUsers[1] } as any);
+        .mockResolvedValueOnce({
+          isOk: () => true,
+          value: createdUsers[0],
+        } as any)
+        .mockResolvedValueOnce({
+          isOk: () => true,
+          value: createdUsers[1],
+        } as any);
 
       const result = await userService.createMultipleUsers(usersData);
 
@@ -537,7 +562,9 @@ describe('UserService (Result-based)', () => {
       });
       vi.mocked(mockRepository.update).mockResolvedValue(null);
 
-      const result = await userService.updateUser('user_1', { name: 'New Name' });
+      const result = await userService.updateUser('user_1', {
+        name: 'New Name',
+      });
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {

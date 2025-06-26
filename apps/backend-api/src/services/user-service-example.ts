@@ -1,9 +1,9 @@
 /**
  * Example user service demonstrating Result-based error handling patterns
- * 
+ *
  * This service shows how to implement business logic using Result types
  * for explicit error handling instead of throwing exceptions.
- * 
+ *
  * @module user-service-example
  */
 
@@ -15,7 +15,7 @@ import {
   ResultUtils,
   type AsyncServiceResult,
   NotFoundError,
-  ConflictError,  
+  ConflictError,
   InternalError,
   createService,
 } from '../utils/result.js';
@@ -160,7 +160,8 @@ export class UserService {
         ...userData,
         isActive: true,
       }),
-      (error) => new InternalError('Failed to create user', { originalError: error })
+      error =>
+        new InternalError('Failed to create user', { originalError: error })
     );
 
     if (createResult.isErr()) {
@@ -188,7 +189,8 @@ export class UserService {
 
     const result = await ResultUtils.fromPromise(
       this.repository.findById(id),
-      (error) => new InternalError('Failed to query user', { originalError: error })
+      error =>
+        new InternalError('Failed to query user', { originalError: error })
     );
 
     if (result.isErr()) {
@@ -222,7 +224,8 @@ export class UserService {
     // For async operations, we need to handle this differently
     const result = await ResultUtils.fromPromise(
       this.repository.findByEmail(email),
-      (error) => new InternalError('Failed to query user', { originalError: error })
+      error =>
+        new InternalError('Failed to query user', { originalError: error })
     );
 
     if (result.isErr()) {
@@ -289,7 +292,8 @@ export class UserService {
     // Perform update
     const updateResult = await ResultUtils.fromPromise(
       this.repository.update(id, validatedData),
-      (error) => new InternalError('Failed to update user', { originalError: error })
+      error =>
+        new InternalError('Failed to update user', { originalError: error })
     );
 
     if (updateResult.isErr()) {
@@ -307,10 +311,7 @@ export class UserService {
     }
 
     const updatedUser = updateResult.value;
-    this.logger.info(
-      { userId: updatedUser.id },
-      'User updated successfully'
-    );
+    this.logger.info({ userId: updatedUser.id }, 'User updated successfully');
 
     return ok(updatedUser);
   }
@@ -338,7 +339,8 @@ export class UserService {
 
     const deleteResult = await ResultUtils.fromPromise(
       this.repository.delete(id),
-      (error) => new InternalError('Failed to delete user', { originalError: error })
+      error =>
+        new InternalError('Failed to delete user', { originalError: error })
     );
 
     if (deleteResult.isErr()) {
@@ -370,7 +372,8 @@ export class UserService {
 
     const listResult = await ResultUtils.fromPromise(
       this.repository.list(options),
-      (error) => new InternalError('Failed to list users', { originalError: error })
+      error =>
+        new InternalError('Failed to list users', { originalError: error })
     );
 
     if (listResult.isErr()) {
@@ -411,7 +414,9 @@ export class UserService {
     );
 
     // Validate all user data first
-    const validationResults = usersData.map(data => validateUserRegistration(data));
+    const validationResults = usersData.map(data =>
+      validateUserRegistration(data)
+    );
     const validationErrors = ResultUtils.collectErrors(validationResults);
 
     if (validationErrors.length > 0) {
@@ -430,10 +435,10 @@ export class UserService {
       const createResult = await this.createUser(userData);
       if (createResult.isErr()) {
         this.logger.error(
-          { 
+          {
             error: createResult.error.toSafeObject(),
             createdCount: createdUsers.length,
-            totalCount: validatedUsers.length 
+            totalCount: validatedUsers.length,
           },
           'Batch user creation partially failed'
         );
@@ -464,7 +469,9 @@ export function createUserService(
 /**
  * Mock factory for testing and examples
  */
-export function createMockUserService(logger: FastifyLoggerInstance): UserService {
+export function createMockUserService(
+  logger: FastifyLoggerInstance
+): UserService {
   return createUserService(new MockUserRepository(), logger);
 }
 
