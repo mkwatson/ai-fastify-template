@@ -25,7 +25,13 @@ export default tseslint.config(
     extends: [tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: [
+            '*.config.ts',
+            '*.config.js',
+            'vitest.config.ts',
+          ],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

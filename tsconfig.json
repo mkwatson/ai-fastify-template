@@ -13,6 +13,5 @@
       "path": "./packages/types"
     }
   ],
-  "include": ["*.config.ts", "*.config.js"],
   "exclude": ["node_modules", "dist", "build", ".turbo"]
 }
