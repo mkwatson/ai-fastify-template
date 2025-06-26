@@ -14,8 +14,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "echo 'Lint skipped for types package - ESLint config needs adjustment'",
-    "lint:fix": "echo 'Lint fix skipped for types package - ESLint config needs adjustment'",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit"

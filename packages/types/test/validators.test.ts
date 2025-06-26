@@ -59,7 +59,7 @@ describe('Validation Utilities', () => {
     it('should validate correct UUID v4 format', () => {
       expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
       expect(isValidUuid('6ba7b810-9dad-41d1-80b4-00c04fd430c8')).toBe(true);
-      expect(isValidUuid('123e4567-e89b-12d3-a456-426614174000')).toBe(true);
+      expect(isValidUuid('123e4567-e89b-42d3-a456-426614174000')).toBe(true);
       
       // UUID v4 specifically (4 in third group)
       expect(isValidUuid('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
@@ -100,7 +100,7 @@ describe('Validation Utilities', () => {
       expect(isValidNanoid('FyPX4j7ZPCS_aXIkPJ5lN')).toBe(true);
       expect(isValidNanoid('abcdefghijklmnopqrstu')).toBe(true);
       expect(isValidNanoid('ABCDEFGHIJKLMNOPQRSTU')).toBe(true);
-      expect(isValidNanoid('0123456789_-ABCDEFGH')).toBe(true);
+      expect(isValidNanoid('0123456789_-ABCDEFGHI')).toBe(true);
     });
 
     it('should reject invalid Nanoid formats', () => {

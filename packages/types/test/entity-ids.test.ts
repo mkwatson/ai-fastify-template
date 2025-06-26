@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { expectType } from 'expect-type';
+import { expectTypeOf } from 'expect-type';
 import {
   // User Management Domain
   type UserId,
@@ -82,7 +82,7 @@ describe('Entity ID Types', () => {
       it('should create valid UserId from UUID', () => {
         const userId = UserId(VALID_UUID);
         
-        expectType<UserId>(userId);
+        expectTypeOf(userId).toEqualTypeOf<UserId>();
         expect(unwrap(userId)).toBe(VALID_UUID);
       });
 
@@ -95,7 +95,7 @@ describe('Entity ID Types', () => {
       it('should create unsafe UserId without validation', () => {
         const userId = UnsafeUserId(INVALID_UUID);
         
-        expectType<UserId>(userId);
+        expectTypeOf(userId).toEqualTypeOf<UserId>();
         expect(unwrap(userId)).toBe(INVALID_UUID);
       });
     });
@@ -104,7 +104,7 @@ describe('Entity ID Types', () => {
       it('should create valid SessionId from UUID', () => {
         const sessionId = SessionId(VALID_UUID);
         
-        expectType<SessionId>(sessionId);
+        expectTypeOf(sessionId).toEqualTypeOf<SessionId>();
         expect(unwrap(sessionId)).toBe(VALID_UUID);
       });
 
@@ -112,8 +112,8 @@ describe('Entity ID Types', () => {
         const userId = UserId(VALID_UUID);
         const sessionId = SessionId(ANOTHER_VALID_UUID);
         
-        expectType<UserId>(userId);
-        expectType<SessionId>(sessionId);
+        expectTypeOf(userId).toEqualTypeOf<UserId>();
+        expectTypeOf(sessionId).toEqualTypeOf<SessionId>();
         
         // These would be compile errors in real code:
         // processUser(sessionId); // ❌ Type error
@@ -125,7 +125,7 @@ describe('Entity ID Types', () => {
       it('should create valid RoleId from non-empty string', () => {
         const roleId = RoleId('admin');
         
-        expectType<RoleId>(roleId);
+        expectTypeOf(roleId).toEqualTypeOf<RoleId>();
         expect(unwrap(roleId)).toBe('admin');
       });
 
@@ -147,7 +147,7 @@ describe('Entity ID Types', () => {
       it('should create valid ProductId from UUID', () => {
         const productId = ProductId(VALID_UUID);
         
-        expectType<ProductId>(productId);
+        expectTypeOf(productId).toEqualTypeOf<ProductId>();
         expect(unwrap(productId)).toBe(VALID_UUID);
       });
 
@@ -155,8 +155,8 @@ describe('Entity ID Types', () => {
         const productId = ProductId(VALID_UUID);
         const orderId = OrderId(ANOTHER_VALID_UUID);
         
-        expectType<ProductId>(productId);
-        expectType<OrderId>(orderId);
+        expectTypeOf(productId).toEqualTypeOf<ProductId>();
+        expectTypeOf(orderId).toEqualTypeOf<OrderId>();
         
         expect(unwrap(productId)).not.toBe(unwrap(orderId));
       });
@@ -166,7 +166,7 @@ describe('Entity ID Types', () => {
       it('should create valid OrderId from UUID', () => {
         const orderId = OrderId(VALID_UUID);
         
-        expectType<OrderId>(orderId);
+        expectTypeOf(orderId).toEqualTypeOf<OrderId>();
         expect(unwrap(orderId)).toBe(VALID_UUID);
       });
     });
@@ -175,7 +175,7 @@ describe('Entity ID Types', () => {
       it('should create valid CustomerId from UUID', () => {
         const customerId = CustomerId(VALID_UUID);
         
-        expectType<CustomerId>(customerId);
+        expectTypeOf(customerId).toEqualTypeOf<CustomerId>();
         expect(unwrap(customerId)).toBe(VALID_UUID);
       });
     });
@@ -184,7 +184,7 @@ describe('Entity ID Types', () => {
       it('should create valid CategoryId from non-empty string', () => {
         const categoryId = CategoryId('electronics');
         
-        expectType<CategoryId>(categoryId);
+        expectTypeOf(categoryId).toEqualTypeOf<CategoryId>();
         expect(unwrap(categoryId)).toBe('electronics');
       });
 
@@ -201,7 +201,7 @@ describe('Entity ID Types', () => {
       it('should create valid ArticleId from UUID', () => {
         const articleId = ArticleId(VALID_UUID);
         
-        expectType<ArticleId>(articleId);
+        expectTypeOf(articleId).toEqualTypeOf<ArticleId>();
         expect(unwrap(articleId)).toBe(VALID_UUID);
       });
     });
@@ -210,7 +210,7 @@ describe('Entity ID Types', () => {
       it('should create valid CommentId from UUID', () => {
         const commentId = CommentId(VALID_UUID);
         
-        expectType<CommentId>(commentId);
+        expectTypeOf(commentId).toEqualTypeOf<CommentId>();
         expect(unwrap(commentId)).toBe(VALID_UUID);
       });
     });
@@ -219,7 +219,7 @@ describe('Entity ID Types', () => {
       it('should create valid AuthorId from UUID', () => {
         const authorId = AuthorId(VALID_UUID);
         
-        expectType<AuthorId>(authorId);
+        expectTypeOf(authorId).toEqualTypeOf<AuthorId>();
         expect(unwrap(authorId)).toBe(VALID_UUID);
       });
     });
@@ -230,7 +230,7 @@ describe('Entity ID Types', () => {
       it('should create valid RequestId from UUID', () => {
         const requestId = RequestId(VALID_UUID);
         
-        expectType<RequestId>(requestId);
+        expectTypeOf(requestId).toEqualTypeOf<RequestId>();
         expect(unwrap(requestId)).toBe(VALID_UUID);
       });
     });
@@ -239,7 +239,7 @@ describe('Entity ID Types', () => {
       it('should create valid TransactionId from UUID', () => {
         const transactionId = TransactionId(VALID_UUID);
         
-        expectType<TransactionId>(transactionId);
+        expectTypeOf(transactionId).toEqualTypeOf<TransactionId>();
         expect(unwrap(transactionId)).toBe(VALID_UUID);
       });
     });
@@ -248,7 +248,7 @@ describe('Entity ID Types', () => {
       it('should create valid LogId from UUID', () => {
         const logId = LogId(VALID_UUID);
         
-        expectType<LogId>(logId);
+        expectTypeOf(logId).toEqualTypeOf<LogId>();
         expect(unwrap(logId)).toBe(VALID_UUID);
       });
     });
@@ -259,7 +259,7 @@ describe('Entity ID Types', () => {
       it('should create valid EmailAddress from email string', () => {
         const email = EmailAddress('user@example.com');
         
-        expectType<EmailAddress>(email);
+        expectTypeOf(email).toEqualTypeOf<EmailAddress>();
         expect(unwrap(email)).toBe('user@example.com');
       });
 
@@ -280,7 +280,7 @@ describe('Entity ID Types', () => {
       it('should create valid Slug from slug string', () => {
         const slug = Slug('my-article-slug');
         
-        expectType<Slug>(slug);
+        expectTypeOf(slug).toEqualTypeOf<Slug>();
         expect(unwrap(slug)).toBe('my-article-slug');
       });
 
@@ -324,8 +324,8 @@ describe('Entity ID Types', () => {
       const unsafeUserId = UnsafeUserId('invalid');
       const unsafeOrderId = UnsafeOrderId('invalid');
       
-      expectType<UserId>(unsafeUserId);
-      expectType<OrderId>(unsafeOrderId);
+      expectTypeOf(unsafeUserId).toEqualTypeOf<UserId>();
+      expectTypeOf(unsafeOrderId).toEqualTypeOf<OrderId>();
       
       // Still type-safe at compile time
       expect(typeof unsafeUserId).toBe('string');
@@ -340,9 +340,9 @@ describe('Entity ID Types', () => {
       const productId = ProductId(VALID_UUID);
       
       // These are all different types at compile time
-      expectType<UserId>(userId);
-      expectType<OrderId>(orderId);
-      expectType<ProductId>(productId);
+      expectTypeOf(userId).toEqualTypeOf<UserId>();
+      expectTypeOf(orderId).toEqualTypeOf<OrderId>();
+      expectTypeOf(productId).toEqualTypeOf<ProductId>();
       
       // But same runtime representation
       expect(typeof userId).toBe('string');
@@ -389,8 +389,8 @@ describe('Entity ID Types', () => {
         const userId = EntityIdConstructors.UserId(VALID_UUID);
         const email = EntityIdConstructors.EmailAddress('test@example.com');
         
-        expectType<UserId>(userId);
-        expectType<EmailAddress>(email);
+        expectTypeOf(userId).toEqualTypeOf<UserId>();
+        expectTypeOf(email).toEqualTypeOf<EmailAddress>();
       });
     });
 

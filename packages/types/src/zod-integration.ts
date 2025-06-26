@@ -13,12 +13,6 @@ import {
   createBrandConstructor,
 } from './brand.js';
 import {
-  isValidUuid,
-  isValidEmail,
-  isNonEmptyString,
-  ValidationErrors,
-} from './validators.js';
-import {
   type UserId,
   type SessionId,
   type RoleId,
@@ -35,6 +29,12 @@ import {
   type EmailAddress,
   type Slug,
 } from './entity-ids.js';
+import {
+  isValidUuid,
+  isValidEmail,
+  isNonEmptyString,
+  ValidationErrors,
+} from './validators.js';
 
 /**
  * Branded Zod type that combines Zod schema with branded type construction.
@@ -328,7 +328,12 @@ export function createFastifySchema<
   querystring?: z.ZodType<TQuerystring>;
   body?: z.ZodType<TBody>;
   response?: Record<number, z.ZodType<TResponse>>;
-}) {
+}): {
+  params?: z.ZodType<TParams>;
+  querystring?: z.ZodType<TQuerystring>;
+  body?: z.ZodType<TBody>;
+  response?: Record<number, z.ZodType<TResponse>>;
+} {
   return {
     ...(schema.params && { params: schema.params }),
     ...(schema.querystring && { querystring: schema.querystring }),
@@ -376,7 +381,7 @@ export const ExampleTypeSafeRoute = {
     },
   }),
   // Simplified handler without complex type assertions
-  handler: async (request: any, reply: any) => {
+  handler: async (request: { params: { userId: UserId } }, reply: { code: (status: number) => { send: (data: unknown) => void } }) => {
     // request.params.userId is typed as UserId through schema validation
     const { userId } = request.params;
     
@@ -386,7 +391,7 @@ export const ExampleTypeSafeRoute = {
     // Note: In real implementation, you would construct branded types properly
     return reply.code(200).send({
       id: userId,
-      email: 'user@example.com' as any, // Would be EmailAddress in real implementation
+      email: 'user@example.com' as unknown as EmailAddress, // Would be EmailAddress in real implementation
       name: 'John Doe',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

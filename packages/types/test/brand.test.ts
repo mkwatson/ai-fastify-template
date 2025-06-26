@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { expectType } from 'expect-type';
+import { expectTypeOf } from 'expect-type';
 import {
   type Brand,
   type Unbranded,
@@ -28,8 +28,8 @@ describe('Core Brand Utilities', () => {
   describe('Brand type', () => {
     it('should create distinct types from same underlying type', () => {
       // Type-level tests: these should compile
-      expectType<TestUserId>('user-123' as TestUserId);
-      expectType<TestOrderId>('order-123' as TestOrderId);
+      expectTypeOf('user-123' as TestUserId).toEqualTypeOf<TestUserId>();
+      expectTypeOf('order-123' as TestOrderId).toEqualTypeOf<TestOrderId>();
       
       // These should be type errors (but we can't test compilation errors in runtime tests)
       // The brand provides compile-time safety
@@ -41,46 +41,46 @@ describe('Core Brand Utilities', () => {
       expect(typeof orderId).toBe('string');
       
       // But they're distinct types at compile time
-      expectType<TestUserId>(userId);
-      expectType<TestOrderId>(orderId);
+      expectTypeOf(userId).toEqualTypeOf<TestUserId>();
+      expectTypeOf(orderId).toEqualTypeOf<TestOrderId>();
     });
 
     it('should work with different underlying types', () => {
       const stringId: Brand<string, 'StringId'> = 'test' as Brand<string, 'StringId'>;
       const numberId: Brand<number, 'NumberId'> = 123 as Brand<number, 'NumberId'>;
       
-      expectType<string>(stringId as string);
-      expectType<number>(numberId as number);
+      expectTypeOf(stringId as string).toEqualTypeOf<string>();
+      expectTypeOf(numberId as number).toEqualTypeOf<number>();
     });
   });
 
   describe('Unbranded utility type', () => {
     it('should extract underlying type from branded type', () => {
       type UnbrandedUserId = Unbranded<TestUserId>;
-      expectType<string>({} as UnbrandedUserId);
+      expectTypeOf({} as UnbrandedUserId).toEqualTypeOf<string>();
       
       type UnbrandedNumberId = Unbranded<TestNumberId>;
-      expectType<number>({} as UnbrandedNumberId);
+      expectTypeOf({} as UnbrandedNumberId).toEqualTypeOf<number>();
     });
 
     it('should return original type for non-branded types', () => {
       type UnbrandedString = Unbranded<string>;
-      expectType<string>({} as UnbrandedString);
+      expectTypeOf({} as UnbrandedString).toEqualTypeOf<string>();
     });
   });
 
   describe('ExtractBrand utility type', () => {
     it('should extract brand from branded type', () => {
       type UserIdBrand = ExtractBrand<TestUserId>;
-      expectType<'TestUserId'>({} as UserIdBrand);
+      expectTypeOf({} as UserIdBrand).toEqualTypeOf<'TestUserId'>();
       
       type OrderIdBrand = ExtractBrand<TestOrderId>;
-      expectType<'TestOrderId'>({} as OrderIdBrand);
+      expectTypeOf({} as OrderIdBrand).toEqualTypeOf<'TestOrderId'>();
     });
 
     it('should return never for non-branded types', () => {
       type StringBrand = ExtractBrand<string>;
-      expectType<never>({} as StringBrand);
+      expectTypeOf({} as StringBrand).toEqualTypeOf<never>();
     });
   });
 
@@ -116,7 +116,7 @@ describe('Core Brand Utilities', () => {
     it('should create constructor that validates and brands values', () => {
       const validId = TestId('test-123');
       
-      expectType<Brand<string, 'TestId'>>(validId);
+      expectTypeOf(validId).toEqualTypeOf<Brand<string, 'TestId'>>();
       expect(validId).toBe('test-123');
     });
 
@@ -152,7 +152,7 @@ describe('Core Brand Utilities', () => {
     it('should create constructor that skips validation', () => {
       const id = UnsafeTestId('any-value');
       
-      expectType<Brand<string, 'UnsafeTestId'>>(id);
+      expectTypeOf(id).toEqualTypeOf<Brand<string, 'UnsafeTestId'>>();
       expect(id).toBe('any-value');
     });
 
@@ -168,7 +168,7 @@ describe('Core Brand Utilities', () => {
       const brandedValue: Brand<string, 'Test'> = 'test-value' as Brand<string, 'Test'>;
       const unwrapped = unwrap(brandedValue);
       
-      expectType<string>(unwrapped);
+      expectTypeOf(unwrapped).toEqualTypeOf<string>();
       expect(unwrapped).toBe('test-value');
     });
 
@@ -176,8 +176,8 @@ describe('Core Brand Utilities', () => {
       const stringBranded: Brand<string, 'String'> = 'test' as Brand<string, 'String'>;
       const numberBranded: Brand<number, 'Number'> = 123 as Brand<number, 'Number'>;
       
-      expectType<string>(unwrap(stringBranded));
-      expectType<number>(unwrap(numberBranded));
+      expectTypeOf(unwrap(stringBranded)).toEqualTypeOf<string>();
+      expectTypeOf(unwrap(numberBranded)).toEqualTypeOf<number>();
       
       expect(unwrap(stringBranded)).toBe('test');
       expect(unwrap(numberBranded)).toBe(123);
@@ -272,8 +272,8 @@ describe('Core Brand Utilities', () => {
       // processUser(orderId); // ❌ Compile error
       
       // But we can verify they're different types at the type level
-      expectType<TestUserId>(userId);
-      expectType<TestOrderId>(orderId);
+      expectTypeOf(userId).toEqualTypeOf<TestUserId>();
+      expectTypeOf(orderId).toEqualTypeOf<TestOrderId>();
       
       // And that they don't automatically convert
       expect(userId).not.toBe(orderId);

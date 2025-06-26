@@ -16,7 +16,7 @@ const UUID_V4_REGEX =
  * ULID validation regex.
  * Matches ULID format: 26 characters, Crockford Base32 encoding
  */
-const ULID_REGEX = /^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$/i;
+const ULID_REGEX = /^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$/;
 
 /**
  * Nanoid validation regex.

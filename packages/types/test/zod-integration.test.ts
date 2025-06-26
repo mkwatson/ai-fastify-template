@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { expectType } from 'expect-type';
+import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import {
   type BrandedZodType,
@@ -174,8 +174,8 @@ describe('Zod Integration', () => {
       const productId = ZodBrandedSchemas.ProductId.parse(VALID_UUID);
       const orderId = ZodBrandedSchemas.OrderId.parse(VALID_UUID);
       
-      expectType<UserId>(userId);
-      expectType<ProductId>(productId);
+      expectTypeOf(userId).toEqualTypeOf<UserId>();
+      expectTypeOf(productId).toEqualTypeOf<ProductId>();
       
       expect(unwrap(userId)).toBe(VALID_UUID);
       expect(unwrap(productId)).toBe(VALID_UUID);
@@ -197,8 +197,8 @@ describe('Zod Integration', () => {
       const email = ZodBrandedSchemas.EmailAddress.parse(VALID_EMAIL);
       const slug = ZodBrandedSchemas.Slug.parse(VALID_SLUG);
       
-      expectType<EmailAddress>(email);
-      expectType<Slug>(slug);
+      expectTypeOf(email).toEqualTypeOf<EmailAddress>();
+      expectTypeOf(slug).toEqualTypeOf<Slug>();
       
       expect(unwrap(email)).toBe(VALID_EMAIL);
       expect(unwrap(slug)).toBe(VALID_SLUG);
@@ -212,7 +212,7 @@ describe('Zod Integration', () => {
         
         const result = GetUserParams.parse({ userId: VALID_UUID });
         
-        expectType<{ userId: UserId }>(result);
+        expectTypeOf(result).toEqualTypeOf<{ userId: UserId }>();
         expect(unwrap(result.userId)).toBe(VALID_UUID);
       });
 
@@ -318,7 +318,7 @@ describe('Zod Integration', () => {
           userId: VALID_UUID,
         });
 
-        expectType<{ userId: UserId }>(result);
+        expectTypeOf(result).toEqualTypeOf<{ userId: UserId }>();
         expect(unwrap(result.userId)).toBe(VALID_UUID);
       });
 
@@ -461,7 +461,7 @@ describe('Zod Integration', () => {
       const result = ZodBrandedSchemas.UserId.parse(VALID_UUID);
       
       // Should be typed as UserId, not string
-      expectType<UserId>(result);
+      expectTypeOf(result).toEqualTypeOf<UserId>();
       
       // Runtime verification
       expect(typeof result).toBe('string');
@@ -490,9 +490,9 @@ describe('Zod Integration', () => {
       });
 
       // All IDs should have proper types
-      expectType<typeof result.id>(result.id);
-      expectType<typeof result.customerId>(result.customerId);
-      expectType<typeof result.items[0].productId>(result.items[0].productId);
+      expectTypeOf(result.id).toEqualTypeOf<typeof result.id>();
+      expectTypeOf(result.customerId).toEqualTypeOf<typeof result.customerId>();
+      expectTypeOf(result.items[0].productId).toEqualTypeOf<typeof result.items[0].productId>();
       
       // Cannot mix up ID types (would be compile error in real usage)
       expect(unwrap(result.id)).toBe(VALID_UUID);
