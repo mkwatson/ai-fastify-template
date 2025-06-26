@@ -6,6 +6,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { propertyTest, generators } from '../src/index.js';
+import fc from 'fast-check';
+
 import {
   isString,
   isNonEmptyString,
@@ -393,6 +396,138 @@ describe('Validation Utilities', () => {
       expect(isPositiveInteger(Number.POSITIVE_INFINITY)).toBe(false);
       expect(isNonNegativeNumber(Number.POSITIVE_INFINITY)).toBe(true);
       expect(isNonNegativeNumber(Number.NEGATIVE_INFINITY)).toBe(false);
+    });
+  });
+});
+
+// ===== Property-Based Tests =====
+
+describe('Validation Utilities - Property Tests', () => {
+  describe('isString - Property Tests', () => {
+    it('should always return boolean for any input', () => {
+      fc.assert(
+        fc.property(fc.anything(), input => {
+          const result = isString(input);
+          expect(typeof result).toBe('boolean');
+        })
+      );
+    });
+
+    it('should return true for all string inputs', () => {
+      fc.assert(
+        fc.property(fc.string(), input => {
+          const result = isString(input);
+          expect(result).toBe(true);
+        })
+      );
+    });
+  });
+
+  describe('isNonEmptyString - Property Tests', () => {
+    it('should consistently validate non-empty strings', () => {
+      fc.assert(
+        fc.property(fc.string(), input => {
+          const result = isNonEmptyString(input);
+          const expected = input.length > 0;
+          expect(result).toBe(expected);
+        })
+      );
+    });
+  });
+
+  describe('isValidUuid - Property Tests', () => {
+    it('should always return boolean for any input', () => {
+      fc.assert(
+        fc.property(fc.string(), input => {
+          const result = isValidUuid(input);
+          expect(typeof result).toBe('boolean');
+        })
+      );
+    });
+  });
+
+  describe('isValidEmail - Property Tests', () => {
+    it('should always return boolean for any input', () => {
+      fc.assert(
+        fc.property(fc.string(), input => {
+          const result = isValidEmail(input);
+          expect(typeof result).toBe('boolean');
+        })
+      );
+    });
+  });
+
+  describe('isPositiveInteger - Property Tests', () => {
+    it('should validate positive integers correctly', () => {
+      fc.assert(
+        fc.property(fc.integer({ min: 1, max: 1000 }), num => {
+          const result = isPositiveInteger(num);
+          expect(result).toBe(true);
+        })
+      );
+    });
+
+    it('should reject non-positive and non-integer numbers', () => {
+      fc.assert(
+        fc.property(
+          fc.oneof(
+            fc.integer({ min: -1000, max: 0 }), // Non-positive integers
+            fc
+              .float({ min: Math.fround(0.1), max: Math.fround(1000) })
+              .filter(n => !Number.isInteger(n)) // Only non-integers
+          ),
+          num => {
+            const result = isPositiveInteger(num);
+            expect(result).toBe(false);
+          }
+        )
+      );
+    });
+  });
+
+  describe('isNonNegativeNumber - Property Tests', () => {
+    it('should validate non-negative numbers correctly', () => {
+      fc.assert(
+        fc.property(
+          fc.float({ min: 0, max: Math.fround(1000), noNaN: true }),
+          num => {
+            const result = isNonNegativeNumber(num);
+            expect(result).toBe(true);
+          }
+        )
+      );
+    });
+  });
+
+  describe('createStringLengthValidator - Property Tests', () => {
+    it('should validate string lengths correctly', () => {
+      fc.assert(
+        fc.property(
+          fc.tuple(
+            fc.string({ minLength: 10, maxLength: 20 }),
+            fc.integer({ min: 5, max: 15 })
+          ),
+          ([str, minLen]) => {
+            const validator = createStringLengthValidator(minLen);
+            const result = validator(str);
+            const expected = str.length >= minLen;
+            expect(result).toBe(expected);
+          }
+        )
+      );
+    });
+  });
+
+  describe('createRegexValidator - Property Tests', () => {
+    it('should validate regex patterns correctly', () => {
+      fc.assert(
+        fc.property(fc.string(), str => {
+          const validator = createRegexValidator(/^[a-zA-Z]+$/);
+          const result = validator(str);
+          const expected = /^[a-zA-Z]+$/.test(str);
+          expect(result).toBe(expected);
+        })
+      );
     });
   });
 });

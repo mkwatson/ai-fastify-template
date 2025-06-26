@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { propertyTest, generators } from '@ai-fastify-template/types';
+import fc from 'fast-check';
 
 import {
   isValidEmail,
@@ -141,5 +143,123 @@ describe('validatePasswordStrength', () => {
     const result = validatePasswordStrength('   ');
     expect(result.isValid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+// ===== Property-Based Tests =====
+
+describe('isValidEmail - Property Tests', () => {
+  it('should consistently return boolean values', () => {
+    fc.assert(
+      fc.property(fc.string(), input => {
+        const result = isValidEmail(input);
+        expect(typeof result).toBe('boolean');
+      })
+    );
+  });
+
+  it('should handle email generator results consistently', () => {
+    fc.assert(
+      fc.property(generators.email(), email => {
+        const result = isValidEmail(email);
+        expect(typeof result).toBe('boolean');
+        // Note: fast-check's email generator may produce emails that our
+        // validator considers invalid due to different RFC compliance levels
+      })
+    );
+  });
+});
+
+describe('isValidUrl - Property Tests', () => {
+  it('should consistently return boolean values', () => {
+    fc.assert(
+      fc.property(fc.string(), input => {
+        const result = isValidUrl(input);
+        expect(typeof result).toBe('boolean');
+      })
+    );
+  });
+
+  it('should handle valid URL protocols', () => {
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.constant('https://example.com'),
+          fc.constant('http://test.org'),
+          fc.constant('ftp://files.com'),
+          fc.webUrl()
+        ),
+        url => {
+          const result = isValidUrl(url);
+          expect(typeof result).toBe('boolean');
+          // Most of these should be valid
+          expect(result).toBe(true);
+        }
+      )
+    );
+  });
+});
+
+describe('isValidPhoneNumber - Property Tests', () => {
+  it('should consistently return boolean values', () => {
+    fc.assert(
+      fc.property(fc.string(), input => {
+        const result = isValidPhoneNumber(input);
+        expect(typeof result).toBe('boolean');
+      })
+    );
+  });
+
+  it('should handle valid phone number patterns', () => {
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.constant('(555) 123-4567'),
+          fc.constant('555-123-4567'),
+          fc.constant('5551234567')
+        ),
+        phone => {
+          const result = isValidPhoneNumber(phone);
+          expect(typeof result).toBe('boolean');
+          // These known valid patterns should return true
+          expect(result).toBe(true);
+        }
+      )
+    );
+  });
+});
+
+describe('validatePasswordStrength - Property Tests', () => {
+  it('should always return object with isValid and errors properties', () => {
+    fc.assert(
+      fc.property(fc.string(), password => {
+        const result = validatePasswordStrength(password);
+
+        expect(typeof result.isValid).toBe('boolean');
+        expect(Array.isArray(result.errors)).toBe(true);
+        expect(result.isValid === (result.errors.length === 0)).toBe(true);
+      })
+    );
+  });
+
+  it('should handle password complexity correctly', () => {
+    fc.assert(
+      fc.property(fc.string({ minLength: 0, maxLength: 20 }), password => {
+        const result = validatePasswordStrength(password);
+
+        // Check that the logic is consistent
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasDigit = /[0-9]/.test(password);
+        const hasSpecial = /[^A-Za-z0-9]/.test(password);
+        const isLongEnough = password.length >= 8;
+
+        const expectedValid =
+          hasUpper && hasLower && hasDigit && hasSpecial && isLongEnough;
+
+        expect(result.isValid).toBe(expectedValid);
+        expect(result.isValid).toBe(result.errors.length === 0);
+      })
+    );
   });
 });
