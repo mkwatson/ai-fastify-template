@@ -590,10 +590,12 @@ describe('Result-based Validators', () => {
 
         expect(result.isErr()).toBe(true);
         if (result.isErr()) {
-          expect(Array.isArray(result.error)).toBe(true);
-          expect((result.error as ValidationError[])[0]).toBeInstanceOf(
-            ValidationError
-          );
+          expect(result.error).toBeInstanceOf(ValidationError);
+          expect(result.error.context?.errors).toBeDefined();
+          expect(Array.isArray(result.error.context?.errors)).toBe(true);
+          expect(
+            (result.error.context?.errors as ValidationError[])[0]
+          ).toBeInstanceOf(ValidationError);
         }
       });
     });

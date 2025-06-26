@@ -161,6 +161,21 @@ export class UserService {
       return err(conflictError);
     }
 
+    // Handle database errors during user lookup
+    if (
+      existingUserResult.isErr() &&
+      !(existingUserResult.error instanceof NotFoundError)
+    ) {
+      const internalError = new InternalError('Failed to check existing user', {
+        originalError: existingUserResult.error,
+      });
+      this.logger.error(
+        { error: internalError.toSafeObject() },
+        'User creation failed: database error during user lookup'
+      );
+      return err(internalError);
+    }
+
     // Create user (wrap potential database errors)
     // Filter out undefined values
     const cleanUserData: CreateUserInput = {
@@ -453,7 +468,38 @@ export class UserService {
     // Create users sequentially to avoid race conditions
     const createdUsers: User[] = [];
     for (const userData of validatedUsers) {
-      const createResult = await this.createUser(userData);
+      // Check if user already exists
+      const existingUserResult = await this.findUserByEmail(userData.email);
+      if (existingUserResult.isOk()) {
+        const conflictError = new ConflictError(
+          'User',
+          `User with email ${userData.email} already exists`,
+          { email: userData.email }
+        );
+        this.logger.warn(
+          { error: conflictError.toSafeObject() },
+          'Batch user creation failed: email already exists'
+        );
+        return err(conflictError);
+      }
+
+      // Create user directly (skip re-validation since already validated)
+      const cleanUserData: CreateUserInput = {
+        email: userData.email,
+        name: userData.name,
+        ...(userData.phone ? { phone: userData.phone } : {}),
+        ...(userData.password ? { password: userData.password } : {}),
+      };
+
+      const createResult = await ResultUtils.fromPromise(
+        this.repository.create({
+          ...cleanUserData,
+          isActive: true,
+        }),
+        error =>
+          new InternalError('Failed to create user', { originalError: error })
+      );
+
       if (createResult.isErr()) {
         this.logger.error(
           {
@@ -465,7 +511,13 @@ export class UserService {
         );
         return err(createResult.error);
       }
-      createdUsers.push(createResult.value);
+
+      const user = createResult.value;
+      this.logger.debug(
+        { userId: user.id, email: user.email },
+        'User created in batch'
+      );
+      createdUsers.push(user);
     }
 
     this.logger.info(

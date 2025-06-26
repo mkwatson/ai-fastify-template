@@ -222,9 +222,15 @@ throw new Error('Something went wrong'); // Too generic!
 #### Result Type Patterns
 
 ```typescript
-import { 
-  Result, ok, err, ResultUtils, FastifyResultUtils,
-  type AsyncServiceResult, ValidationError, NotFoundError 
+import {
+  Result,
+  ok,
+  err,
+  ResultUtils,
+  FastifyResultUtils,
+  type AsyncServiceResult,
+  ValidationError,
+  NotFoundError,
 } from '../utils/result.js';
 
 // ✅ REQUIRED: Service methods return Results
@@ -245,7 +251,8 @@ class UserService {
     // Create user with automatic error wrapping
     const createResult = await ResultUtils.fromPromise(
       this.repository.create(data),
-      (error) => new InternalError('Failed to create user', { originalError: error })
+      error =>
+        new InternalError('Failed to create user', { originalError: error })
     );
 
     return createResult;
@@ -254,11 +261,12 @@ class UserService {
   async findUserById(id: string): AsyncServiceResult<User> {
     const result = await ResultUtils.fromPromise(
       this.repository.findById(id),
-      (error) => new InternalError('Database query failed', { originalError: error })
+      error =>
+        new InternalError('Database query failed', { originalError: error })
     );
 
     if (result.isErr()) return err(result.error);
-    
+
     if (!result.value) {
       return err(new NotFoundError('User', id));
     }
@@ -268,25 +276,32 @@ class UserService {
 }
 
 // ✅ REQUIRED: Routes use FastifyResultUtils for automatic error conversion
-fastify.post('/users', {
-  schema: { body: CreateUserSchema }
-}, async (request, reply) => {
-  // Automatic error handling - one line!
-  const result = await fastify.userService.createUser(request.body);
-  const user = await FastifyResultUtils.handleResult(fastify, result);
-  
-  return reply.code(201).send(user);
-});
+fastify.post(
+  '/users',
+  {
+    schema: { body: CreateUserSchema },
+  },
+  async (request, reply) => {
+    // Automatic error handling - one line!
+    const result = await fastify.userService.createUser(request.body);
+    const user = await FastifyResultUtils.handleResult(fastify, result);
+
+    return reply.code(201).send(user);
+  }
+);
 
 // ✅ Alternative: Manual Result handling for custom logic
 fastify.get('/users/:id', async (request, reply) => {
   const result = await fastify.userService.findUserById(request.params.id);
-  
+
   if (result.isErr()) {
-    fastify.log.error({ error: result.error.toSafeObject() }, 'User lookup failed');
+    fastify.log.error(
+      { error: result.error.toSafeObject() },
+      'User lookup failed'
+    );
     throw FastifyResultUtils.toHttpError(fastify, result.error);
   }
-  
+
   return reply.send(result.value);
 });
 ```
@@ -297,26 +312,26 @@ fastify.get('/users/:id', async (request, reply) => {
 // ✅ Standard application errors with HTTP status mapping
 class ValidationError extends AppError {
   readonly code = 'VALIDATION_ERROR';
-  readonly statusCode = 400;  // Bad Request
+  readonly statusCode = 400; // Bad Request
   readonly isOperational = true;
 }
 
 class NotFoundError extends AppError {
   readonly code = 'NOT_FOUND';
-  readonly statusCode = 404;  // Not Found
+  readonly statusCode = 404; // Not Found
   readonly isOperational = true;
 }
 
 class ConflictError extends AppError {
   readonly code = 'CONFLICT';
-  readonly statusCode = 409;  // Conflict
+  readonly statusCode = 409; // Conflict
   readonly isOperational = true;
 }
 
 class InternalError extends AppError {
   readonly code = 'INTERNAL_ERROR';
-  readonly statusCode = 500;  // Internal Server Error
-  readonly isOperational = false;  // Non-operational - indicates system issues
+  readonly statusCode = 500; // Internal Server Error
+  readonly isOperational = false; // Non-operational - indicates system issues
 }
 ```
 
@@ -324,13 +339,18 @@ class InternalError extends AppError {
 
 ```typescript
 // ✅ Chain multiple operations
-async function createUserWithProfile(userData: CreateUserRequest): AsyncServiceResult<UserWithProfile> {
+async function createUserWithProfile(
+  userData: CreateUserRequest
+): AsyncServiceResult<UserWithProfile> {
   const userResult = await userService.createUser(userData);
-  
-  return AsyncResultUtils.chain(userResult, async (user) => {
-    const profileResult = await profileService.createProfile(user.id, userData.profile);
-    
-    return ResultUtils.chain(profileResult, (profile) => {
+
+  return AsyncResultUtils.chain(userResult, async user => {
+    const profileResult = await profileService.createProfile(
+      user.id,
+      userData.profile
+    );
+
+    return ResultUtils.chain(profileResult, profile => {
       return ok({ user, profile });
     });
   });
@@ -344,8 +364,12 @@ async function getUserDashboard(userId: string): AsyncServiceResult<Dashboard> {
     settingsService.getUserSettings(userId),
   ]);
 
-  const combinedResult = ResultUtils.combine([userResult, postsResult, settingsResult]);
-  
+  const combinedResult = ResultUtils.combine([
+    userResult,
+    postsResult,
+    settingsResult,
+  ]);
+
   return ResultUtils.chain(combinedResult, ([user, posts, settings]) => {
     return ok({ user, posts, settings });
   });
@@ -368,10 +392,13 @@ const validateUserData = (data: unknown): ServiceResult<UserData> => {
 };
 
 // ✅ Database operation wrapping
-const safeDbOperation = async <T>(operation: Promise<T>): AsyncServiceResult<T> => {
+const safeDbOperation = async <T>(
+  operation: Promise<T>
+): AsyncServiceResult<T> => {
   return ResultUtils.fromPromise(
     operation,
-    (error) => new InternalError('Database operation failed', { originalError: error })
+    error =>
+      new InternalError('Database operation failed', { originalError: error })
   );
 };
 
@@ -379,15 +406,22 @@ const safeDbOperation = async <T>(operation: Promise<T>): AsyncServiceResult<T> 
 const ValidationPatterns = {
   // Collect all errors for detailed feedback
   validateAllFields: (data: Record<string, unknown>) => {
-    const results = Object.entries(data).map(([key, value]) => 
+    const results = Object.entries(data).map(([key, value]) =>
       validateField(key, value)
     );
-    
+
     const errors = ResultUtils.collectErrors(results);
     if (errors.length > 0) {
-      return err(new ValidationError('Multiple validation errors', undefined, undefined, { errors }));
+      return err(
+        new ValidationError(
+          'Multiple validation errors',
+          undefined,
+          undefined,
+          { errors }
+        )
+      );
     }
-    
+
     return ok(ResultUtils.collectSuccesses(results));
   },
 
@@ -409,7 +443,7 @@ const ValidationPatterns = {
 describe('UserService', () => {
   it('should return validation error for invalid email', async () => {
     const result = await userService.createUser({ email: 'invalid' });
-    
+
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
       expect(result.error).toBeInstanceOf(ValidationError);
@@ -420,7 +454,7 @@ describe('UserService', () => {
   it('should return user for valid creation', async () => {
     const userData = { email: 'user@example.com', name: 'John' };
     const result = await userService.createUser(userData);
-    
+
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       expect(result.value).toMatchObject(userData);
@@ -432,17 +466,19 @@ describe('UserService', () => {
 describe('User routes', () => {
   it('should handle service errors correctly', async () => {
     const mockService = {
-      createUser: vi.fn().mockResolvedValue(err(new ValidationError('Invalid email'))),
+      createUser: vi
+        .fn()
+        .mockResolvedValue(err(new ValidationError('Invalid email'))),
     };
-    
+
     fastify.decorate('userService', mockService);
-    
+
     const response = await fastify.inject({
       method: 'POST',
       url: '/users',
       payload: { email: 'invalid' },
     });
-    
+
     expect(response.statusCode).toBe(400);
     expect(JSON.parse(response.payload).message).toContain('Invalid email');
   });
@@ -908,7 +944,7 @@ const routes: FastifyPluginAsync = async fastify => {
     {
       schema: {
         body: RequestSchema,
-        response: { 
+        response: {
           201: ResponseSchema,
           400: ErrorResponseSchema,
           500: ErrorResponseSchema,
@@ -932,7 +968,7 @@ const routes: FastifyPluginAsync = async fastify => {
     {
       schema: {
         params: z.object({ id: z.string() }),
-        response: { 
+        response: {
           200: ResponseSchema,
           404: ErrorResponseSchema,
           500: ErrorResponseSchema,
@@ -944,7 +980,7 @@ const routes: FastifyPluginAsync = async fastify => {
       fastify.log.debug({ id }, 'Getting resource by ID');
 
       const result = await fastify.service.getById(id);
-      
+
       if (result.isErr()) {
         // Manual error handling for custom responses
         fastify.log.error(
@@ -988,14 +1024,14 @@ export default routes;
 ### Service Layer Template
 
 ```typescript
-import { 
-  Result, 
-  ok, 
-  err, 
-  ResultUtils, 
-  type AsyncServiceResult, 
-  ValidationError, 
-  InternalError 
+import {
+  Result,
+  ok,
+  err,
+  ResultUtils,
+  type AsyncServiceResult,
+  ValidationError,
+  InternalError,
 } from '../utils/result.js';
 
 export interface ServiceInterface {
@@ -1014,7 +1050,8 @@ export class ServiceImplementation implements ServiceInterface {
     // Use Result patterns instead of try/catch
     const dbResult = await ResultUtils.fromPromise(
       this.db.collection.operation(data),
-      (error) => new InternalError('Database operation failed', { originalError: error })
+      error =>
+        new InternalError('Database operation failed', { originalError: error })
     );
 
     if (dbResult.isErr()) {
@@ -1047,13 +1084,15 @@ export class ServiceImplementation implements ServiceInterface {
     // Perform database operation
     try {
       const result = await this.db.collection.operation(data);
-      this.logger.info({ resultId: result.id }, 'Alternative operation completed');
+      this.logger.info(
+        { resultId: result.id },
+        'Alternative operation completed'
+      );
       return ok(result);
     } catch (error) {
-      const internalError = new InternalError(
-        'Database operation failed',
-        { originalError: error }
-      );
+      const internalError = new InternalError('Database operation failed', {
+        originalError: error,
+      });
       this.logger.error(
         { error: internalError.toSafeObject(), data: sanitizedData },
         'Alternative operation failed'

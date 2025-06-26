@@ -46,6 +46,7 @@ describe('UserService (Result-based)', () => {
       email: 'user@example.com',
       name: 'John Doe',
       phone: '(555) 123-4567',
+      password: 'SecurePassword123!',
     };
 
     it('should create user successfully', async () => {
@@ -468,17 +469,11 @@ describe('UserService (Result-based)', () => {
         },
       ];
 
-      // Mock individual createUser calls
-      const createUserSpy = vi.spyOn(userService, 'createUser');
-      createUserSpy
-        .mockResolvedValueOnce({
-          isOk: () => true,
-          value: createdUsers[0],
-        } as any)
-        .mockResolvedValueOnce({
-          isOk: () => true,
-          value: createdUsers[1],
-        } as any);
+      // Mock repository calls for batch creation
+      vi.mocked(mockRepository.findByEmail).mockResolvedValue(null); // No existing users
+      vi.mocked(mockRepository.create)
+        .mockResolvedValueOnce(createdUsers[0])
+        .mockResolvedValueOnce(createdUsers[1]);
 
       const result = await userService.createMultipleUsers(usersData);
 
@@ -487,13 +482,12 @@ describe('UserService (Result-based)', () => {
         expect(result.value).toEqual(createdUsers);
       }
 
-      expect(createUserSpy).toHaveBeenCalledTimes(2);
+      expect(mockRepository.findByEmail).toHaveBeenCalledTimes(2);
+      expect(mockRepository.create).toHaveBeenCalledTimes(2);
       expect(mockLogger.info).toHaveBeenCalledWith(
         { userCount: 2 },
         'Batch user creation completed successfully'
       );
-
-      createUserSpy.mockRestore();
     });
 
     it('should return validation error for invalid user data', async () => {
@@ -515,17 +509,29 @@ describe('UserService (Result-based)', () => {
     });
 
     it('should stop on first creation failure', async () => {
-      const createUserSpy = vi.spyOn(userService, 'createUser');
-      createUserSpy
-        .mockResolvedValueOnce({
-          isOk: () => true,
-          value: { id: 'user_1', email: 'user1@example.com' },
-        } as any)
-        .mockResolvedValueOnce({
-          isOk: () => false,
-          isErr: () => true,
-          error: new ConflictError('User'),
-        } as any);
+      const existingUser = {
+        id: 'existing_user',
+        email: 'user2@example.com',
+        name: 'Existing User',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isActive: true,
+      };
+
+      // First email check: no user (success)
+      // Second email check: user exists (conflict)
+      vi.mocked(mockRepository.findByEmail)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(existingUser);
+
+      vi.mocked(mockRepository.create).mockResolvedValueOnce({
+        id: 'user_1',
+        email: 'user1@example.com',
+        name: 'User 1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isActive: true,
+      });
 
       const result = await userService.createMultipleUsers(usersData);
 
@@ -534,10 +540,9 @@ describe('UserService (Result-based)', () => {
         expect(result.error).toBeInstanceOf(ConflictError);
       }
 
-      expect(createUserSpy).toHaveBeenCalledTimes(2);
-      expect(mockLogger.error).toHaveBeenCalled();
-
-      createUserSpy.mockRestore();
+      expect(mockRepository.findByEmail).toHaveBeenCalledTimes(2);
+      expect(mockRepository.create).toHaveBeenCalledTimes(1); // Only first user created
+      expect(mockLogger.warn).toHaveBeenCalled(); // Conflict errors log as warnings
     });
   });
 

@@ -300,9 +300,13 @@ export const CommonValidations = {
     if (itemValidator) {
       const arrayResult = ValidationUtils.validateArray(itemValidator, value);
       if (arrayResult.isErr()) {
-        return err(
-          arrayResult.error[0] ?? new ValidationError('Validation failed')
-        ); // Return first error
+        const validationError = new ValidationError(
+          `${fieldName} contains invalid items`,
+          fieldName,
+          undefined,
+          { errors: arrayResult.error }
+        );
+        return err(validationError);
       }
       return ok(arrayResult.value);
     }

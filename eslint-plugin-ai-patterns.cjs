@@ -221,7 +221,8 @@ module.exports = {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Require Result<T, E> return types for async service operations',
+          description:
+            'Require Result<T, E> return types for async service operations',
           category: 'Best Practices',
           recommended: true,
         },
@@ -259,7 +260,9 @@ module.exports = {
         const allowThrowInTests = options.allowThrowInTests !== false;
 
         function isServiceFile(filename) {
-          return filename.includes('/services/') || filename.includes('/utils/');
+          return (
+            filename.includes('/services/') || filename.includes('/utils/')
+          );
         }
 
         function isTestFile(filename) {
@@ -271,13 +274,17 @@ module.exports = {
         }
 
         function isExampleFile(filename) {
-          return filename.includes('-example.') || filename.includes('.example.');
+          return (
+            filename.includes('-example.') || filename.includes('.example.')
+          );
         }
 
         function hasResultReturnType(node) {
           if (!node.returnType) return false;
 
-          const returnTypeText = context.getSourceCode().getText(node.returnType);
+          const returnTypeText = context
+            .getSourceCode()
+            .getText(node.returnType);
           return (
             returnTypeText.includes('Result<') ||
             returnTypeText.includes('AsyncResult<') ||
@@ -451,7 +458,7 @@ module.exports = {
             // Allow throws in validation/setup code, but warn in service methods
             const functionNode = node.parent;
             let currentNode = functionNode;
-            
+
             // Walk up to find if we're in a service method
             while (currentNode && currentNode.type !== 'Program') {
               if (
