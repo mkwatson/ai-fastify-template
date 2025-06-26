@@ -342,8 +342,8 @@ describe('Property-based tests - Percentage formatting', () => {
   it('should be monotonic - larger values produce larger percentages', () => {
     fc.assert(
       fc.property(
-        fc.float({ min: 0, max: 1, noNaN: true }),
-        fc.float({ min: 0, max: 0.1, noNaN: true }),
+        fc.float({ min: 0, max: Math.fround(1), noNaN: true }),
+        fc.float({ min: 0, max: Math.fround(0.1), noNaN: true }),
         fc.integer({ min: 0, max: 3 }),
         (base, addition, decimals) => {
           if (
@@ -357,7 +357,11 @@ describe('Property-based tests - Percentage formatting', () => {
             const smallerNum = parseFloat(smaller.replace('%', ''));
             const largerNum = parseFloat(larger.replace('%', ''));
 
-            expect(largerNum).toBeGreaterThan(smallerNum);
+            // Only test monotonicity if the formatted values are actually different
+            // (to handle cases where addition is too small to affect formatting)
+            if (smallerNum !== largerNum) {
+              expect(largerNum).toBeGreaterThan(smallerNum);
+            }
           }
         }
       )
@@ -444,8 +448,10 @@ describe('Property-based tests - File size formatting', () => {
           [1099511627776, Number.MAX_SAFE_INTEGER, 'TB']
         ),
         ([min, max, expectedUnit]) => {
+          // Ensure max is at least min to avoid invalid ranges
+          const safeMax = Math.max(min, Math.min(max, 1000000000));
           const bytes = fc.sample(
-            fc.integer({ min, max: Math.min(max, 1000000000) }),
+            fc.integer({ min, max: safeMax }),
             1
           )[0];
           const result = formatFileSize(bytes);
@@ -465,7 +471,7 @@ describe('Property-based tests - File size formatting', () => {
 
   it('should throw for non-integer numbers', () => {
     fc.assert(
-      fc.property(fc.float({ min: 0.1, max: 1000.9 }), floatBytes => {
+      fc.property(fc.float({ min: Math.fround(0.1), max: Math.fround(1000.9) }), floatBytes => {
         if (!Number.isInteger(floatBytes)) {
           expect(() => formatFileSize(floatBytes)).toThrow();
         }

@@ -138,9 +138,25 @@ export abstract class ApiModelTest<TState extends ModelState> {
 
     const response = await this.app.inject(injectOptions);
 
+    // Handle responses that may not have JSON body (e.g., 204 No Content)
+    let responsePayload: unknown;
+    try {
+      // Don't try to parse JSON for status codes that typically don't have bodies
+      if (response.statusCode === 204 || response.statusCode === 304) {
+        responsePayload = null;
+      } else if (response.payload && response.payload.length > 0) {
+        responsePayload = response.json();
+      } else {
+        responsePayload = null;
+      }
+    } catch {
+      // If JSON parsing fails, use raw payload
+      responsePayload = response.payload;
+    }
+
     const apiResponse: ApiResponse = {
       statusCode: response.statusCode,
-      payload: response.json(),
+      payload: responsePayload,
       headers: response.headers as Record<string, string>,
     };
 

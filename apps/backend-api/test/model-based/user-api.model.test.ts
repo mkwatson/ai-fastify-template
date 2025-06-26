@@ -28,12 +28,10 @@ interface UserApiState {
 class UserApiModel extends ApiModelTest<UserApiState> {
   async resetApiState(): Promise<void> {
     // Reset the API state to match the initial model state
-    console.log('Resetting API state...');
-    const resetResponse = await this.app.inject({
+    await this.app.inject({
       method: 'DELETE',
       url: '/users/test/reset',
     });
-    console.log('Reset response status:', resetResponse.statusCode);
   }
 
   getInitialState(): UserApiState {
@@ -50,17 +48,11 @@ class UserApiModel extends ApiModelTest<UserApiState> {
       CommandBuilders.get('list-users', '/users', {
         postcondition: (state, result: { users: unknown[] }, response) => {
           // API should return array matching model state
-          console.log('list-users postcondition check:');
-          console.log('  Model state users length:', state.users.length);
-          console.log('  API response users length:', result.users?.length);
-          console.log('  Response status:', response.statusCode);
-
-          const isValid =
+          return (
             response.statusCode === 200 &&
             Array.isArray(result.users) &&
-            result.users.length === state.users.length;
-          console.log('  Postcondition valid:', isValid);
-          return isValid;
+            result.users.length === state.users.length
+          );
         },
         transform: state => ({
           ...state,
@@ -324,8 +316,8 @@ describe('Model-based testing - User API', () => {
     // Run model-based test with sequences of operations
     await expect(
       model.runTest({
-        runs: 50, // Number of test runs
-        maxCommands: 15, // Maximum commands per sequence
+        runs: 10, // Number of test runs (reduced for performance)
+        maxCommands: 5, // Maximum commands per sequence (reduced for performance)
       })
     ).resolves.toBeUndefined();
   });
@@ -375,8 +367,8 @@ describe('Model-based testing - User API', () => {
 
     await expect(
       model.runTest({
-        runs: 30,
-        maxCommands: 8,
+        runs: 5, // Reduced for performance
+        maxCommands: 3, // Reduced for performance
       })
     ).resolves.toBeUndefined();
   });

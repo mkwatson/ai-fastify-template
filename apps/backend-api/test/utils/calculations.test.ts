@@ -124,7 +124,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 1000, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(1000), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 100 }),
             })
           ),
@@ -141,7 +141,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             }),
             { minLength: 2 }
@@ -161,7 +161,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             }),
             { maxLength: 5 }
@@ -222,7 +222,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             })
           ),
@@ -241,7 +241,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             })
           ),
