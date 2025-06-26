@@ -97,5 +97,140 @@ module.exports = {
         };
       },
     },
+
+    // Rule 3: Require property tests for business logic functions
+    'require-property-tests': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description:
+            'Require property-based tests for all business logic functions',
+          category: 'Testing',
+          recommended: true,
+        },
+        messages: {
+          missingPropertyTests:
+            'Business logic function "{{functionName}}" requires property-based tests - add tests with fast-check invariants',
+          missingPropertyTestsFile:
+            'Business logic functions found but no corresponding property tests file exists',
+        },
+        schema: [],
+      },
+      create(context) {
+        return {
+          Program(node) {
+            const filename = context.getFilename();
+            const sourceCode = context.getSourceCode();
+            const text = sourceCode.getText();
+
+            // Only check business logic files (utils, services, calculations, validators)
+            if (
+              !filename.includes('/utils/') &&
+              !filename.includes('/services/') &&
+              !filename.includes('/lib/') &&
+              !filename.includes('calculations') &&
+              !filename.includes('validators')
+            ) {
+              return;
+            }
+
+            // Skip test files
+            if (
+              filename.includes('.test.') ||
+              filename.includes('.spec.') ||
+              filename.includes('/test/')
+            ) {
+              return;
+            }
+
+            // Find exported functions
+            const exportedFunctions = [];
+            
+            // Match function declarations: export function name()
+            const functionDeclarations = text.matchAll(
+              /export\s+function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
+            );
+            for (const match of functionDeclarations) {
+              exportedFunctions.push(match[1]);
+            }
+
+            // Match arrow function exports: export const name = () =>
+            const arrowFunctions = text.matchAll(
+              /export\s+const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*\([^)]*\)\s*=>/g
+            );
+            for (const match of arrowFunctions) {
+              exportedFunctions.push(match[1]);
+            }
+
+            if (exportedFunctions.length === 0) {
+              return;
+            }
+
+            // Check if corresponding test file exists
+            const testFilePaths = [
+              filename.replace('/src/', '/test/').replace('.ts', '.test.ts'),
+              filename.replace('/src/', '/test/').replace('.ts', '.spec.ts'),
+              filename.replace('.ts', '.test.ts'),
+              filename.replace('.ts', '.spec.ts'),
+            ];
+
+            const fs = require('fs');
+            let testFileExists = false;
+            let testFileContent = '';
+
+            for (const testPath of testFilePaths) {
+              try {
+                if (fs.existsSync(testPath)) {
+                  testFileExists = true;
+                  testFileContent = fs.readFileSync(testPath, 'utf8');
+                  break;
+                }
+              } catch {
+                // File doesn't exist, continue
+              }
+            }
+
+            if (!testFileExists) {
+              context.report({
+                node,
+                messageId: 'missingPropertyTestsFile',
+              });
+              return;
+            }
+
+            // Check each function for property tests
+            for (const functionName of exportedFunctions) {
+              // Look for property tests with this function name
+              const hasPropertyTests = 
+                testFileContent.includes('fc.assert') &&
+                testFileContent.includes('fc.property') &&
+                testFileContent.includes(functionName);
+
+              if (!hasPropertyTests) {
+                // Find the actual function node for better error reporting
+                const functionPattern = new RegExp(
+                  `export\\s+(?:function\\s+${functionName}|const\\s+${functionName}\\s*=)`,
+                  'g'
+                );
+                const match = functionPattern.exec(text);
+                
+                if (match) {
+                  const lines = text.substring(0, match.index).split('\n');
+                  const line = lines.length;
+                  const column = lines[lines.length - 1].length;
+                  
+                  context.report({
+                    node,
+                    loc: { line, column },
+                    messageId: 'missingPropertyTests',
+                    data: { functionName },
+                  });
+                }
+              }
+            }
+          },
+        };
+      },
+    },
   },
 };

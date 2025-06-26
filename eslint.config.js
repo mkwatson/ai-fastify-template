@@ -53,6 +53,7 @@ export default tseslint.config(
       // 3. Custom runtime patterns
       'runtime-safety/no-direct-env-access': 'error',
       'runtime-safety/require-zod-validation': 'error',
+      'runtime-safety/require-property-tests': 'error',
 
       // 4. Module boundaries
       '@typescript-eslint/explicit-module-boundary-types': 'error',
@@ -107,6 +108,7 @@ export default tseslint.config(
       '@typescript-eslint/restrict-template-expressions': 'off',
       'runtime-safety/no-direct-env-access': 'off',
       'runtime-safety/require-zod-validation': 'off',
+      'runtime-safety/require-property-tests': 'off',
       'security/detect-object-injection': 'off',
     },
   }

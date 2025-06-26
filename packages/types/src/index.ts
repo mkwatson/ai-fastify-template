@@ -64,3 +64,8 @@ export * from './entity-ids.js';
 
 // Re-export Zod integration
 export * from './zod-integration.js';
+
+// Property-based testing utilities
+export * from './property-testing.js';
+export * from './api-fuzzing.js';
+export * from './model-based-testing.js';

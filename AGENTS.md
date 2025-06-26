@@ -810,6 +810,296 @@ it('should calculate 10% discount correctly', () => {
 });
 ```
 
+### 🚨 MANDATORY: Property-Based Testing Requirements
+
+**ENTERPRISE PRIORITY: TIER 1 - CRITICAL FOUNDATION**
+
+Property-based testing is **MANDATORY** for all business logic functions. This provides mathematical guarantees about function behavior by testing thousands of generated cases, catching edge cases that traditional unit tests miss.
+
+#### ESLint Enforcement
+
+A custom ESLint rule enforces property testing requirements:
+
+```typescript
+// ❌ ESLint Error: Business logic function requires property-based tests
+export function calculateTotal(items: Item[]): number {
+  // Implementation...
+}
+
+// ✅ Required: Corresponding property tests with fc.assert and fc.property
+describe('calculateTotal - properties', () => {
+  it('should maintain invariants', () => {
+    fc.assert(fc.property(
+      fc.array(fc.record({
+        price: fc.float({ min: 0, max: 1000, noNaN: true }),
+        quantity: fc.integer({ min: 0, max: 100 })
+      })),
+      (items) => {
+        const total = calculateTotal(items);
+        
+        // Mathematical invariants
+        expect(total).toBeGreaterThanOrEqual(0);
+        expect(Number.isFinite(total)).toBe(true);
+        
+        // Business logic invariants
+        const expectedTotal = items.reduce((sum, item) => 
+          sum + (item.price * item.quantity), 0);
+        expect(total).toBeCloseTo(expectedTotal, 2);
+      }
+    ));
+  });
+});
+```
+
+#### Core Property Testing Patterns
+
+**1. Mathematical Invariants**
+
+Properties that must always hold regardless of input:
+
+```typescript
+import { testInvariants, financialAmount, quantity } from '@ai-fastify-template/types';
+
+// Non-negative results
+testInvariants(
+  fc.array(fc.record({ price: financialAmount(), quantity: quantity() })),
+  calculateTotal,
+  [
+    (input, output) => output >= 0,
+    (input, output) => Number.isFinite(output),
+    (input, output) => input.length === 0 ? output === 0 : true
+  ]
+);
+
+// Monotonicity (more items = higher/equal total)
+fc.assert(fc.property(
+  fc.array(itemRecord(), { minLength: 1 }),
+  (items) => {
+    const fullTotal = calculateTotal(items);
+    const partialTotal = calculateTotal(items.slice(0, -1));
+    expect(partialTotal).toBeLessThanOrEqual(fullTotal);
+  }
+));
+```
+
+**2. Business Logic Invariants**
+
+Domain-specific rules that must hold:
+
+```typescript
+// Tax calculation properties
+fc.assert(fc.property(
+  fc.array(itemRecord()),
+  fc.float({ min: 0, max: 1 }),
+  (items, taxRate) => {
+    const baseTotal = calculateTotal(items);
+    const totalWithTax = calculateTotalWithTax(items, taxRate);
+    
+    // Tax increases total (or keeps it same for 0% tax)
+    expect(totalWithTax).toBeGreaterThanOrEqual(baseTotal);
+    
+    // Correct tax calculation
+    const expectedTax = baseTotal * taxRate;
+    expect(totalWithTax).toBeCloseTo(baseTotal + expectedTax, 2);
+  }
+));
+
+// Discount properties
+fc.assert(fc.property(
+  financialAmount(),
+  fc.float({ min: 0, max: 100 }),
+  (price, discountPercent) => {
+    const discount = calculateDiscount(price, discountPercent);
+    
+    // Discount never exceeds price
+    expect(discount).toBeLessThanOrEqual(price);
+    expect(discount).toBeGreaterThanOrEqual(0);
+    
+    // Correct percentage calculation
+    const expectedDiscount = price * (discountPercent / 100);
+    expect(discount).toBeCloseTo(expectedDiscount, 2);
+  }
+));
+```
+
+**3. Composition Properties**
+
+Testing function composition and equivalence:
+
+```typescript
+import { testComposition } from '@ai-fastify-template/types';
+
+// Two ways of calculating should give same result
+testComposition(
+  fc.array(itemRecord()),
+  (items) => calculateTotalWithTax(items, 0.1),
+  (items) => calculateTotal(items) * 1.1,
+  (a, b) => Math.abs(a - b) < 0.01 // Allow floating point errors
+);
+```
+
+**4. Order Independence (Commutativity)**
+
+```typescript
+// Order of items shouldn't matter for total
+fc.assert(fc.property(
+  fc.array(itemRecord(), { minLength: 2 }),
+  (items) => {
+    const total1 = calculateTotal(items);
+    const shuffled = [...items].reverse();
+    const total2 = calculateTotal(shuffled);
+    expect(total1).toBeCloseTo(total2, 10);
+  }
+));
+```
+
+#### API Endpoint Fuzzing
+
+**MANDATORY** for all API endpoints:
+
+```typescript
+import { fuzzEndpoint, fuzzSchemaValidation } from '@ai-fastify-template/types';
+
+describe('API Fuzzing Tests', () => {
+  it('should handle malicious inputs safely', async () => {
+    await fuzzEndpoint(app, 'POST', '/users', {
+      iterations: 100,
+      expectedSuccessStatuses: [200, 201],
+      expectedErrorStatuses: [400, 422, 429]
+    });
+  });
+
+  it('should validate schema properly', async () => {
+    const validPayload = { email: 'test@example.com', name: 'Test' };
+    await fuzzSchemaValidation(app, 'POST', '/users', validPayload);
+  });
+});
+```
+
+#### Model-Based Testing for Stateful Systems
+
+For complex stateful systems (shopping carts, user sessions, etc.):
+
+```typescript
+import { 
+  shoppingCartStateMachine, 
+  runModelBasedTest,
+  AddItemCommand,
+  RemoveItemCommand 
+} from '@ai-fastify-template/types';
+
+describe('Shopping Cart State Machine', () => {
+  it('should maintain consistency across operations', async () => {
+    await runModelBasedTest(
+      shoppingCartStateMachine(() => new ShoppingCart()),
+      { maxCommands: 50, iterations: 20 }
+    );
+  });
+});
+```
+
+#### Property Test Templates
+
+Use pre-built templates for common patterns:
+
+```typescript
+import { 
+  testInvariants,
+  testMonotonicity, 
+  testIdempotency,
+  invariants 
+} from '@ai-fastify-template/types';
+
+// Template for financial calculations
+testInvariants(
+  fc.array(itemRecord()),
+  calculateTotal,
+  [
+    invariants.nonNegative,
+    invariants.finite,
+    invariants.zeroForEmpty,
+    invariants.boundedBySum
+  ]
+);
+
+// Template for monotonic functions
+testMonotonicity(
+  fc.tuple(fc.float({ min: 0, max: 100 }), fc.float({ min: 0, max: 100 })),
+  ([a, b]) => [Math.min(a, b), Math.max(a, b)],
+  (discountPercent) => calculateDiscount(100, discountPercent)
+);
+```
+
+#### Required Property Test Structure
+
+Every business logic function MUST have:
+
+1. **Invariant tests** - Properties that always hold
+2. **Boundary value tests** - Edge cases with fast-check generators
+3. **Composition tests** - Function interaction properties
+4. **Error condition tests** - Invalid input handling
+
+```typescript
+describe('BusinessFunction - Properties', () => {
+  describe('Invariants', () => {
+    it('should maintain mathematical properties', () => {
+      // fc.assert with mathematical invariants
+    });
+  });
+
+  describe('Boundary Values', () => {
+    it('should handle edge cases correctly', () => {
+      // fc.assert with boundary value generators
+    });
+  });
+
+  describe('Composition', () => {
+    it('should compose correctly with other functions', () => {
+      // testComposition or manual composition tests
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle invalid inputs gracefully', () => {
+      // fc.assert with invalid input generators
+    });
+  });
+});
+```
+
+#### Property Test Quality Standards
+
+**Minimum Requirements:**
+
+- **1000+ test cases per property** (fast-check default)
+- **Coverage of all input domains** using appropriate generators
+- **Mathematical rigor** - precise invariant specifications
+- **Integration with mutation testing** - properties must kill mutants
+
+**Generator Quality:**
+
+```typescript
+// ❌ Poor: Too narrow, misses edge cases
+fc.integer({ min: 1, max: 10 })
+
+// ✅ Good: Comprehensive range with edge cases
+fc.oneof(
+  fc.constant(0),
+  fc.integer({ min: 1, max: 100 }),
+  fc.integer({ min: 1000, max: Number.MAX_SAFE_INTEGER })
+)
+```
+
+**Invariant Quality:**
+
+```typescript
+// ❌ Weak: Doesn't verify business logic
+expect(result).toBeDefined();
+
+// ✅ Strong: Verifies mathematical relationship
+expect(result).toBe(input.reduce((sum, item) => sum + item.price * item.quantity, 0));
+```
+
 ## Common Patterns & Examples
 
 ### Route Structure Template
