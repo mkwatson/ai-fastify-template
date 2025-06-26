@@ -28,5 +28,7 @@ export function getPort(): number {
  * @returns The host to bind to
  */
 export function getHost(): string {
-  return process.env['HOST'] ?? DEFAULT_HOST;
+  // Use || instead of ?? because empty string should be treated as "not set"
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  return process.env['HOST'] || DEFAULT_HOST;
 }

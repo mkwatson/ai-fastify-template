@@ -19,7 +19,7 @@ pnpm ai:check          # Pre-commit validation
 pnpm ai:compliance     # Full quality pipeline
 
 # CI Validation (CRITICAL: Run before pushing)
-pnpm ci:check          # Same validation as GitHub Actions (lint + type-check)
+pnpm ci:check          # Same validation as GitHub Actions (lint + type-check + test)
 
 # Project management
 # Use Linear MCP tools for issue management

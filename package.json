@@ -25,7 +25,7 @@
     "ai:security": "audit-ci --config audit-ci.json",
     "ai:compliance": "turbo lint type-check graph:validate test test:mutation build && pnpm ai:security && echo '🎉 All AI compliance checks passed!'",
     "ai:fix": "pnpm lint:fix && echo 'Code formatting and linting fixes applied'",
-    "ci:check": "turbo lint type-check && echo '✅ Local CI validation passed (matches GitHub Actions)'",
+    "ci:check": "turbo lint type-check test && echo '✅ Local CI validation passed (matches GitHub Actions)'",
     "smart:lint": "node scripts/smart-turbo.js lint",
     "smart:test": "node scripts/smart-turbo.js test",
     "smart:check": "node scripts/smart-turbo.js lint && node scripts/smart-turbo.js type-check && node scripts/smart-turbo.js graph:validate",
