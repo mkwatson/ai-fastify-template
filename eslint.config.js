@@ -144,6 +144,18 @@ export default [
       'ai-patterns/require-input-validation': 'error',
       'ai-patterns/service-dependency-injection': 'error',
       'ai-patterns/fastify-plugin-wrapper': 'error',
+      'ai-patterns/require-property-tests': [
+        'error',
+        {
+          excludePatterns: [
+            // Exclude simple index/re-export files
+            'index\\.ts',
+            // Allow exclusion of simple getter functions (can be overridden)
+            // 'get[A-Z]\\w*',
+          ],
+          requireTestFile: true,
+        },
+      ],
 
       // Import organization and circular dependency detection
       'import/order': [

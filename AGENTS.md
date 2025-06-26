@@ -354,6 +354,347 @@ pnpm ai:compliance    # Includes mutation testing in full pipeline
 
 See [docs/MUTATION_TESTING_GUIDE.md](./docs/MUTATION_TESTING_GUIDE.md) for detailed implementation patterns.
 
+## 🚨 MANDATORY: Property-Based Testing Requirements
+
+**Property-based testing is MANDATORY for all business logic functions.** This enterprise-grade requirement is enforced by ESLint and ensures comprehensive edge case coverage through mathematical properties and invariants.
+
+### Why Property-Based Testing is Required
+
+Traditional unit tests check specific examples. Property-based tests verify that functions satisfy mathematical properties across thousands of generated inputs:
+
+```typescript
+// ❌ TRADITIONAL: Tests 3 examples
+it('should calculate total correctly', () => {
+  expect(calculateTotal([{ price: 10, quantity: 2 }])).toBe(20);
+  expect(calculateTotal([{ price: 5, quantity: 3 }])).toBe(15);
+  expect(calculateTotal([])).toBe(0);
+});
+
+// ✅ PROPERTY-BASED: Tests thousands of examples + invariants
+it('should maintain mathematical properties', () => {
+  fc.assert(
+    fc.property(
+      fc.array(
+        fc.record({
+          price: fc.float({ min: 0, max: 1000, noNaN: true }),
+          quantity: fc.integer({ min: 0, max: 100 }),
+        })
+      ),
+      items => {
+        const total = calculateTotal(items);
+
+        // Property 1: Non-negative result
+        expect(total).toBeGreaterThanOrEqual(0);
+
+        // Property 2: Equals manual calculation
+        const expected = items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        expect(total).toBeCloseTo(expected, 10);
+
+        // Property 3: Associative (order doesn't matter)
+        const shuffled = [...items].reverse();
+        expect(calculateTotal(shuffled)).toBeCloseTo(total, 10);
+      }
+    )
+  );
+});
+```
+
+### ESLint Enforcement
+
+**ESLint Rule**: `ai-patterns/require-property-tests`
+
+This rule automatically detects business logic functions in `utils/` directories and requires corresponding property-based tests using fast-check:
+
+```bash
+# ❌ LINT ERROR: Missing property tests
+/src/utils/formatters.ts
+  1:1  error  Business logic function "formatCurrency" requires property-based tests using fast-check
+
+# ✅ FIX: Add property-based tests
+describe('Property-based tests - Currency formatting', () => {
+  it('should maintain formatting properties', () => {
+    fc.assert(fc.property(
+      fc.float({min: -1000000, max: 1000000, noNaN: true}),
+      fc.constantFrom('USD', 'EUR', 'GBP', 'JPY'),
+      (amount, currency) => {
+        if (Number.isFinite(amount)) {
+          const result = formatCurrency(amount, currency);
+          expect(typeof result).toBe('string');
+          expect(result.length).toBeGreaterThan(0);
+        }
+      }
+    ));
+  });
+});
+```
+
+### Core Property Testing Patterns
+
+#### 1. **Validator Functions - Invariant Properties**
+
+```typescript
+describe('Property-based tests - Email validation', () => {
+  it('should never accept strings without @ symbol', () => {
+    fc.assert(
+      fc.property(
+        fc.string().filter(s => !s.includes('@') && s.length > 0),
+        invalidEmail => {
+          expect(isValidEmail(invalidEmail)).toBe(false);
+        }
+      )
+    );
+  });
+
+  it('should be consistent between function and schema validation', () => {
+    fc.assert(
+      fc.property(fc.string(), emailString => {
+        const functionResult = isValidEmail(emailString);
+        let schemaResult;
+        try {
+          EmailSchema.parse(emailString);
+          schemaResult = true;
+        } catch {
+          schemaResult = false;
+        }
+        expect(functionResult).toBe(schemaResult);
+      })
+    );
+  });
+});
+```
+
+#### 2. **Calculation Functions - Mathematical Properties**
+
+```typescript
+describe('Property-based tests - Mathematical invariants', () => {
+  it('should be monotonic - larger inputs produce larger outputs', () => {
+    fc.assert(
+      fc.property(
+        fc.float({ min: 0, max: 1000, noNaN: true }),
+        fc.float({ min: 0, max: 100, noNaN: true }),
+        (base, addition) => {
+          if (
+            Number.isFinite(base) &&
+            Number.isFinite(addition) &&
+            addition > 0
+          ) {
+            expect(calculateTax(base + addition)).toBeGreaterThan(
+              calculateTax(base)
+            );
+          }
+        }
+      )
+    );
+  });
+
+  it('should be deterministic - same input always produces same output', () => {
+    fc.assert(
+      fc.property(fc.float({ min: 0, max: 1000, noNaN: true }), amount => {
+        const result1 = calculateTax(amount);
+        const result2 = calculateTax(amount);
+        expect(result1).toBe(result2);
+      })
+    );
+  });
+});
+```
+
+#### 3. **Formatter Functions - Output Properties**
+
+```typescript
+describe('Property-based tests - Formatter invariants', () => {
+  it('should always return valid format', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: 1000000000 }), bytes => {
+        const result = formatFileSize(bytes);
+        expect(typeof result).toBe('string');
+        expect(result).toMatch(/^\d+\.\d+ [KMGT]?B$/);
+
+        // Never return empty unit strings
+        const parts = result.split(' ');
+        expect(parts).toHaveLength(2);
+        expect(parts[1]).not.toBe('');
+      })
+    );
+  });
+});
+```
+
+### Required Test Structure
+
+**Every business logic function MUST have:**
+
+1. **Traditional unit tests** (specific examples)
+2. **Property-based tests** (mathematical properties)
+3. **Cross-function invariants** (if applicable)
+
+```typescript
+describe('calculateDiscount', () => {
+  // 1. Traditional unit tests
+  describe('Traditional unit tests', () => {
+    it('should calculate 10% discount correctly', () => {
+      expect(calculateDiscount(100, 10)).toBe(10);
+    });
+  });
+
+  // 2. Property-based tests (MANDATORY)
+  describe('Property-based tests', () => {
+    it('should never return discount greater than price', () => {
+      fc.assert(
+        fc.property(
+          fc.float({ min: 0, max: 10000, noNaN: true }),
+          fc.float({ min: 0, max: 100, noNaN: true }),
+          (price, discountPercent) => {
+            const discount = calculateDiscount(price, discountPercent);
+            expect(discount).toBeLessThanOrEqual(price);
+            expect(discount).toBeGreaterThanOrEqual(0);
+          }
+        )
+      );
+    });
+  });
+
+  // 3. Cross-function invariants (if applicable)
+  describe('Cross-function invariants', () => {
+    it('should maintain consistency with tax calculations', () => {
+      fc.assert(
+        fc.property(fc.float({ min: 0, max: 1000, noNaN: true }), amount => {
+          const afterDiscount = amount - calculateDiscount(amount, 10);
+          const taxOnDiscounted = calculateTax(afterDiscount);
+          expect(taxOnDiscounted).toBeGreaterThanOrEqual(0);
+        })
+      );
+    });
+  });
+});
+```
+
+### Fast-Check Generator Patterns
+
+**Common arbitraries for business domains:**
+
+```typescript
+// Email addresses
+fc.emailAddress();
+
+// URLs
+fc.webUrl();
+
+// Domain names
+fc.domain();
+
+// Finite numbers (no NaN/Infinity)
+fc.float({ min: 0, max: 1000, noNaN: true });
+
+// Arrays with constraints
+fc.array(fc.string(), { minLength: 1, maxLength: 10 });
+
+// Records with optional fields
+fc.record({
+  id: fc.string(),
+  name: fc.option(fc.string()),
+  active: fc.boolean(),
+});
+
+// Constant from set
+fc.constantFrom('USD', 'EUR', 'GBP', 'JPY');
+
+// Filtered inputs
+fc.string().filter(s => s.length > 0 && !s.includes('@'));
+```
+
+### Model-Based Testing for APIs
+
+For testing stateful systems like APIs, use the model-based testing framework:
+
+```typescript
+import { ApiModelTest, CommandBuilders } from '@ai-fastify-template/config';
+
+class UserApiModel extends ApiModelTest<UserState> {
+  getCommands(state: UserState): ApiCommand<UserState>[] {
+    return [
+      CommandBuilders.get('list-users', '/users'),
+      CommandBuilders.post(
+        'create-user',
+        '/users',
+        () => ({
+          name: `User ${state.nextId}`,
+          email: `user${state.nextId}@example.com`,
+        }),
+        (state, result) => ({ ...state, users: [...state.users, result] })
+      ),
+      // ... more commands
+    ];
+  }
+
+  setupInvariants(): void {
+    this.addInvariant({
+      name: 'non-negative-user-count',
+      description: 'User count should never be negative',
+      check: state => state.users.length >= 0,
+    });
+  }
+}
+
+// Run model-based test
+it('should maintain invariants across API operations', async () => {
+  const model = new UserApiModel(app);
+  model.setupInvariants();
+  await model.runTest({ runs: 50, maxCommands: 15 });
+});
+```
+
+### Common Properties to Test
+
+**For All Functions:**
+
+- ✅ **Deterministic**: Same input → Same output
+- ✅ **Type safety**: Never throw for valid inputs
+- ✅ **Boundary handling**: Handle edge cases gracefully
+
+**For Validators:**
+
+- ✅ **Consistency**: Function and schema return same result
+- ✅ **Rejection invariants**: Invalid patterns always rejected
+- ✅ **Boolean return**: Always returns true/false
+
+**For Calculators:**
+
+- ✅ **Mathematical properties**: Monotonic, associative, commutative
+- ✅ **Range bounds**: Results within expected ranges
+- ✅ **Precision handling**: Decimal arithmetic correctness
+
+**For Formatters:**
+
+- ✅ **Output format**: Always returns expected string pattern
+- ✅ **Non-empty results**: Never returns empty strings
+- ✅ **Encoding safety**: Handles special characters
+
+**For Collections:**
+
+- ✅ **Size invariants**: Length relationships maintained
+- ✅ **Uniqueness**: Duplicate handling correct
+- ✅ **Ordering**: Sort stability and correctness
+
+### Integration with Quality Pipeline
+
+Property-based tests integrate seamlessly with existing quality tools:
+
+```bash
+# Property tests run automatically in standard pipeline
+pnpm test              # Includes property-based tests
+pnpm test:mutation     # Property tests improve mutation scores
+pnpm ai:compliance     # Full validation including property tests
+
+# ESLint enforces property test presence
+pnpm lint              # Fails if property tests missing
+```
+
+**Mutation Testing Synergy**: Property-based tests dramatically improve mutation test scores because they test actual business logic properties, not just code coverage.
+
 ### 🚨 CRITICAL: AI Agent Testing Guidelines
 
 **The goal is not coverage, it's confidence.** Tests that don't fail when logic is broken are worse than no tests.

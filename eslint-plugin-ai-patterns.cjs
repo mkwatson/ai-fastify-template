@@ -215,5 +215,228 @@ module.exports = {
         };
       },
     },
+
+    // Rule 6: Mandatory property-based testing for business logic functions
+    'require-property-tests': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description:
+            'Require property-based tests for all business logic functions',
+          category: 'Quality',
+          recommended: true,
+        },
+        messages: {
+          missingPropertyTests:
+            'Business logic function "{{functionName}}" requires property-based tests using fast-check. Create tests that verify mathematical properties and invariants.',
+          noPropertyTestFile:
+            'Business logic in utils/ requires corresponding property-based tests. Create a test file with fc.assert() and fc.property() for functions: {{functions}}',
+        },
+        schema: [
+          {
+            type: 'object',
+            properties: {
+              excludePatterns: {
+                type: 'array',
+                items: { type: 'string' },
+                description:
+                  'Patterns to exclude from property testing requirements',
+              },
+              requireTestFile: {
+                type: 'boolean',
+                description: 'Whether to require test files for utils modules',
+                default: true,
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      create(context) {
+        const options = context.options[0] || {};
+        const excludePatterns = options.excludePatterns || [];
+        const requireTestFile = options.requireTestFile !== false;
+
+        // Helper to check if function should be excluded
+        function isExcluded(functionName, filename) {
+          const fullPath = `${filename}:${functionName}`;
+          return excludePatterns.some(pattern => {
+            const regex = new RegExp(pattern);
+            return regex.test(fullPath) || regex.test(functionName);
+          });
+        }
+
+        // Helper to find exported functions
+        function getExportedFunctions() {
+          const sourceCode = context.getSourceCode();
+          const text = sourceCode.getText();
+          const functions = [];
+
+          // Find export function declarations
+          const exportFunctionRegex = /export\s+function\s+(\w+)/g;
+          let match;
+          while ((match = exportFunctionRegex.exec(text)) !== null) {
+            functions.push(match[1]);
+          }
+
+          // Find export const functions (arrow functions)
+          const exportConstRegex =
+            /export\s+const\s+(\w+)\s*=\s*\([^)]*\)\s*=>/g;
+          while ((match = exportConstRegex.exec(text)) !== null) {
+            functions.push(match[1]);
+          }
+
+          return functions;
+        }
+
+        // Helper to check if test file exists and has property tests
+        function hasPropertyTests(utilsFilename, functions) {
+          const fs = require('fs');
+
+          try {
+            // Convert utils file path to test file path
+            const basePath = utilsFilename.replace(/\/src\//, '/test/');
+            const testFilePath = basePath.replace(/\.ts$/, '.test.ts');
+
+            if (!fs.existsSync(testFilePath)) {
+              return { exists: false, hasPropertyTests: false };
+            }
+
+            const testContent = fs.readFileSync(testFilePath, 'utf8');
+
+            // Check for fast-check usage
+            const hasFastCheck =
+              testContent.includes('fc.assert') &&
+              testContent.includes('fc.property');
+
+            if (!hasFastCheck) {
+              return {
+                exists: true,
+                hasPropertyTests: false,
+                missingPropertyTests: functions,
+              };
+            }
+
+            // Check if all functions have property tests
+            // Look for broader patterns that indicate property testing for each function
+            const missingPropertyTests = functions.filter(func => {
+              // More flexible patterns to detect property tests for a function
+              const patterns = [
+                // Direct function name in describe/it with "property" or "invariant"
+                new RegExp(
+                  `describe\\([^)]*${func}[^)]*property|describe\\([^)]*property[^)]*${func}`,
+                  'i'
+                ),
+                new RegExp(
+                  `describe\\([^)]*${func}[^)]*invariant|describe\\([^)]*invariant[^)]*${func}`,
+                  'i'
+                ),
+                // Function name in property test sections
+                new RegExp(
+                  `Property-based[^}]*${func}|${func}[^}]*Property-based`,
+                  'i'
+                ),
+                // Function name near fc.assert/fc.property (much broader search)
+                new RegExp(
+                  `fc\\.assert[\\s\\S]*?${func}[\\s\\S]*?\\}\\s*\\)\\s*;|${func}[\\s\\S]*?fc\\.assert`,
+                  'g'
+                ),
+                // Pattern for test sections with function names and property-based
+                new RegExp(
+                  `${func}[\\s\\S]*?property.*?fc\\.assert|property.*?${func}[\\s\\S]*?fc\\.assert`,
+                  'gi'
+                ),
+                // Broader pattern for describe blocks containing the function name and property tests
+                new RegExp(
+                  `describe\\([^}]*${func}[^}]*\\{[\\s\\S]*?property[\\s\\S]*?fc\\.assert`,
+                  'gi'
+                ),
+                // Pattern for describe blocks with Property-based in title that contain the function
+                new RegExp(
+                  `describe\\([^}]*Property-based[^}]*\\{[\\s\\S]*?${func}`,
+                  'gi'
+                ),
+              ];
+
+              return !patterns.some(pattern => pattern.test(testContent));
+            });
+
+            return {
+              exists: true,
+              hasPropertyTests: hasFastCheck,
+              missingPropertyTests,
+            };
+          } catch {
+            return { exists: false, hasPropertyTests: false };
+          }
+        }
+
+        return {
+          Program(node) {
+            const filename = context.getFilename();
+
+            // Only check files in utils/ directory
+            if (
+              !filename.includes('/utils/') ||
+              filename.includes('.test.') ||
+              filename.includes('.spec.')
+            ) {
+              return;
+            }
+
+            const functions = getExportedFunctions();
+
+            if (functions.length === 0) {
+              return;
+            }
+
+            // Filter out excluded functions
+            const functionsToTest = functions.filter(
+              func => !isExcluded(func, filename)
+            );
+
+            if (functionsToTest.length === 0) {
+              return;
+            }
+
+            if (requireTestFile) {
+              const testInfo = hasPropertyTests(filename, functionsToTest);
+
+              if (!testInfo.exists) {
+                context.report({
+                  node,
+                  messageId: 'noPropertyTestFile',
+                  data: { functions: functionsToTest.join(', ') },
+                });
+                return;
+              }
+
+              if (!testInfo.hasPropertyTests) {
+                context.report({
+                  node,
+                  messageId: 'noPropertyTestFile',
+                  data: { functions: functionsToTest.join(', ') },
+                });
+                return;
+              }
+
+              // Report specific functions missing property tests
+              if (
+                testInfo.missingPropertyTests &&
+                testInfo.missingPropertyTests.length > 0
+              ) {
+                testInfo.missingPropertyTests.forEach(func => {
+                  context.report({
+                    node,
+                    messageId: 'missingPropertyTests',
+                    data: { functionName: func },
+                  });
+                });
+              }
+            }
+          },
+        };
+      },
+    },
   },
 };
