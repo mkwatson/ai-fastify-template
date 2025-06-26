@@ -26,7 +26,7 @@
     "ai:compliance": "pnpm ai:check && pnpm test && pnpm test:mutation && pnpm build && pnpm ai:security && echo '🎉 All AI compliance checks passed!'",
     "ai:fix": "pnpm lint:fix && echo 'Code formatting and linting fixes applied'",
     "ai:security": "audit-ci --config audit-ci.json",
-    "ci:check": "pnpm lint && pnpm type-check && pnpm test && echo '✅ Local CI validation passed (matches GitHub Actions)'",
+    "ci:check": "pnpm lint && pnpm type-check && pnpm test && pnpm test:mutation && pnpm build && echo '✅ Local CI validation passed (matches GitHub Actions)'",
     "graph": "depcruise apps/backend-api/src --config .dependency-cruiser.js",
     "graph:validate": "turbo graph:validate",
     "graph:dot": "depcruise apps/backend-api/src --config .dependency-cruiser.js --output-type dot",

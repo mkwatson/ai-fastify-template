@@ -21,7 +21,7 @@ async function generateOpenAPISpec() {
     }
 
     // Import the built app
-    const { default: App } = await import('../build/app.js');
+    const { default: App } = await import('../build/src/app.js');
 
     // Build the Fastify app
     const app = Fastify({
