@@ -39,6 +39,9 @@ coverage/
 *.tsbuildinfo
 .tsbuildinfo
 
+# Validation pipeline cache
+.validation-cache/
+
 # IDE
 .vscode/
 .idea/

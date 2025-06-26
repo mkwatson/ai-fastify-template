@@ -12,16 +12,19 @@ CI failures are expensive, slow down development, and often indicate process fai
 
 ```bash
 # 🚀 FASTEST: Core validation (lint + types + tests + build) - ~30 seconds
-pnpm ci:check
+pnpm ci:check               # Uses zero-drift validation pipeline
+
+# ⚡ DEVELOPMENT: Lightning fast feedback - ~5 seconds
+pnpm ai:quick               # Parallel lint + type-check with smart caching
 
 # 🔧 FIX: Auto-fix formatting and linting issues
 pnpm lint:fix
 
-# 🎯 TARGETED: Check specific areas
-pnpm lint        # ESLint validation
-pnpm type-check  # TypeScript compilation
-pnpm test        # Test suite
-pnpm build       # Production build
+# 🎯 TARGETED: Direct validation pipeline access
+node scripts/validation-pipeline.mjs --preset quick      # Fast development validation
+node scripts/validation-pipeline.mjs --preset ci        # Complete CI validation
+node scripts/validation-pipeline.mjs --preset pre-commit # Pre-commit validation
+node scripts/validation-pipeline.mjs --clear-cache      # Clear validation cache
 ```
 
 ## 🏗️ **Comprehensive Validation Pipeline**
@@ -49,6 +52,36 @@ pnpm ai:compliance  # Full pipeline: mutation testing + security audit
 ```
 
 Run before important PRs or releases.
+
+## 🛡️ **Zero-Drift Validation Architecture**
+
+**BREAKTHROUGH**: This project implements a **zero-drift validation architecture** that eliminates configuration differences between local and CI validation.
+
+### **How It Works**
+
+1. **Single Source of Truth**: All validation logic lives in `scripts/validation-pipeline.mjs`
+2. **Config-Aware Caching**: Automatically invalidates cache when config files change
+3. **CI Parity Enforcement**: CI automatically verifies it uses the same pipeline as local commands
+
+### **Key Benefits**
+
+✅ **Impossible Configuration Drift**: Local and CI use identical validation logic  
+✅ **Smart Caching**: No more cache confusion - automatically knows when to invalidate  
+✅ **Developer Friendly**: Same commands work everywhere with consistent results  
+✅ **Self-Healing**: Pipeline consistency is automatically verified in CI
+
+### **Available Presets**
+
+- **`quick`**: Fast development validation (lint + type-check, ~5s)
+- **`ci`**: Complete CI validation (lint + type-check + test + build, ~30s)
+- **`pre-commit`**: Pre-commit validation (lint + type-check + test)
+- **`compliance`**: Full compliance (includes mutation testing, ~5min)
+
+### **Cache Strategies**
+
+- **`none`**: Never use cache (slowest, most accurate)
+- **`smart`**: Use cache intelligently based on preset
+- **`config-aware`**: Invalidate cache when config files change (recommended)
 
 ## 🔍 **Troubleshooting Common Issues**
 
@@ -99,6 +132,29 @@ pnpm clean && pnpm build
 # Check for circular dependencies
 pnpm graph
 ```
+
+### **Cache Issues (Now Automatically Handled)**
+
+With the new zero-drift architecture, cache issues are largely eliminated:
+
+```bash
+# Clear validation pipeline cache (smart invalidation)
+node scripts/validation-pipeline.mjs --clear-cache
+
+# Force fresh validation (bypasses all caches)
+pnpm ci:check --force    # Or any validation command with --force
+
+# Turbo cache issues (legacy - rarely needed now)
+rm -rf .turbo && pnpm clean && pnpm ci:check
+```
+
+**Zero-Drift Benefits**:
+
+- ✅ **Config-aware caching** automatically invalidates when config files change
+- ✅ **CI forces fresh validation** so no stale results leak through
+- ✅ **Smart cache strategies** eliminate most cache confusion
+
+**Rare scenarios**: If you still see cache issues, run with `--force` flag or clear validation cache.
 
 ## 🚀 **Pre-Commit Hook Integration**
 

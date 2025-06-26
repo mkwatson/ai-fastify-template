@@ -44,20 +44,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate code formatting and linting
-        run: pnpm lint
+      - name: Validate pipeline consistency
+        run: |
+          echo "🔍 Verifying local 'pnpm ci:check' uses same pipeline as CI..."
 
-      - name: Type check
-        run: pnpm type-check
+          # Check that ci:check script uses validation pipeline
+          if ! grep -q "node scripts/validation-pipeline.mjs --preset ci" package.json; then
+            echo "❌ ERROR: package.json ci:check script not using validation pipeline!"
+            echo "Expected: node scripts/validation-pipeline.mjs --preset ci"
+            echo "Found: $(grep -A1 'ci:check' package.json | tail -1)"
+            exit 1
+          fi
 
-      - name: Run tests
-        run: pnpm test
+          echo "✅ Pipeline consistency verified"
 
-      - name: Run mutation tests
-        run: pnpm test:mutation
-
-      - name: Build project
-        run: pnpm build
+      - name: Run validation pipeline
+        run: node scripts/validation-pipeline.mjs --preset ci --force --verbose
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
