@@ -200,6 +200,112 @@ export default [
       'no-var': 'error',
     },
   },
+
+  // TypeScript source files in packages (excluding tests and config files)
+  {
+    files: ['packages/*/src/**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        // Enable type-aware rules with specific project configuration
+        project: ['./packages/*/tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        require: 'readonly',
+        NodeJS: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        Buffer: 'readonly',
+        global: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      security,
+      import: importPlugin,
+      promise: promisePlugin,
+      n: nodePlugin,
+    },
+    rules: {
+      // TypeScript strict mode enforcement (non-type-aware rules only)
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      'no-unused-vars': 'off', // Let TypeScript handle this
+
+      // Advanced TypeScript rules (now enabled with type-aware parsing)
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/prefer-readonly': 'error',
+      '@typescript-eslint/prefer-string-starts-ends-with': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+
+      // Security patterns
+      'security/detect-object-injection': 'error',
+      'security/detect-non-literal-regexp': 'error',
+      'security/detect-unsafe-regex': 'error',
+
+      // Import organization and circular dependency detection
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+      'import/no-cycle': 'error',
+      'import/no-duplicates': 'error',
+      'import/no-unresolved': 'off', // TypeScript handles this
+
+      // Promise handling best practices
+      'promise/always-return': 'error',
+      'promise/catch-or-return': 'error',
+      'promise/no-callback-in-promise': 'error',
+
+      // Performance patterns
+      'no-unreachable-loop': 'error',
+      'no-constant-condition': 'error',
+      'prefer-object-spread': 'error',
+      'no-new-object': 'error',
+      'no-array-constructor': 'error',
+
+      // Node.js best practices (using eslint-plugin-n)
+      'n/no-deprecated-api': 'error',
+      'n/no-extraneous-import': 'error',
+      'n/no-missing-import': 'off', // TypeScript handles this better
+      'n/no-unpublished-import': 'off', // Allow dev dependencies in source
+      'n/no-process-exit': 'off', // Allow process.exit in server startup
+      'n/prefer-global/process': 'error',
+      'n/prefer-global/console': 'error',
+
+      // General code quality
+      'no-console': 'off', // Allow console in library code
+      'prefer-const': 'error',
+      'no-var': 'error',
+      
+      // Allow type/value declaration merging (branded types pattern)
+      'no-redeclare': 'off',
+    },
+  },
+
   // Test files with Vitest rules
   {
     files: [

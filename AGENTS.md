@@ -125,6 +125,191 @@ fastify.post(
 );
 ```
 
+### Type Safety Patterns with Branded Types
+
+The project implements **branded types** for compile-time ID safety, preventing ID mixups that cause runtime errors. This enterprise-grade approach ensures type safety while maintaining runtime validation.
+
+#### Core Principles
+
+- **Compile-time safety**: Prevent ID confusion at build time
+- **Runtime validation**: Ensure data integrity with validation constructors
+- **Zero performance overhead**: Brands are phantom types (compile-time only)
+- **API boundary protection**: Integrate with Zod for request/response validation
+
+#### Basic Usage
+
+```typescript
+import { UserId, OrderId, ProductId } from '@ai-fastify-template/types';
+
+// ✅ Type-safe ID creation with validation
+const userId = UserId('550e8400-e29b-41d4-a716-446655440000');
+const orderId = OrderId('660e8400-e29b-41d4-a716-446655440000');
+
+// ❌ Compile error: Cannot mix ID types
+function processOrder(orderId: OrderId) { /* ... */ }
+processOrder(userId); // TypeScript Error: UserId is not assignable to OrderId
+
+// ✅ Type-safe operations
+function processOrder(orderId: OrderId) {
+  // orderId is guaranteed to be a valid, branded OrderId
+  console.log(`Processing order: ${orderId}`);
+}
+processOrder(orderId); // ✅ Correct type
+```
+
+#### API Route Integration with Zod
+
+```typescript
+import { ZodBrandedSchemas } from '@ai-fastify-template/types';
+
+// ✅ Type-safe route parameters
+const GetUserParams = z.object({
+  userId: ZodBrandedSchemas.UserId,
+});
+
+const CreateOrderBody = z.object({
+  customerId: ZodBrandedSchemas.CustomerId,
+  items: z.array(z.object({
+    productId: ZodBrandedSchemas.ProductId,
+    quantity: z.number().int().positive(),
+  })),
+});
+
+// ✅ Fastify route with branded type safety
+fastify.post('/orders', {
+  schema: {
+    body: CreateOrderBody,
+    response: { 201: OrderResponseSchema },
+  },
+}, async (request, reply) => {
+  // request.body.customerId is typed as CustomerId (branded)
+  // request.body.items[0].productId is typed as ProductId (branded)
+  
+  const order = await orderService.createOrder(request.body);
+  return reply.code(201).send(order);
+});
+```
+
+#### Available Entity Types
+
+**User Management Domain:**
+- `UserId`, `SessionId`, `RoleId`
+
+**E-commerce Domain:**
+- `ProductId`, `OrderId`, `CustomerId`, `CategoryId`
+
+**Content Management:**
+- `ArticleId`, `CommentId`, `AuthorId`
+
+**System Resources:**
+- `RequestId`, `TransactionId`, `LogId`
+
+**Alternative Types:**
+- `EmailAddress` (email validation)
+- `Slug` (URL-friendly strings)
+
+#### Service Layer Patterns
+
+```typescript
+// ✅ Type-safe service methods
+export class OrderService {
+  async createOrder(data: {
+    customerId: CustomerId;
+    items: Array<{ productId: ProductId; quantity: number }>;
+  }): Promise<Order> {
+    // Compile-time guarantee that IDs are correct types
+    const customer = await this.customerRepo.findById(data.customerId);
+    const products = await this.productRepo.findByIds(
+      data.items.map(item => item.productId)
+    );
+    
+    // Business logic with type safety
+    return this.orderRepo.create({
+      customerId: data.customerId,
+      items: data.items,
+    });
+  }
+  
+  // ❌ This would be a compile error:
+  async getOrdersByUser(orderId: OrderId): Promise<Order[]> {
+    // return this.orderRepo.findByCustomerId(orderId); // Error!
+    // OrderId cannot be used where CustomerId is expected
+  }
+}
+```
+
+#### Error Prevention Examples
+
+```typescript
+// Common ID mixup scenarios that branded types prevent:
+
+// ❌ Without branded types (dangerous):
+function transferOrder(fromUserId: string, toUserId: string, orderId: string) {
+  // Easy to accidentally swap parameters
+  return orderService.transfer(orderId, fromUserId, toUserId); // Bug!
+}
+
+// ✅ With branded types (safe):
+function transferOrder(fromUser: UserId, toUser: UserId, order: OrderId) {
+  // Compile error if parameters are swapped
+  return orderService.transfer(order, fromUser, toUser); // ✅ Correct
+}
+
+// ❌ Database query mixups (dangerous):
+const orders = await db.query('SELECT * FROM orders WHERE customer_id = ?', [productId]); // Bug!
+
+// ✅ Type-safe queries (safe):
+const orders = await db.query('SELECT * FROM orders WHERE customer_id = ?', [customerId]); // ✅ Correct
+```
+
+#### Testing with Branded Types
+
+```typescript
+// ✅ Test branded type validation
+describe('OrderService', () => {
+  it('should create order with valid IDs', () => {
+    const customerId = CustomerId('550e8400-e29b-41d4-a716-446655440000');
+    const productId = ProductId('660e8400-e29b-41d4-a716-446655440000');
+    
+    const order = orderService.createOrder({
+      customerId,
+      items: [{ productId, quantity: 2 }],
+    });
+    
+    expect(order.customerId).toBe(customerId);
+  });
+  
+  it('should reject invalid UUID format', () => {
+    expect(() => UserId('invalid-uuid')).toThrow('Invalid UUID format');
+  });
+});
+```
+
+#### Unsafe Constructors (Use with Caution)
+
+```typescript
+// When you're certain a value is valid (e.g., from database)
+import { UnsafeUserId } from '@ai-fastify-template/types';
+
+const userId = UnsafeUserId(dbRecord.user_id); // Skips validation
+```
+
+#### Migration Strategy
+
+```typescript
+// Step 1: Add branded types gradually
+type UserId = Brand<string, 'UserId'>;
+
+// Step 2: Update function signatures
+function getUser(id: UserId): Promise<User> { /* ... */ }
+
+// Step 3: Update call sites
+const userId = UserId(request.params.id);
+const user = await getUser(userId);
+
+// Step 4: Add Zod integration for API routes
+```
+
 ### Fastify Architectural Patterns
 
 - **Thin routes**: Keep HTTP concerns separate from business logic
