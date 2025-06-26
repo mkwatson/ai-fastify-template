@@ -49,7 +49,11 @@ describe('Sensible Plugin Unit Tests', () => {
     expect(app.assert).toBeTypeOf('function');
 
     // Test assert works
-    expect(() => app.assert(true, 400, 'Should not throw')).not.toThrow();
-    expect(() => app.assert(false, 400, 'Should throw')).toThrow();
+    expect(() => {
+      app.assert(true, 400, 'Should not throw');
+    }).not.toThrow();
+    expect(() => {
+      app.assert(false, 400, 'Should throw');
+    }).toThrow();
   });
 });

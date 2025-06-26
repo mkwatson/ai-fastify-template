@@ -1,9 +1,9 @@
 /* eslint-env node */
 /**
- * ESLint Plugin for AI Fastify Template Architectural Patterns
- *
- * Custom rules to enforce project-specific architectural constraints
- * that ensure code quality and maintainability for AI development.
+ * ESLint Plugin for Runtime Safety Patterns
+ * 
+ * Minimal custom rules for patterns TypeScript cannot enforce at compile-time.
+ * Focus: Environment validation and request validation only.
  */
 
 module.exports = {
@@ -13,14 +13,12 @@ module.exports = {
       meta: {
         type: 'problem',
         docs: {
-          description:
-            'Disallow direct process.env access outside of environment validation files',
-          category: 'Best Practices',
+          description: 'Disallow direct process.env access outside of environment validation files',
+          category: 'Security',
           recommended: true,
         },
         messages: {
-          noDirectEnv:
-            'Direct process.env access found - use validated env schema instead',
+          noDirectEnv: 'Direct process.env access found - use validated env schema instead',
         },
         schema: [],
       },
@@ -55,54 +53,17 @@ module.exports = {
       },
     },
 
-    // Rule 2: Fastify error handling patterns in routes
-    'fastify-error-handling': {
+    // Rule 2: Require input validation in routes that use request.body
+    'require-zod-validation': {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Enforce Fastify error handling patterns in routes',
-          category: 'Best Practices',
+          description: 'Require Zod schema validation for routes using request.body',
+          category: 'Security',
           recommended: true,
         },
         messages: {
-          genericError:
-            'Generic Error throwing in routes - use Fastify error handling patterns (fastify.httpErrors)',
-        },
-        schema: [],
-      },
-      create(context) {
-        return {
-          ThrowStatement(node) {
-            const filename = context.getFilename();
-
-            if (
-              filename.includes('/routes/') &&
-              node.argument.type === 'NewExpression' &&
-              node.argument.callee.name === 'Error'
-            ) {
-              context.report({
-                node,
-                messageId: 'genericError',
-              });
-            }
-          },
-        };
-      },
-    },
-
-    // Rule 3: Require input validation in routes that use request.body
-    'require-input-validation': {
-      meta: {
-        type: 'problem',
-        docs: {
-          description:
-            'Require Zod schema validation for routes using request.body',
-          category: 'Best Practices',
-          recommended: true,
-        },
-        messages: {
-          missingValidation:
-            'Route uses request.body without Zod schema validation',
+          missingValidation: 'Route uses request.body without Zod schema validation',
         },
         schema: [],
       },
@@ -126,89 +87,6 @@ module.exports = {
               context.report({
                 node,
                 messageId: 'missingValidation',
-              });
-            }
-          },
-        };
-      },
-    },
-
-    // Rule 4: Service layer dependency injection patterns
-    'service-dependency-injection': {
-      meta: {
-        type: 'suggestion',
-        docs: {
-          description:
-            'Enforce dependency injection via constructor in service classes',
-          category: 'Best Practices',
-          recommended: true,
-        },
-        messages: {
-          missingDI:
-            'Service class should use dependency injection via constructor',
-        },
-        schema: [],
-      },
-      create(context) {
-        return {
-          Program(node) {
-            const filename = context.getFilename();
-
-            if (!filename.includes('/services/')) {
-              return;
-            }
-
-            const sourceCode = context.getSourceCode();
-            const text = sourceCode.getText();
-
-            if (
-              text.includes('new ') &&
-              text.includes('class ') &&
-              !text.includes('constructor(')
-            ) {
-              context.report({
-                node,
-                messageId: 'missingDI',
-              });
-            }
-          },
-        };
-      },
-    },
-
-    // Rule 5: Fastify plugin registration patterns
-    'fastify-plugin-wrapper': {
-      meta: {
-        type: 'problem',
-        docs: {
-          description: 'Require fastify-plugin wrapper for Fastify plugins',
-          category: 'Best Practices',
-          recommended: true,
-        },
-        messages: {
-          missingWrapper: 'Fastify plugins should use fastify-plugin wrapper',
-        },
-        schema: [],
-      },
-      create(context) {
-        return {
-          Program(node) {
-            const filename = context.getFilename();
-
-            if (!filename.includes('/plugins/')) {
-              return;
-            }
-
-            const sourceCode = context.getSourceCode();
-            const text = sourceCode.getText();
-
-            if (
-              text.includes('export default') &&
-              !text.includes('fastify-plugin')
-            ) {
-              context.report({
-                node,
-                messageId: 'missingWrapper',
               });
             }
           },

@@ -24,14 +24,14 @@ const start = async (): Promise<void> => {
     const host = getHost();
 
     await server.listen({ port, host });
-    server.log.info(`Server listening on http://${host}:${port}`);
+    server.log.info(`Server listening on http://${host}:${String(port)}`);
   } catch (err) {
     server.log.error(err);
     throw new Error('Failed to start server');
   }
 };
 
-start().catch(error => {
+start().catch((error: unknown) => {
   console.error('Failed to start server:', error);
   process.exit(1);
 });

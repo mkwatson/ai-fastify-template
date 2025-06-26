@@ -399,7 +399,7 @@ export const ExampleTypeSafeRoute = {
     // The userId is guaranteed to be a valid branded UserId
 
     // Note: In real implementation, you would construct branded types properly
-    return reply.code(200).send({
+    reply.code(200).send({
       id: userId,
       email: 'user@example.com' as unknown as EmailAddress, // Would be EmailAddress in real implementation
       name: 'John Doe',

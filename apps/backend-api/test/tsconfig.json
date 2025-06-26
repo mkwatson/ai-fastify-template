@@ -1,8 +1,17 @@
 {
-  "extends": "../tsconfig.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["../src/*"]
+    },
     "noEmit": true
   },
-  "include": ["../src/**/*.ts", "**/*.ts"]
+  "include": ["../src/**/*.ts", "**/*.ts"],
+  "references": [
+    { "path": "../" },
+    { "path": "../../../packages/config" },
+    { "path": "../../../packages/types" }
+  ]
 }

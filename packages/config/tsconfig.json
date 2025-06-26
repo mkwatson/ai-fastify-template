@@ -1,10 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./build",
     "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build", "test"]

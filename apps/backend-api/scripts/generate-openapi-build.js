@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-undef */
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

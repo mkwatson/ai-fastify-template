@@ -1,36 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "moduleResolution": "node",
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022"],
     "outDir": "build",
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build", "test"]
+  "exclude": ["node_modules", "build", "test"],
+  "references": [
+    { "path": "../../packages/config" },
+    { "path": "../../packages/types" }
+  ]
 }
