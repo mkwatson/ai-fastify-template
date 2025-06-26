@@ -388,7 +388,7 @@ export const ExampleTypeSafeRoute = {
     },
   }),
   // Simplified handler without complex type assertions
-  handler: async (
+  handler: (
     request: { params: { userId: UserId } },
     reply: { code: (status: number) => { send: (data: unknown) => void } }
   ) => {

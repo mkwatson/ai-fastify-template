@@ -2,7 +2,7 @@ import fc from 'fast-check';
 
 /**
  * API Fuzzing Framework Templates
- * 
+ *
  * Provides templates and generators for API fuzzing tests.
  * These are designed to be used in actual test files with real Fastify instances.
  */
@@ -10,7 +10,13 @@ import fc from 'fast-check';
 // ===== HTTP METHOD AND STATUS GENERATORS =====
 
 export const httpMethods = fc.constantFrom(
-  'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS'
 );
 
 export const httpStatusCodes = {
@@ -18,9 +24,21 @@ export const httpStatusCodes = {
   clientError: fc.constantFrom(400, 401, 403, 404, 409, 422, 429),
   serverError: fc.constantFrom(500, 502, 503, 504),
   all: fc.constantFrom(
-    200, 201, 202, 204,
-    400, 401, 403, 404, 409, 422, 429,
-    500, 502, 503, 504
+    200,
+    201,
+    202,
+    204,
+    400,
+    401,
+    403,
+    404,
+    409,
+    422,
+    429,
+    500,
+    502,
+    503,
+    504
   ),
 };
 
@@ -34,42 +52,44 @@ export const maliciousStrings = fc.oneof(
   fc.constant("'; DROP TABLE users; --"),
   fc.constant("1' OR '1'='1"),
   fc.constant("admin'--"),
-  
+
   // XSS attempts
   fc.constant("<script>alert('xss')</script>"),
   fc.constant("javascript:alert('xss')"),
   fc.constant("<img src=x onerror=alert('xss')>"),
-  
+
   // Path traversal
-  fc.constant("../../../etc/passwd"),
-  fc.constant("..\\..\\..\\windows\\system32\\config\\sam"),
-  
+  fc.constant('../../../etc/passwd'),
+  fc.constant('..\\..\\..\\windows\\system32\\config\\sam'),
+
   // Command injection
-  fc.constant("; cat /etc/passwd"),
-  fc.constant("| ls -la"),
-  fc.constant("$(whoami)"),
-  
+  fc.constant('; cat /etc/passwd'),
+  fc.constant('| ls -la'),
+  fc.constant('$(whoami)'),
+
   // LDAP injection
-  fc.constant("*)(uid=*))(|(uid=*"),
-  
+  fc.constant('*)(uid=*))(|(uid=*'),
+
   // XXE attempts
-  fc.constant("<?xml version='1.0'?><!DOCTYPE root [<!ENTITY test SYSTEM 'file:///etc/passwd'>]><root>&test;</root>"),
-  
+  fc.constant(
+    "<?xml version='1.0'?><!DOCTYPE root [<!ENTITY test SYSTEM 'file:///etc/passwd'>]><root>&test;</root>"
+  ),
+
   // Large strings
   fc.string({ minLength: 10000, maxLength: 100000 }),
-  
+
   // Unicode and encoding issues
-  fc.constant("𝕏𝔗ℝÑŋ€"),
-  fc.constant("%00%00%00"),
-  fc.constant("\u0000\u0001\u0002"),
-  
+  fc.constant('𝕏𝔗ℝÑŋ€'),
+  fc.constant('%00%00%00'),
+  fc.constant('\u0000\u0001\u0002'),
+
   // Empty and whitespace
-  fc.constant(""),
-  fc.constant("   "),
-  fc.constant("\n\r\t"),
-  
+  fc.constant(''),
+  fc.constant('   '),
+  fc.constant('\n\r\t'),
+
   // Null bytes and control characters
-  fc.string().filter(s => /[\x00-\x1F\x7F-\x9F]/.test(s)),
+  fc.string().filter(s => /[\x00-\x1F\x7F-\x9F]/.test(s))
 );
 
 /**
@@ -77,26 +97,32 @@ export const maliciousStrings = fc.oneof(
  */
 export const maliciousJson = fc.oneof(
   // Extremely nested objects (to cause stack overflow)
-  fc.constant(JSON.stringify(Array(1000).fill(0).reduce((acc) => ({ nested: acc }), {}))),
-  
+  fc.constant(
+    JSON.stringify(
+      Array(1000)
+        .fill(0)
+        .reduce(acc => ({ nested: acc }), {})
+    )
+  ),
+
   // Very large arrays
-  fc.constant(JSON.stringify(Array(10000).fill("A".repeat(1000)))),
-  
+  fc.constant(JSON.stringify(Array(10000).fill('A'.repeat(1000)))),
+
   // Circular references (will cause JSON.stringify to fail)
   fc.constant('{"a": {"$ref": "#/a"}}'),
-  
+
   // Prototype pollution attempts
   fc.constant('{"__proto__": {"isAdmin": true}}'),
   fc.constant('{"constructor": {"prototype": {"isAdmin": true}}}'),
-  
+
   // Type confusion
   fc.constant('{"length": 4294967295}'),
   fc.constant('{"toString": "not a function"}'),
-  
+
   // Invalid JSON
   fc.constant('{invalid json}'),
   fc.constant('{"unclosed": "string'),
-  fc.constant('{"trailing": "comma",}'),
+  fc.constant('{"trailing": "comma",}')
 );
 
 /**
@@ -110,9 +136,9 @@ export const boundaryValues = {
     fc.constant(Number.MAX_SAFE_INTEGER),
     fc.constant(Number.MIN_SAFE_INTEGER),
     fc.constant(2147483647), // MAX_INT32
-    fc.constant(-2147483648), // MIN_INT32
+    fc.constant(-2147483648) // MIN_INT32
   ),
-  
+
   floats: fc.oneof(
     fc.constant(0.0),
     fc.constant(-0.0),
@@ -121,21 +147,21 @@ export const boundaryValues = {
     fc.constant(Number.NaN),
     fc.constant(Number.MAX_VALUE),
     fc.constant(Number.MIN_VALUE),
-    fc.constant(Number.EPSILON),
+    fc.constant(Number.EPSILON)
   ),
-  
+
   strings: fc.oneof(
-    fc.constant(""),
+    fc.constant(''),
     fc.string({ minLength: 1, maxLength: 1 }),
     fc.string({ minLength: 255, maxLength: 256 }),
     fc.string({ minLength: 65535, maxLength: 65536 }),
-    fc.string({ minLength: 1048576, maxLength: 1048576 }), // 1MB
+    fc.string({ minLength: 1048576, maxLength: 1048576 }) // 1MB
   ),
-  
+
   arrays: fc.oneof(
     fc.constant([]),
     fc.array(fc.anything(), { minLength: 1, maxLength: 1 }),
-    fc.array(fc.anything(), { minLength: 1000, maxLength: 1000 }),
+    fc.array(fc.anything(), { minLength: 1000, maxLength: 1000 })
   ),
 };
 
@@ -148,8 +174,14 @@ export const fuzzedHeaders = fc.dictionary(
   fc.oneof(
     // Standard headers
     fc.constantFrom(
-      'content-type', 'authorization', 'user-agent', 'accept',
-      'content-length', 'host', 'origin', 'referer'
+      'content-type',
+      'authorization',
+      'user-agent',
+      'accept',
+      'content-length',
+      'host',
+      'origin',
+      'referer'
     ),
     // Custom headers
     fc.string({ minLength: 1, maxLength: 50 })
@@ -181,20 +213,20 @@ export const fuzzedQuery = fc.dictionary(
 export const fuzzedPaths = fc.oneof(
   // Normal paths
   fc.string({ minLength: 1, maxLength: 100 }).map(s => `/${s}`),
-  
+
   // Very long paths
   fc.string({ minLength: 8192, maxLength: 8192 }).map(s => `/${s}`),
-  
+
   // Path traversal attempts
-  fc.constant("/../../../etc/passwd"),
-  fc.constant("/..\\..\\..\\windows\\system32"),
-  
+  fc.constant('/../../../etc/passwd'),
+  fc.constant('/..\\..\\..\\windows\\system32'),
+
   // Encoded paths
-  fc.constant("/%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"),
-  
+  fc.constant('/%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd'),
+
   // Unicode normalization issues
-  fc.constant("/\u{1F4A9}"), // Pile of poo emoji
-  fc.constant("/caf\u00E9"), // café with combining characters
+  fc.constant('/\u{1F4A9}'), // Pile of poo emoji
+  fc.constant('/caf\u00E9') // café with combining characters
 );
 
 // ===== FUZZING TEST DATA GENERATORS =====
@@ -208,8 +240,11 @@ export const fuzzingTestData = fc.record({
   body: fc.oneof(
     fc.anything(),
     maliciousJson.map(s => {
-      try { return JSON.parse(s); }
-      catch { return s; }
+      try {
+        return JSON.parse(s);
+      } catch {
+        return s;
+      }
     }),
     maliciousStrings
   ),
@@ -235,35 +270,35 @@ export const securityAttackPayloads = {
     "admin'--",
     "'; INSERT INTO users VALUES ('hacker', 'password'); --"
   ),
-  
+
   xss: fc.constantFrom(
     "<script>alert('xss')</script>",
     "javascript:alert('xss')",
     "<img src=x onerror=alert('xss')>",
     "<svg onload=alert('xss')>"
   ),
-  
+
   pathTraversal: fc.constantFrom(
-    "../../../etc/passwd",
-    "..\\..\\..\\windows\\system32\\config\\sam",
-    "....//....//....//etc/passwd",
-    "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+    '../../../etc/passwd',
+    '..\\..\\..\\windows\\system32\\config\\sam',
+    '....//....//....//etc/passwd',
+    '%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd'
   ),
-  
+
   commandInjection: fc.constantFrom(
-    "; cat /etc/passwd",
-    "| ls -la",
-    "$(whoami)",
-    "`id`",
-    "&& ping -c 1 127.0.0.1"
+    '; cat /etc/passwd',
+    '| ls -la',
+    '$(whoami)',
+    '`id`',
+    '&& ping -c 1 127.0.0.1'
   ),
-  
+
   prototypePollution: fc.constantFrom(
     '{"__proto__": {"isAdmin": true}}',
     '{"constructor": {"prototype": {"isAdmin": true}}}',
     '{"__proto__.isAdmin": true}'
   ),
-  
+
   xxe: fc.constantFrom(
     "<?xml version='1.0'?><!DOCTYPE root [<!ENTITY test SYSTEM 'file:///etc/passwd'>]><root>&test;</root>",
     "<?xml version='1.0'?><!DOCTYPE root [<!ENTITY test SYSTEM 'http://attacker.com/'>]><root>&test;</root>"
@@ -279,17 +314,21 @@ export const payloadMutationStrategies = {
   /**
    * Add unexpected fields
    */
-  addUnexpectedFields: (payload: Record<string, unknown>): Record<string, unknown> => ({
+  addUnexpectedFields: (
+    payload: Record<string, unknown>
+  ): Record<string, unknown> => ({
     ...payload,
     __proto__: { admin: true },
-    unexpectedField: "unexpected_value",
-    constructor: { prototype: { admin: true } }
+    unexpectedField: 'unexpected_value',
+    constructor: { prototype: { admin: true } },
   }),
 
   /**
    * Remove required fields
    */
-  removeRequiredFields: (payload: Record<string, unknown>): Record<string, unknown> => {
+  removeRequiredFields: (
+    payload: Record<string, unknown>
+  ): Record<string, unknown> => {
     const mutated = { ...payload };
     const keys = Object.keys(mutated);
     if (keys.length > 0 && keys[0]) {
@@ -301,11 +340,13 @@ export const payloadMutationStrategies = {
   /**
    * Type confusion attacks
    */
-  typeConfusion: (payload: Record<string, unknown>): Record<string, unknown> => {
+  typeConfusion: (
+    payload: Record<string, unknown>
+  ): Record<string, unknown> => {
     const mutated = { ...payload };
     const keys = Object.keys(mutated);
     if (keys.length > 0 && keys[0]) {
-      mutated[keys[0]] = "string_instead_of_number";
+      mutated[keys[0]] = 'string_instead_of_number';
     }
     return mutated;
   },
@@ -313,7 +354,9 @@ export const payloadMutationStrategies = {
   /**
    * Boundary value injection
    */
-  boundaryValues: (payload: Record<string, unknown>): Record<string, unknown> => {
+  boundaryValues: (
+    payload: Record<string, unknown>
+  ): Record<string, unknown> => {
     const mutated = { ...payload };
     const keys = Object.keys(mutated);
     if (keys.length > 0 && keys[0]) {
@@ -325,7 +368,9 @@ export const payloadMutationStrategies = {
   /**
    * Null/undefined injection
    */
-  nullUndefinedInjection: (payload: Record<string, unknown>): Record<string, unknown> => {
+  nullUndefinedInjection: (
+    payload: Record<string, unknown>
+  ): Record<string, unknown> => {
     const mutated = { ...payload };
     const keys = Object.keys(mutated);
     if (keys.length > 0 && keys[0]) {
@@ -403,7 +448,7 @@ export const apiInvariants = {
       /private/,
       /stack trace/,
       /error:/,
-      /exception:/
+      /exception:/,
     ];
     return !sensitivePatterns.some(pattern => pattern.test(lowerBody));
   },
@@ -438,9 +483,9 @@ export const apiInvariants = {
         'ECONNRESET',
         'ECONNREFUSED',
         'timeout',
-        'socket hang up'
+        'socket hang up',
       ];
-      return !crashIndicators.some(indicator => 
+      return !crashIndicators.some(indicator =>
         error.message.includes(indicator)
       );
     }

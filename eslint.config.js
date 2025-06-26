@@ -17,6 +17,8 @@ export default tseslint.config(
       '**/.turbo',
       '**/.stryker-tmp',
       '**/reports',
+      'examples/**', // Documentation examples may have intentional type issues
+      '.claude/**', // Claude Code commands/tools
     ],
   },
   {
@@ -73,6 +75,22 @@ export default tseslint.config(
     files: ['packages/config/**/*.ts'],
     rules: {
       'runtime-safety/no-direct-env-access': 'off',
+    },
+  },
+  {
+    // Legacy complex property testing framework - relaxed rules for backward compatibility
+    files: [
+      'packages/types/src/property-testing.ts',
+      'packages/types/src/api-fuzzing.ts',
+      'packages/types/src/model-based-testing.ts',
+    ],
+    rules: {
+      '@typescript-eslint/explicit-module-boundary-types': 'off', // Legacy framework uses implicit returns
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
     },
   },
   {

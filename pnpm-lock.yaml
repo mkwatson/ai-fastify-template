@@ -108,6 +108,9 @@ importers:
         specifier: ^3.25.67
         version: 3.25.67
     devDependencies:
+      '@ai-fastify-template/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@types/node':
         specifier: ^22.1.0
         version: 22.15.31

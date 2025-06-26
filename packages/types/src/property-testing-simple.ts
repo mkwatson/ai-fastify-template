@@ -2,7 +2,7 @@ import fc from 'fast-check';
 
 /**
  * Simplified Property Testing Framework
- * 
+ *
  * Focused on the 5 most common property testing patterns with minimal API surface.
  * Designed for high adoption and easy maintenance.
  */
@@ -11,7 +11,7 @@ import fc from 'fast-check';
 
 /**
  * Test a function with property-based testing
- * 
+ *
  * @example
  * propertyTest(calculateTotal, generators.items(), ['nonNegative', 'finite']);
  */
@@ -22,23 +22,27 @@ export function propertyTest<T, R>(
   options?: { iterations?: number }
 ): void {
   const { iterations = 1000 } = options || {};
-  
+
   fc.assert(
-    fc.property(generator, (input) => {
+    fc.property(generator, input => {
       const output = testFunction(input);
-      
-      // Apply selected invariants
+
+      // Apply selected invariants - validate each one exists and execute
       for (const invariantName of invariantNames) {
-        if (!Object.prototype.hasOwnProperty.call(simpleInvariants, invariantName)) {
-          throw new Error(`Unknown invariant: ${invariantName}`);
+        // Type-safe invariant lookup with proper type guard
+        // eslint-disable-next-line security/detect-object-injection
+        const invariant = simpleInvariants[invariantName];
+        if (!invariant) {
+          throw new Error(
+            `Unknown invariant: ${invariantName}. Available: ${Object.keys(simpleInvariants).join(', ')}`
+          );
         }
-        
-        const invariant = simpleInvariants[invariantName as keyof typeof simpleInvariants]!;
+
         if (!invariant(input, output)) {
           throw new Error(`Invariant violation: ${invariantName}`);
         }
       }
-      
+
       return true;
     }),
     { numRuns: iterations }
@@ -55,14 +59,14 @@ export const generators = {
    * Financial amounts (0 to 1M, 2 decimal places)
    */
   money: (): fc.Arbitrary<number> =>
-    fc.float({ min: 0, max: 1_000_000, noNaN: true })
+    fc
+      .float({ min: 0, max: 1_000_000, noNaN: true })
       .map(n => Math.round(n * 100) / 100),
 
   /**
    * Quantities (non-negative integers)
    */
-  quantity: (): fc.Arbitrary<number> =>
-    fc.integer({ min: 0, max: 1000 }),
+  quantity: (): fc.Arbitrary<number> => fc.integer({ min: 0, max: 1000 }),
 
   /**
    * Shopping cart items
@@ -91,8 +95,7 @@ export const generators = {
   /**
    * Email addresses (valid format)
    */
-  email: (): fc.Arbitrary<string> =>
-    fc.emailAddress(),
+  email: (): fc.Arbitrary<string> => fc.emailAddress(),
 
   /**
    * Currency codes
@@ -106,7 +109,10 @@ export const generators = {
 /**
  * Common mathematical invariants that most business functions should satisfy
  */
-export const simpleInvariants: Record<string, (input: any, output: any) => boolean> = {
+export const simpleInvariants: Record<
+  string,
+  (input: any, output: any) => boolean
+> = {
   /**
    * Output must be non-negative
    */
@@ -176,11 +182,11 @@ export function testFormatterFunction<T>(
 
 /**
  * Example property test for a calculation function
- * 
+ *
  * @example
  * ```typescript
  * import { propertyTest, generators } from '@ai-fastify-template/types/property-testing-simple';
- * 
+ *
  * describe('calculateTotal - Properties', () => {
  *   it('should satisfy mathematical invariants', () => {
  *     propertyTest(
@@ -189,7 +195,7 @@ export function testFormatterFunction<T>(
  *       ['nonNegative', 'finite']
  *     );
  *   });
- * 
+ *
  *   it('should handle edge cases', () => {
  *     testArrayFunction(calculateTotal, generators.money());
  *   });

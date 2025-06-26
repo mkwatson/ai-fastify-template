@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  propertyTest,
-  generators,
-} from '@ai-fastify-template/types';
+import { propertyTest, generators } from '@ai-fastify-template/types';
 import fc from 'fast-check';
 
 import {
@@ -153,122 +150,116 @@ describe('validatePasswordStrength', () => {
 
 describe('isValidEmail - Property Tests', () => {
   it('should consistently return boolean values', () => {
-    propertyTest(
-      isValidEmail,
-      fc.string(),
-      ['nonEmptyString'] // Note: This tests that the function returns a string representation
+    fc.assert(
+      fc.property(fc.string(), input => {
+        const result = isValidEmail(input);
+        expect(typeof result).toBe('boolean');
+      })
     );
   });
 
-  it('should accept valid email formats', () => {
-    propertyTest(
-      (email: string) => {
+  it('should handle email generator results consistently', () => {
+    fc.assert(
+      fc.property(generators.email(), email => {
         const result = isValidEmail(email);
-        return typeof result === 'boolean';
-      },
-      generators.email(),
-      ['nonEmptyString'] // Testing the string conversion of the boolean result
+        expect(typeof result).toBe('boolean');
+        // Note: fast-check's email generator may produce emails that our
+        // validator considers invalid due to different RFC compliance levels
+      })
     );
   });
 });
 
 describe('isValidUrl - Property Tests', () => {
   it('should consistently return boolean values', () => {
-    propertyTest(
-      (input: string) => {
+    fc.assert(
+      fc.property(fc.string(), input => {
         const result = isValidUrl(input);
-        return typeof result === 'boolean';
-      },
-      fc.string(),
-      ['nonEmptyString'] // Testing string conversion of boolean
+        expect(typeof result).toBe('boolean');
+      })
     );
   });
 
   it('should handle valid URL protocols', () => {
-    propertyTest(
-      (url: string) => {
-        const result = isValidUrl(url);
-        return typeof result === 'boolean';
-      },
-      fc.oneof(
-        fc.constant('https://example.com'),
-        fc.constant('http://test.org'),
-        fc.constant('ftp://files.com'),
-        fc.webUrl()
-      ),
-      ['nonEmptyString'] // Testing string conversion of boolean
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.constant('https://example.com'),
+          fc.constant('http://test.org'),
+          fc.constant('ftp://files.com'),
+          fc.webUrl()
+        ),
+        url => {
+          const result = isValidUrl(url);
+          expect(typeof result).toBe('boolean');
+          // Most of these should be valid
+          expect(result).toBe(true);
+        }
+      )
     );
   });
 });
 
 describe('isValidPhoneNumber - Property Tests', () => {
   it('should consistently return boolean values', () => {
-    propertyTest(
-      (input: string) => {
+    fc.assert(
+      fc.property(fc.string(), input => {
         const result = isValidPhoneNumber(input);
-        return typeof result === 'boolean';
-      },
-      fc.string(),
-      ['nonEmptyString'] // Testing string conversion of boolean
+        expect(typeof result).toBe('boolean');
+      })
     );
   });
 
-  it('should handle phone number patterns', () => {
-    propertyTest(
-      (phone: string) => {
-        const result = isValidPhoneNumber(phone);
-        return typeof result === 'boolean';
-      },
-      fc.oneof(
-        fc.constant('(555) 123-4567'),
-        fc.constant('555-123-4567'),
-        fc.constant('5551234567'),
-        fc.string({ minLength: 10, maxLength: 15 })
-          .filter(s => /^[\d\s\-\(\)\+\.]+$/.test(s))
-      ),
-      ['nonEmptyString'] // Testing string conversion of boolean
+  it('should handle valid phone number patterns', () => {
+    fc.assert(
+      fc.property(
+        fc.oneof(
+          fc.constant('(555) 123-4567'),
+          fc.constant('555-123-4567'),
+          fc.constant('5551234567')
+        ),
+        phone => {
+          const result = isValidPhoneNumber(phone);
+          expect(typeof result).toBe('boolean');
+          // These known valid patterns should return true
+          expect(result).toBe(true);
+        }
+      )
     );
   });
 });
 
 describe('validatePasswordStrength - Property Tests', () => {
   it('should always return object with isValid and errors properties', () => {
-    propertyTest(
-      (password: string) => {
+    fc.assert(
+      fc.property(fc.string(), password => {
         const result = validatePasswordStrength(password);
-        return JSON.stringify({
-          hasIsValid: typeof result.isValid === 'boolean',
-          hasErrors: Array.isArray(result.errors),
-          consistent: result.isValid === (result.errors.length === 0)
-        });
-      },
-      fc.string(),
-      ['nonEmptyString'] // Testing JSON string output
+
+        expect(typeof result.isValid).toBe('boolean');
+        expect(Array.isArray(result.errors)).toBe(true);
+        expect(result.isValid === (result.errors.length === 0)).toBe(true);
+      })
     );
   });
 
   it('should handle password complexity correctly', () => {
-    propertyTest(
-      (password: string) => {
+    fc.assert(
+      fc.property(fc.string({ minLength: 0, maxLength: 20 }), password => {
         const result = validatePasswordStrength(password);
-        // Strong passwords should have fewer errors
+
+        // Check that the logic is consistent
         const hasUpper = /[A-Z]/.test(password);
         const hasLower = /[a-z]/.test(password);
         const hasDigit = /[0-9]/.test(password);
         const hasSpecial = /[^A-Za-z0-9]/.test(password);
         const isLongEnough = password.length >= 8;
-        
-        const expectedValid = hasUpper && hasLower && hasDigit && hasSpecial && isLongEnough;
-        
-        return JSON.stringify({
-          inputLength: password.length,
-          expectedValid,
-          actualValid: result.isValid,
-          errorCount: result.errors.length
-        });
-      },
-      fc.string({ minLength: 0, maxLength: 20 }),
-      ['nonEmptyString'] // Testing JSON string output
+
+        const expectedValid =
+          hasUpper && hasLower && hasDigit && hasSpecial && isLongEnough;
+
+        expect(result.isValid).toBe(expectedValid);
+        expect(result.isValid).toBe(result.errors.length === 0);
+      })
     );
   });
 });

@@ -1,10 +1,14 @@
 import { describe, it } from 'vitest';
-import { propertyTest, generators, testFormatterFunction } from '@ai-fastify-template/types/property-testing-simple';
+import {
+  propertyTest,
+  generators,
+  testFormatterFunction,
+} from '@ai-fastify-template/types/property-testing-simple';
 import fc from 'fast-check';
 
 /**
  * Example: Property testing for validation and formatting functions
- * 
+ *
  * Copy this file to your test directory and adapt for your functions.
  */
 
@@ -20,7 +24,10 @@ function formatCurrency(amount: number, currency: string = 'USD'): string {
   }).format(amount);
 }
 
-function validatePassword(password: string): { valid: boolean; reason?: string } {
+function validatePassword(password: string): {
+  valid: boolean;
+  reason?: string;
+} {
   if (password.length < 8) {
     return { valid: false, reason: 'Too short' };
   }
@@ -37,24 +44,18 @@ describe('Validation Functions - Property Tests', () => {
   describe('isValidEmail', () => {
     it('should always return boolean', () => {
       fc.assert(
-        fc.property(
-          fc.string(),
-          (email) => {
-            const result = isValidEmail(email);
-            return typeof result === 'boolean';
-          }
-        )
+        fc.property(fc.string(), email => {
+          const result = isValidEmail(email);
+          return typeof result === 'boolean';
+        })
       );
     });
 
     it('should accept valid email format', () => {
       fc.assert(
-        fc.property(
-          generators.email(),
-          (email) => {
-            return isValidEmail(email) === true;
-          }
-        )
+        fc.property(generators.email(), email => {
+          return isValidEmail(email) === true;
+        })
       );
     });
 
@@ -68,12 +69,9 @@ describe('Validation Functions - Property Tests', () => {
       );
 
       fc.assert(
-        fc.property(
-          invalidEmails,
-          (email) => {
-            return isValidEmail(email) === false;
-          }
-        )
+        fc.property(invalidEmails, email => {
+          return isValidEmail(email) === false;
+        })
       );
     });
   });
@@ -81,7 +79,7 @@ describe('Validation Functions - Property Tests', () => {
   describe('formatCurrency', () => {
     it('should always return non-empty string for valid amounts', () => {
       testFormatterFunction(
-        (amount) => formatCurrency(amount),
+        amount => formatCurrency(amount),
         generators.money()
       );
     });
@@ -100,13 +98,10 @@ describe('Validation Functions - Property Tests', () => {
 
     it('should include currency symbol', () => {
       fc.assert(
-        fc.property(
-          generators.money(),
-          (amount) => {
-            const result = formatCurrency(amount, 'USD');
-            return result.includes('$');
-          }
-        )
+        fc.property(generators.money(), amount => {
+          const result = formatCurrency(amount, 'USD');
+          return result.includes('$');
+        })
       );
     });
   });
@@ -114,44 +109,36 @@ describe('Validation Functions - Property Tests', () => {
   describe('validatePassword', () => {
     it('should always return object with valid boolean', () => {
       fc.assert(
-        fc.property(
-          fc.string(),
-          (password) => {
-            const result = validatePassword(password);
-            return (
-              typeof result === 'object' &&
-              typeof result.valid === 'boolean' &&
-              (result.valid || typeof result.reason === 'string')
-            );
-          }
-        )
+        fc.property(fc.string(), password => {
+          const result = validatePassword(password);
+          return (
+            typeof result === 'object' &&
+            typeof result.valid === 'boolean' &&
+            (result.valid || typeof result.reason === 'string')
+          );
+        })
       );
     });
 
     it('should reject short passwords', () => {
       fc.assert(
-        fc.property(
-          fc.string({ maxLength: 7 }),
-          (password) => {
-            const result = validatePassword(password);
-            return result.valid === false;
-          }
-        )
+        fc.property(fc.string({ maxLength: 7 }), password => {
+          const result = validatePassword(password);
+          return result.valid === false;
+        })
       );
     });
 
     it('should accept strong passwords', () => {
-      const strongPassword = fc.string({ minLength: 8, maxLength: 20 })
+      const strongPassword = fc
+        .string({ minLength: 8, maxLength: 20 })
         .map(s => s + 'A1'); // Ensure it has uppercase and number
 
       fc.assert(
-        fc.property(
-          strongPassword,
-          (password) => {
-            const result = validatePassword(password);
-            return result.valid === true;
-          }
-        )
+        fc.property(strongPassword, password => {
+          const result = validatePassword(password);
+          return result.valid === true;
+        })
       );
     });
   });

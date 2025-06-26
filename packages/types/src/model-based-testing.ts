@@ -2,10 +2,10 @@ import fc from 'fast-check';
 
 /**
  * Model-Based Testing Framework Templates
- * 
+ *
  * Provides templates and interfaces for testing stateful systems by modeling
  * expected behavior and comparing it against actual implementation.
- * 
+ *
  * Note: These are templates - actual implementations should import expect()
  * from your testing framework and implement the specific system interfaces.
  */
@@ -77,7 +77,10 @@ export interface CartReal {
 }
 
 export interface AuthModel {
-  users: Map<string, { email: string; passwordHash: string; isActive: boolean }>;
+  users: Map<
+    string,
+    { email: string; passwordHash: string; isActive: boolean }
+  >;
   sessions: Map<string, { userId: string; expiresAt: Date }>;
   currentUser?: string;
 }
@@ -118,7 +121,11 @@ export const cartCommandGenerators = {
   addItem: fc.record({
     itemId: fc.uuid(),
     quantity: fc.integer({ min: 1, max: 10 }),
-    price: fc.float({ min: Math.fround(0.01), max: Math.fround(1000), noNaN: true }),
+    price: fc.float({
+      min: Math.fround(0.01),
+      max: Math.fround(1000),
+      noNaN: true,
+    }),
   }),
 
   removeItem: fc.record({
@@ -166,7 +173,11 @@ export const transactionCommandGenerators = {
   transfer: fc.record({
     from: fc.string(),
     to: fc.string(),
-    amount: fc.float({ min: 0.01, max: 1000, noNaN: true }),
+    amount: fc.float({
+      min: Math.fround(0.01),
+      max: Math.fround(1000),
+      noNaN: true,
+    }),
   }),
 };
 
@@ -464,16 +475,20 @@ export const modelTestingUtils = {
   /**
    * Generate a sequence of operations that should maintain invariants
    */
-  generateOperationSequence: (operations: string[], length: number) =>
-    fc.array(fc.constantFrom(...operations), { minLength: 1, maxLength: length }),
+  generateOperationSequence: (
+    operations: string[],
+    length: number
+  ): fc.Arbitrary<string[]> =>
+    fc.array(fc.constantFrom(...operations), {
+      minLength: 1,
+      maxLength: length,
+    }),
 
   /**
    * Create a template for property test with state machine invariants
    * Note: This is a template - actual implementation requires proper fast-check setup
    */
-  createInvariantTestTemplate: (
-    invariantNames: string[]
-  ): string => {
+  createInvariantTestTemplate: (invariantNames: string[]): string => {
     return `
 // Example property test for state machine invariants:
 fc.assert(

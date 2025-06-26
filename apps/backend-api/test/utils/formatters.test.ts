@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  propertyTest,
-  generators,
-} from '@ai-fastify-template/types/property-testing-simple';
+import { propertyTest, generators } from '@ai-fastify-template/types';
 import fc from 'fast-check';
 
 import {
@@ -247,10 +244,7 @@ describe('formatPercentage - Property Tests', () => {
   it('should handle all valid decimal places', () => {
     propertyTest(
       ([value, decimals]) => formatPercentage(value / 100, decimals),
-      fc.tuple(
-        generators.percentage(),
-        fc.integer({ min: 0, max: 10 })
-      ),
+      fc.tuple(generators.percentage(), fc.integer({ min: 0, max: 10 })),
       ['nonEmptyString']
     );
   });
@@ -260,7 +254,8 @@ describe('formatFileSize - Property Tests', () => {
   it('should satisfy string formatting invariants', () => {
     propertyTest(
       formatFileSize,
-      fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER })
+      fc
+        .integer({ min: 0, max: Number.MAX_SAFE_INTEGER })
         .filter(n => Number.isSafeInteger(n)),
       ['nonEmptyString']
     );

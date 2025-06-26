@@ -145,7 +145,7 @@ export const ValidationErrors = {
       ? `String length must be between ${min} and ${max}, got ${String(value).length}`
       : `String length must be at least ${min}, got ${String(value).length}`,
   NOT_POSITIVE_INTEGER: (value: unknown) =>
-    `Expected positive integer, got ${value}`,
+    `Expected positive integer, got ${String(value)}`,
   NOT_NON_NEGATIVE_NUMBER: (value: unknown) =>
-    `Expected non-negative number, got ${value}`,
+    `Expected non-negative number, got ${String(value)}`,
 } as const;

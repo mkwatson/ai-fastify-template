@@ -124,7 +124,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 1000, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(1000), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 100 }),
             })
           ),
@@ -141,7 +141,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             }),
             { minLength: 2 }
@@ -161,7 +161,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             }),
             { maxLength: 5 }
@@ -183,8 +183,8 @@ describe('Property-based tests', () => {
     it('should never return discount greater than price', () => {
       fc.assert(
         fc.property(
-          fc.float({ min: 0, max: 10000, noNaN: true }),
-          fc.float({ min: 0, max: 100, noNaN: true }),
+          fc.float({ min: 0, max: Math.fround(10000), noNaN: true }),
+          fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
           (price, discountPercent) => {
             const discount = calculateDiscount(price, discountPercent);
             expect(discount).toBeLessThanOrEqual(price);
@@ -197,9 +197,9 @@ describe('Property-based tests', () => {
     it('should be monotonic (higher discount % = higher discount amount)', () => {
       fc.assert(
         fc.property(
-          fc.float({ min: 1, max: 1000, noNaN: true }),
-          fc.float({ min: 0, max: 50, noNaN: true }),
-          fc.float({ min: 0, max: 50, noNaN: true }),
+          fc.float({ min: 1, max: Math.fround(1000), noNaN: true }),
+          fc.float({ min: 0, max: Math.fround(50), noNaN: true }),
+          fc.float({ min: 0, max: Math.fround(50), noNaN: true }),
           (price, discount1, discount2) => {
             const [lower, higher] =
               discount1 <= discount2
@@ -222,11 +222,11 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             })
           ),
-          fc.float({ min: 0, max: 1, noNaN: true }),
+          fc.float({ min: 0, max: Math.fround(1), noNaN: true }),
           (items, taxRate) => {
             const baseTotal = calculateTotal(items);
             const totalWithTax = calculateTotalWithTax(items, taxRate);
@@ -241,7 +241,7 @@ describe('Property-based tests', () => {
         fc.property(
           fc.array(
             fc.record({
-              price: fc.float({ min: 0, max: 100, noNaN: true }),
+              price: fc.float({ min: 0, max: Math.fround(100), noNaN: true }),
               quantity: fc.integer({ min: 0, max: 10 }),
             })
           ),

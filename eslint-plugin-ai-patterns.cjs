@@ -145,7 +145,7 @@ module.exports = {
 
             // Find exported functions
             const exportedFunctions = [];
-            
+
             // Match function declarations: export function name()
             const functionDeclarations = text.matchAll(
               /export\s+function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g
@@ -202,32 +202,33 @@ module.exports = {
             for (const functionName of exportedFunctions) {
               // Look for property tests with this function name
               // Accept both complex (fc.assert + fc.property) and simple (propertyTest) patterns
-              const hasComplexPropertyTests = 
+              const hasComplexPropertyTests =
                 testFileContent.includes('fc.assert') &&
                 testFileContent.includes('fc.property') &&
                 testFileContent.includes(functionName);
 
-              const hasSimplePropertyTests = 
+              const hasSimplePropertyTests =
                 testFileContent.includes('propertyTest') &&
                 testFileContent.includes(functionName);
 
-              const hasTestFinancialFunction = 
+              const hasTestFinancialFunction =
                 testFileContent.includes('testFinancialFunction') &&
                 testFileContent.includes(functionName);
 
-              const hasTestArrayFunction = 
+              const hasTestArrayFunction =
                 testFileContent.includes('testArrayFunction') &&
                 testFileContent.includes(functionName);
 
-              const hasTestFormatterFunction = 
+              const hasTestFormatterFunction =
                 testFileContent.includes('testFormatterFunction') &&
                 testFileContent.includes(functionName);
 
-              const hasPropertyTests = hasComplexPropertyTests || 
-                                     hasSimplePropertyTests || 
-                                     hasTestFinancialFunction || 
-                                     hasTestArrayFunction || 
-                                     hasTestFormatterFunction;
+              const hasPropertyTests =
+                hasComplexPropertyTests ||
+                hasSimplePropertyTests ||
+                hasTestFinancialFunction ||
+                hasTestArrayFunction ||
+                hasTestFormatterFunction;
 
               if (!hasPropertyTests) {
                 // Find the actual function node for better error reporting
@@ -236,12 +237,12 @@ module.exports = {
                   'g'
                 );
                 const match = functionPattern.exec(text);
-                
+
                 if (match) {
                   const lines = text.substring(0, match.index).split('\n');
                   const line = lines.length;
                   const column = lines[lines.length - 1].length;
-                  
+
                   context.report({
                     node,
                     loc: { line, column },

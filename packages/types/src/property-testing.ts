@@ -2,7 +2,7 @@ import fc from 'fast-check';
 
 /**
  * Property Testing Templates and Generators
- * 
+ *
  * Provides reusable generators and templates for comprehensive property-based testing
  * with fast-check. These ensure mathematical guarantees about function behavior.
  */
@@ -13,27 +13,24 @@ import fc from 'fast-check';
  * Generator for financial amounts (non-negative numbers with 2 decimal precision)
  */
 export const financialAmount = () =>
-  fc.float({ min: 0, max: 1_000_000, noNaN: true }).map(n =>
-    Math.round(n * 100) / 100
-  );
+  fc
+    .float({ min: 0, max: 1_000_000, noNaN: true })
+    .map(n => Math.round(n * 100) / 100);
 
 /**
  * Generator for percentages (0-100)
  */
-export const percentage = () =>
-  fc.float({ min: 0, max: 100, noNaN: true });
+export const percentage = () => fc.float({ min: 0, max: 100, noNaN: true });
 
 /**
  * Generator for tax rates (0-1)
  */
-export const taxRate = () =>
-  fc.float({ min: 0, max: 1, noNaN: true });
+export const taxRate = () => fc.float({ min: 0, max: 1, noNaN: true });
 
 /**
  * Generator for quantities (non-negative integers)
  */
-export const quantity = () =>
-  fc.integer({ min: 0, max: 1000 });
+export const quantity = () => fc.integer({ min: 0, max: 1000 });
 
 /**
  * Generator for item records with price and quantity
@@ -47,18 +44,20 @@ export const itemRecord = () =>
 /**
  * Generator for arrays of items
  */
-export const itemsArray = (options?: { minLength?: number; maxLength?: number }) =>
-  fc.array(itemRecord(), options);
+export const itemsArray = (options?: {
+  minLength?: number;
+  maxLength?: number;
+}) => fc.array(itemRecord(), options);
 
 // ===== PROPERTY TEST TEMPLATES =====
 
 /**
  * Template for testing mathematical invariants
- * 
+ *
  * @param generator - Fast-check generator for input data
  * @param testFunction - Function under test
  * @param invariants - Array of invariant functions to check
- * 
+ *
  * @example
  * testInvariants(
  *   fc.array(itemRecord()),
@@ -76,15 +75,17 @@ export function testInvariants<T, R>(
   options?: fc.Parameters<[T]>
 ) {
   return fc.assert(
-    fc.property(generator, (input) => {
+    fc.property(generator, input => {
       const output = testFunction(input);
-      
+
       for (const invariant of invariants) {
         if (!invariant(input, output)) {
-          throw new Error(`Invariant violation for input: ${JSON.stringify(input)}`);
+          throw new Error(
+            `Invariant violation for input: ${JSON.stringify(input)}`
+          );
         }
       }
-      
+
       return true;
     }),
     options
@@ -93,7 +94,7 @@ export function testInvariants<T, R>(
 
 /**
  * Template for testing function composition properties
- * 
+ *
  * @example
  * testComposition(
  *   fc.array(itemRecord()),
@@ -110,7 +111,7 @@ export function testComposition<T, R>(
   options?: fc.Parameters<[T]>
 ) {
   return fc.assert(
-    fc.property(generator, (input) => {
+    fc.property(generator, input => {
       const result1 = method1(input);
       const result2 = method2(input);
       return equality(result1, result2);
@@ -121,7 +122,7 @@ export function testComposition<T, R>(
 
 /**
  * Template for testing monotonicity (function is non-decreasing)
- * 
+ *
  * @example
  * testMonotonicity(
  *   fc.tuple(percentage(), percentage()),
@@ -137,7 +138,7 @@ export function testMonotonicity<T, R>(
   options?: fc.Parameters<[T]>
 ) {
   return fc.assert(
-    fc.property(generator, (input) => {
+    fc.property(generator, input => {
       const [smallerInput, largerInput] = orderInputs(input);
       const smallerResult = testFunction(smallerInput);
       const largerResult = testFunction(largerInput);
@@ -153,11 +154,12 @@ export function testMonotonicity<T, R>(
 export function testIdempotency<T>(
   generator: fc.Arbitrary<T>,
   testFunction: (input: T) => T,
-  equality: (a: T, b: T) => boolean = (a, b) => JSON.stringify(a) === JSON.stringify(b),
+  equality: (a: T, b: T) => boolean = (a, b) =>
+    JSON.stringify(a) === JSON.stringify(b),
   options?: fc.Parameters<[T]>
 ) {
   return fc.assert(
-    fc.property(generator, (input) => {
+    fc.property(generator, input => {
       const result1 = testFunction(input);
       const result2 = testFunction(result1);
       return equality(result1, result2);
@@ -282,14 +284,18 @@ export const financial = {
       type: fc.constantFrom('debit', 'credit'),
       timestamp: fc.date({ min: new Date('2020-01-01'), max: new Date() }),
       description: fc.lorem({ maxCount: 5 }),
-      category: fc.constantFrom('food', 'transport', 'entertainment', 'utilities'),
+      category: fc.constantFrom(
+        'food',
+        'transport',
+        'entertainment',
+        'utilities'
+      ),
     }),
 
   /**
    * Interest rate (realistic banking rates)
    */
-  interestRate: () =>
-    fc.float({ min: 0, max: 0.2, noNaN: true }),
+  interestRate: () => fc.float({ min: 0, max: 0.2, noNaN: true }),
 };
 
 // ===== STATEFUL TESTING UTILITIES =====
@@ -309,9 +315,7 @@ export interface SimpleCommand<Model, Real> {
  * Simple stateful test template
  * For production use, prefer the full model-based testing framework
  */
-export function createStatefulTestTemplate(
-  commands: string[]
-): {
+export function createStatefulTestTemplate(commands: string[]): {
   commands: string[];
   example: string;
 } {
@@ -332,7 +336,7 @@ fc.assert(
       }
     }
   )
-);`
+);`,
   };
 }
 
@@ -350,8 +354,10 @@ export const invariants = {
   /**
    * Result must be positive for non-empty input
    */
-  positiveForNonEmpty: <T extends { length: number }>(input: T, output: number) =>
-    input.length === 0 ? output === 0 : output > 0,
+  positiveForNonEmpty: <T extends { length: number }>(
+    input: T,
+    output: number
+  ) => (input.length === 0 ? output === 0 : output > 0),
 
   /**
    * Result must be zero for empty input
@@ -362,8 +368,12 @@ export const invariants = {
   /**
    * Result must be less than or equal to sum of inputs
    */
-  boundedBySum: (input: { price: number; quantity: number }[], output: number) =>
-    output <= input.reduce((sum, item) => sum + item.price * item.quantity, 0) + 0.01, // Allow for floating point errors
+  boundedBySum: (
+    input: { price: number; quantity: number }[],
+    output: number
+  ) =>
+    output <=
+    input.reduce((sum, item) => sum + item.price * item.quantity, 0) + 0.01, // Allow for floating point errors
 
   /**
    * Result must be finite (not NaN or Infinity)

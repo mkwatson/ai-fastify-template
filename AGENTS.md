@@ -827,15 +827,14 @@ export function calculateTotal(items: Item[]): number {
 }
 
 // ✅ Option 1: Simple API (recommended for most use cases)
-import { propertyTest, generators } from '@ai-fastify-template/types/property-testing-simple';
+import {
+  propertyTest,
+  generators,
+} from '@ai-fastify-template/types/property-testing-simple';
 
 describe('calculateTotal - properties', () => {
   it('should maintain mathematical invariants', () => {
-    propertyTest(
-      calculateTotal,
-      generators.items(),
-      ['nonNegative', 'finite']
-    );
+    propertyTest(calculateTotal, generators.items(), ['nonNegative', 'finite']);
   });
 });
 
@@ -849,14 +848,13 @@ describe('calculateTotal - properties', () => {
 // ✅ Option 3: Complex API (for advanced cases)
 describe('calculateTotal - properties', () => {
   it('should maintain complex invariants', () => {
-    fc.assert(fc.property(
-      generators.items(),
-      (items) => {
+    fc.assert(
+      fc.property(generators.items(), items => {
         const total = calculateTotal(items);
         expect(total).toBeGreaterThanOrEqual(0);
         expect(Number.isFinite(total)).toBe(true);
-      }
-    ));
+      })
+    );
   });
 });
 ```
@@ -870,7 +868,11 @@ describe('calculateTotal - properties', () => {
 Properties that must always hold regardless of input:
 
 ```typescript
-import { testInvariants, financialAmount, quantity } from '@ai-fastify-template/types';
+import {
+  testInvariants,
+  financialAmount,
+  quantity,
+} from '@ai-fastify-template/types';
 
 // Non-negative results
 testInvariants(
@@ -879,19 +881,18 @@ testInvariants(
   [
     (input, output) => output >= 0,
     (input, output) => Number.isFinite(output),
-    (input, output) => input.length === 0 ? output === 0 : true
+    (input, output) => (input.length === 0 ? output === 0 : true),
   ]
 );
 
 // Monotonicity (more items = higher/equal total)
-fc.assert(fc.property(
-  fc.array(itemRecord(), { minLength: 1 }),
-  (items) => {
+fc.assert(
+  fc.property(fc.array(itemRecord(), { minLength: 1 }), items => {
     const fullTotal = calculateTotal(items);
     const partialTotal = calculateTotal(items.slice(0, -1));
     expect(partialTotal).toBeLessThanOrEqual(fullTotal);
-  }
-));
+  })
+);
 ```
 
 **2. Business Logic Invariants**
@@ -900,38 +901,42 @@ Domain-specific rules that must hold:
 
 ```typescript
 // Tax calculation properties
-fc.assert(fc.property(
-  fc.array(itemRecord()),
-  fc.float({ min: 0, max: 1 }),
-  (items, taxRate) => {
-    const baseTotal = calculateTotal(items);
-    const totalWithTax = calculateTotalWithTax(items, taxRate);
-    
-    // Tax increases total (or keeps it same for 0% tax)
-    expect(totalWithTax).toBeGreaterThanOrEqual(baseTotal);
-    
-    // Correct tax calculation
-    const expectedTax = baseTotal * taxRate;
-    expect(totalWithTax).toBeCloseTo(baseTotal + expectedTax, 2);
-  }
-));
+fc.assert(
+  fc.property(
+    fc.array(itemRecord()),
+    fc.float({ min: 0, max: 1 }),
+    (items, taxRate) => {
+      const baseTotal = calculateTotal(items);
+      const totalWithTax = calculateTotalWithTax(items, taxRate);
+
+      // Tax increases total (or keeps it same for 0% tax)
+      expect(totalWithTax).toBeGreaterThanOrEqual(baseTotal);
+
+      // Correct tax calculation
+      const expectedTax = baseTotal * taxRate;
+      expect(totalWithTax).toBeCloseTo(baseTotal + expectedTax, 2);
+    }
+  )
+);
 
 // Discount properties
-fc.assert(fc.property(
-  financialAmount(),
-  fc.float({ min: 0, max: 100 }),
-  (price, discountPercent) => {
-    const discount = calculateDiscount(price, discountPercent);
-    
-    // Discount never exceeds price
-    expect(discount).toBeLessThanOrEqual(price);
-    expect(discount).toBeGreaterThanOrEqual(0);
-    
-    // Correct percentage calculation
-    const expectedDiscount = price * (discountPercent / 100);
-    expect(discount).toBeCloseTo(expectedDiscount, 2);
-  }
-));
+fc.assert(
+  fc.property(
+    financialAmount(),
+    fc.float({ min: 0, max: 100 }),
+    (price, discountPercent) => {
+      const discount = calculateDiscount(price, discountPercent);
+
+      // Discount never exceeds price
+      expect(discount).toBeLessThanOrEqual(price);
+      expect(discount).toBeGreaterThanOrEqual(0);
+
+      // Correct percentage calculation
+      const expectedDiscount = price * (discountPercent / 100);
+      expect(discount).toBeCloseTo(expectedDiscount, 2);
+    }
+  )
+);
 ```
 
 **3. Composition Properties**
@@ -944,8 +949,8 @@ import { testComposition } from '@ai-fastify-template/types';
 // Two ways of calculating should give same result
 testComposition(
   fc.array(itemRecord()),
-  (items) => calculateTotalWithTax(items, 0.1),
-  (items) => calculateTotal(items) * 1.1,
+  items => calculateTotalWithTax(items, 0.1),
+  items => calculateTotal(items) * 1.1,
   (a, b) => Math.abs(a - b) < 0.01 // Allow floating point errors
 );
 ```
@@ -954,15 +959,14 @@ testComposition(
 
 ```typescript
 // Order of items shouldn't matter for total
-fc.assert(fc.property(
-  fc.array(itemRecord(), { minLength: 2 }),
-  (items) => {
+fc.assert(
+  fc.property(fc.array(itemRecord(), { minLength: 2 }), items => {
     const total1 = calculateTotal(items);
     const shuffled = [...items].reverse();
     const total2 = calculateTotal(shuffled);
     expect(total1).toBeCloseTo(total2, 10);
-  }
-));
+  })
+);
 ```
 
 #### API Endpoint Fuzzing
@@ -977,7 +981,7 @@ describe('API Fuzzing Tests', () => {
     await fuzzEndpoint(app, 'POST', '/users', {
       iterations: 100,
       expectedSuccessStatuses: [200, 201],
-      expectedErrorStatuses: [400, 422, 429]
+      expectedErrorStatuses: [400, 422, 429],
     });
   });
 
@@ -993,11 +997,11 @@ describe('API Fuzzing Tests', () => {
 For complex stateful systems (shopping carts, user sessions, etc.):
 
 ```typescript
-import { 
-  shoppingCartStateMachine, 
+import {
+  shoppingCartStateMachine,
   runModelBasedTest,
   AddItemCommand,
-  RemoveItemCommand 
+  RemoveItemCommand,
 } from '@ai-fastify-template/types';
 
 describe('Shopping Cart State Machine', () => {
@@ -1015,30 +1019,26 @@ describe('Shopping Cart State Machine', () => {
 Use pre-built templates for common patterns:
 
 ```typescript
-import { 
+import {
   testInvariants,
-  testMonotonicity, 
+  testMonotonicity,
   testIdempotency,
-  invariants 
+  invariants,
 } from '@ai-fastify-template/types';
 
 // Template for financial calculations
-testInvariants(
-  fc.array(itemRecord()),
-  calculateTotal,
-  [
-    invariants.nonNegative,
-    invariants.finite,
-    invariants.zeroForEmpty,
-    invariants.boundedBySum
-  ]
-);
+testInvariants(fc.array(itemRecord()), calculateTotal, [
+  invariants.nonNegative,
+  invariants.finite,
+  invariants.zeroForEmpty,
+  invariants.boundedBySum,
+]);
 
 // Template for monotonic functions
 testMonotonicity(
   fc.tuple(fc.float({ min: 0, max: 100 }), fc.float({ min: 0, max: 100 })),
   ([a, b]) => [Math.min(a, b), Math.max(a, b)],
-  (discountPercent) => calculateDiscount(100, discountPercent)
+  discountPercent => calculateDiscount(100, discountPercent)
 );
 ```
 
@@ -1092,14 +1092,14 @@ describe('BusinessFunction - Properties', () => {
 
 ```typescript
 // ❌ Poor: Too narrow, misses edge cases
-fc.integer({ min: 1, max: 10 })
+fc.integer({ min: 1, max: 10 });
 
 // ✅ Good: Comprehensive range with edge cases
 fc.oneof(
   fc.constant(0),
   fc.integer({ min: 1, max: 100 }),
   fc.integer({ min: 1000, max: Number.MAX_SAFE_INTEGER })
-)
+);
 ```
 
 **Invariant Quality:**
@@ -1109,7 +1109,9 @@ fc.oneof(
 expect(result).toBeDefined();
 
 // ✅ Strong: Verifies mathematical relationship
-expect(result).toBe(input.reduce((sum, item) => sum + item.price * item.quantity, 0));
+expect(result).toBe(
+  input.reduce((sum, item) => sum + item.price * item.quantity, 0)
+);
 ```
 
 ## Common Patterns & Examples

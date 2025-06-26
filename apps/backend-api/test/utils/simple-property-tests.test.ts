@@ -4,7 +4,7 @@ import {
   propertyTest,
   generators,
   testFinancialFunction,
-} from '@ai-fastify-template/types/property-testing-simple';
+} from '@ai-fastify-template/types';
 
 import {
   calculateTotal,
@@ -15,7 +15,7 @@ import {
 
 /**
  * Simplified Property-Based Tests for Business Logic
- * 
+ *
  * Demonstrates the new simplified API for property testing.
  * This replaces complex fast-check boilerplate with readable, maintainable tests.
  */
@@ -23,19 +23,11 @@ import {
 describe('Simplified Property Tests - calculateTotal', () => {
   it('should satisfy basic financial invariants', () => {
     // Simple API: test function + generator + invariant names
-    propertyTest(
-      calculateTotal,
-      generators.items(),
-      ['nonNegative', 'finite']
-    );
+    propertyTest(calculateTotal, generators.items(), ['nonNegative', 'finite']);
   });
 
   it('should handle empty arrays correctly', () => {
-    propertyTest(
-      calculateTotal,
-      generators.items(),
-      ['zeroForEmpty']
-    );
+    propertyTest(calculateTotal, generators.items(), ['zeroForEmpty']);
   });
 
   it('should use convenience function for financial testing', () => {
@@ -74,7 +66,7 @@ describe('Integration: Multiple Functions Together', () => {
         const subtotal = calculateTotal(items);
         const withTax = calculateTotalWithTax(items, taxRate);
         const discount = calculateDiscount(subtotal, discountPercent);
-        
+
         // Return final amount for invariant checking
         return withTax - discount;
       },

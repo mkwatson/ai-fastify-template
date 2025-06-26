@@ -133,6 +133,65 @@ pnpm lint             # Code formatting and linting (ESLint + Prettier)
 pnpm clean            # Clean build artifacts
 ```
 
+## 🛡️ Local Validation - Prevent CI Failures
+
+> **Critical**: Always validate locally before pushing. CI failures are expensive and slow.
+
+### ⚡ Quick Commands (Use Daily)
+
+```bash
+# 🚀 FASTEST: Match CI exactly (~30 seconds)
+pnpm ci:check         # Same validation as GitHub Actions
+
+# 🔧 FIX: Auto-fix issues
+pnpm lint:fix         # Fix formatting + linting
+
+# 🎯 TARGETED: Specific checks
+pnpm lint             # ESLint errors
+pnpm type-check       # TypeScript compilation
+pnpm test             # Test suite
+pnpm build            # Production build
+```
+
+### 📊 Validation Levels
+
+| Command              | Speed | Use Case                     | What It Checks                   |
+| -------------------- | ----- | ---------------------------- | -------------------------------- |
+| `pnpm ai:quick`      | ~5s   | **Constantly during coding** | lint + type-check                |
+| `pnpm ci:check`      | ~30s  | **Before every commit**      | lint + type-check + test + build |
+| `pnpm ai:compliance` | ~5min | **Before important PRs**     | Full pipeline + mutation testing |
+
+### 🚨 Pre-Commit Safety
+
+Pre-commit hooks automatically run comprehensive validation:
+
+- 🔒 Security scanning (GitLeaks)
+- 🎨 Code quality (ESLint + Prettier)
+- 🔷 Type safety (TypeScript)
+- 🧪 Test validation
+- 🏗️ Build verification
+
+**If pre-commit fails:**
+
+```bash
+# Fix the issues
+pnpm lint:fix && pnpm ci:check
+
+# Then commit normally (hooks will pass)
+git commit -m "your message"
+```
+
+**Need to bypass? (Emergency only)**
+
+```bash
+# Provides safety guidance and requires justification
+./scripts/safe-commit.sh --no-verify -m "emergency: detailed reason"
+```
+
+### 📖 Full Guide
+
+See [docs/LOCAL_VALIDATION_GUIDE.md](docs/LOCAL_VALIDATION_GUIDE.md) for comprehensive troubleshooting and best practices.
+
 ## Project Structure
 
 ```
