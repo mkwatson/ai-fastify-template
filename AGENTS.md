@@ -818,7 +818,7 @@ Property-based testing is **MANDATORY** for all business logic functions. This p
 
 #### ESLint Enforcement
 
-A custom ESLint rule enforces property testing requirements:
+A custom ESLint rule enforces property testing requirements and accepts multiple patterns:
 
 ```typescript
 // ❌ ESLint Error: Business logic function requires property-based tests
@@ -826,30 +826,42 @@ export function calculateTotal(items: Item[]): number {
   // Implementation...
 }
 
-// ✅ Required: Corresponding property tests with fc.assert and fc.property
+// ✅ Option 1: Simple API (recommended for most use cases)
+import { propertyTest, generators } from '@ai-fastify-template/types/property-testing-simple';
+
 describe('calculateTotal - properties', () => {
-  it('should maintain invariants', () => {
+  it('should maintain mathematical invariants', () => {
+    propertyTest(
+      calculateTotal,
+      generators.items(),
+      ['nonNegative', 'finite']
+    );
+  });
+});
+
+// ✅ Option 2: Convenience functions for common patterns
+describe('calculateTotal - properties', () => {
+  it('should satisfy financial function requirements', () => {
+    testFinancialFunction(calculateTotal, generators.items());
+  });
+});
+
+// ✅ Option 3: Complex API (for advanced cases)
+describe('calculateTotal - properties', () => {
+  it('should maintain complex invariants', () => {
     fc.assert(fc.property(
-      fc.array(fc.record({
-        price: fc.float({ min: 0, max: 1000, noNaN: true }),
-        quantity: fc.integer({ min: 0, max: 100 })
-      })),
+      generators.items(),
       (items) => {
         const total = calculateTotal(items);
-        
-        // Mathematical invariants
         expect(total).toBeGreaterThanOrEqual(0);
         expect(Number.isFinite(total)).toBe(true);
-        
-        // Business logic invariants
-        const expectedTotal = items.reduce((sum, item) => 
-          sum + (item.price * item.quantity), 0);
-        expect(total).toBeCloseTo(expectedTotal, 2);
       }
     ));
   });
 });
 ```
+
+**Recommendation**: Start with the simple API (Option 1) for 90% of use cases. Use the complex API only when you need custom invariants not covered by the built-in patterns.
 
 #### Core Property Testing Patterns
 

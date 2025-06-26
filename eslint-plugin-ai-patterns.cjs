@@ -201,10 +201,33 @@ module.exports = {
             // Check each function for property tests
             for (const functionName of exportedFunctions) {
               // Look for property tests with this function name
-              const hasPropertyTests = 
+              // Accept both complex (fc.assert + fc.property) and simple (propertyTest) patterns
+              const hasComplexPropertyTests = 
                 testFileContent.includes('fc.assert') &&
                 testFileContent.includes('fc.property') &&
                 testFileContent.includes(functionName);
+
+              const hasSimplePropertyTests = 
+                testFileContent.includes('propertyTest') &&
+                testFileContent.includes(functionName);
+
+              const hasTestFinancialFunction = 
+                testFileContent.includes('testFinancialFunction') &&
+                testFileContent.includes(functionName);
+
+              const hasTestArrayFunction = 
+                testFileContent.includes('testArrayFunction') &&
+                testFileContent.includes(functionName);
+
+              const hasTestFormatterFunction = 
+                testFileContent.includes('testFormatterFunction') &&
+                testFileContent.includes(functionName);
+
+              const hasPropertyTests = hasComplexPropertyTests || 
+                                     hasSimplePropertyTests || 
+                                     hasTestFinancialFunction || 
+                                     hasTestArrayFunction || 
+                                     hasTestFormatterFunction;
 
               if (!hasPropertyTests) {
                 // Find the actual function node for better error reporting

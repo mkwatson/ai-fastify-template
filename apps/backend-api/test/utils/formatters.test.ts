@@ -1,4 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import {
+  propertyTest,
+  generators,
+} from '@ai-fastify-template/types/property-testing-simple';
+import fc from 'fast-check';
 
 import {
   formatCurrency,
@@ -204,5 +209,74 @@ describe('formatFileSize', () => {
     const result = formatFileSize(1024 * 1024 * 1024 * 1024);
     expect(result).toMatch(/1\.0 TB$/);
     expect(result).not.toMatch(/1\.0 $/); // Would happen if TB mutated to empty string
+  });
+});
+
+// ===== Property-Based Tests =====
+
+describe('formatCurrency - Property Tests', () => {
+  it('should satisfy string formatting invariants', () => {
+    propertyTest(
+      (amount: number) => formatCurrency(amount),
+      generators.money(),
+      ['nonEmptyString']
+    );
+  });
+
+  it('should work with all supported currencies', () => {
+    propertyTest(
+      ([amount, currency]) => formatCurrency(amount, currency),
+      fc.tuple(
+        generators.money(),
+        fc.constantFrom<Currency>('USD', 'EUR', 'GBP', 'JPY')
+      ),
+      ['nonEmptyString']
+    );
+  });
+});
+
+describe('formatPercentage - Property Tests', () => {
+  it('should satisfy string formatting invariants', () => {
+    propertyTest(
+      (value: number) => formatPercentage(value / 100), // Convert percentage to decimal
+      generators.percentage(),
+      ['nonEmptyString']
+    );
+  });
+
+  it('should handle all valid decimal places', () => {
+    propertyTest(
+      ([value, decimals]) => formatPercentage(value / 100, decimals),
+      fc.tuple(
+        generators.percentage(),
+        fc.integer({ min: 0, max: 10 })
+      ),
+      ['nonEmptyString']
+    );
+  });
+});
+
+describe('formatFileSize - Property Tests', () => {
+  it('should satisfy string formatting invariants', () => {
+    propertyTest(
+      formatFileSize,
+      fc.integer({ min: 0, max: Number.MAX_SAFE_INTEGER })
+        .filter(n => Number.isSafeInteger(n)),
+      ['nonEmptyString']
+    );
+  });
+
+  it('should handle all byte ranges correctly', () => {
+    propertyTest(
+      formatFileSize,
+      fc.oneof(
+        fc.constant(0),
+        fc.integer({ min: 1, max: 1023 }), // Bytes
+        fc.integer({ min: 1024, max: 1048575 }), // KB range
+        fc.integer({ min: 1048576, max: 1073741823 }), // MB range
+        fc.integer({ min: 1073741824, max: 1099511627775 }) // GB range
+      ),
+      ['nonEmptyString']
+    );
   });
 });

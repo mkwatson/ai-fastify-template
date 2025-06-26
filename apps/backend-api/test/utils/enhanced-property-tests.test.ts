@@ -46,7 +46,7 @@ describe('Enhanced Property Tests - calculateTotal', () => {
           (items) => {
             const total = calculateTotal(items);
             const manualTotal = items.reduce(
-              (sum, item) => sum + item.price * item.quantity,
+              (sum: number, item) => sum + item.price * item.quantity,
               0
             );
             expect(total).toBeCloseTo(manualTotal, 10);

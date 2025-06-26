@@ -1,0 +1,14 @@
+# Generated files
+dist/
+build/
+.turbo/
+*.d.ts
+
+# Documentation and examples (may have intentional type issues)
+examples/
+
+# Node modules
+node_modules/
+
+# Cache files
+.eslintcache

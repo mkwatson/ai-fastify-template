@@ -118,7 +118,7 @@ export const cartCommandGenerators = {
   addItem: fc.record({
     itemId: fc.uuid(),
     quantity: fc.integer({ min: 1, max: 10 }),
-    price: fc.float({ min: 0.01, max: 1000, noNaN: true }),
+    price: fc.float({ min: Math.fround(0.01), max: Math.fround(1000), noNaN: true }),
   }),
 
   removeItem: fc.record({

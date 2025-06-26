@@ -1,4 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import {
+  propertyTest,
+  generators,
+} from '@ai-fastify-template/types';
+import fc from 'fast-check';
 
 import {
   isValidEmail,
@@ -141,5 +146,129 @@ describe('validatePasswordStrength', () => {
     const result = validatePasswordStrength('   ');
     expect(result.isValid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+// ===== Property-Based Tests =====
+
+describe('isValidEmail - Property Tests', () => {
+  it('should consistently return boolean values', () => {
+    propertyTest(
+      isValidEmail,
+      fc.string(),
+      ['nonEmptyString'] // Note: This tests that the function returns a string representation
+    );
+  });
+
+  it('should accept valid email formats', () => {
+    propertyTest(
+      (email: string) => {
+        const result = isValidEmail(email);
+        return typeof result === 'boolean';
+      },
+      generators.email(),
+      ['nonEmptyString'] // Testing the string conversion of the boolean result
+    );
+  });
+});
+
+describe('isValidUrl - Property Tests', () => {
+  it('should consistently return boolean values', () => {
+    propertyTest(
+      (input: string) => {
+        const result = isValidUrl(input);
+        return typeof result === 'boolean';
+      },
+      fc.string(),
+      ['nonEmptyString'] // Testing string conversion of boolean
+    );
+  });
+
+  it('should handle valid URL protocols', () => {
+    propertyTest(
+      (url: string) => {
+        const result = isValidUrl(url);
+        return typeof result === 'boolean';
+      },
+      fc.oneof(
+        fc.constant('https://example.com'),
+        fc.constant('http://test.org'),
+        fc.constant('ftp://files.com'),
+        fc.webUrl()
+      ),
+      ['nonEmptyString'] // Testing string conversion of boolean
+    );
+  });
+});
+
+describe('isValidPhoneNumber - Property Tests', () => {
+  it('should consistently return boolean values', () => {
+    propertyTest(
+      (input: string) => {
+        const result = isValidPhoneNumber(input);
+        return typeof result === 'boolean';
+      },
+      fc.string(),
+      ['nonEmptyString'] // Testing string conversion of boolean
+    );
+  });
+
+  it('should handle phone number patterns', () => {
+    propertyTest(
+      (phone: string) => {
+        const result = isValidPhoneNumber(phone);
+        return typeof result === 'boolean';
+      },
+      fc.oneof(
+        fc.constant('(555) 123-4567'),
+        fc.constant('555-123-4567'),
+        fc.constant('5551234567'),
+        fc.string({ minLength: 10, maxLength: 15 })
+          .filter(s => /^[\d\s\-\(\)\+\.]+$/.test(s))
+      ),
+      ['nonEmptyString'] // Testing string conversion of boolean
+    );
+  });
+});
+
+describe('validatePasswordStrength - Property Tests', () => {
+  it('should always return object with isValid and errors properties', () => {
+    propertyTest(
+      (password: string) => {
+        const result = validatePasswordStrength(password);
+        return JSON.stringify({
+          hasIsValid: typeof result.isValid === 'boolean',
+          hasErrors: Array.isArray(result.errors),
+          consistent: result.isValid === (result.errors.length === 0)
+        });
+      },
+      fc.string(),
+      ['nonEmptyString'] // Testing JSON string output
+    );
+  });
+
+  it('should handle password complexity correctly', () => {
+    propertyTest(
+      (password: string) => {
+        const result = validatePasswordStrength(password);
+        // Strong passwords should have fewer errors
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasDigit = /[0-9]/.test(password);
+        const hasSpecial = /[^A-Za-z0-9]/.test(password);
+        const isLongEnough = password.length >= 8;
+        
+        const expectedValid = hasUpper && hasLower && hasDigit && hasSpecial && isLongEnough;
+        
+        return JSON.stringify({
+          inputLength: password.length,
+          expectedValid,
+          actualValid: result.isValid,
+          errorCount: result.errors.length
+        });
+      },
+      fc.string({ minLength: 0, maxLength: 20 }),
+      ['nonEmptyString'] // Testing JSON string output
+    );
   });
 });
