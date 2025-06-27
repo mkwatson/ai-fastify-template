@@ -11,7 +11,7 @@
     "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": ["src/**/*", "test/**/*", "vitest.config.ts"],
-  "exclude": ["node_modules", "dist"],
+  "exclude": ["node_modules", "dist", "**/dist/**", "**/*.js", "**/*.d.ts.map"],
   "references": [
     { "path": "../../packages/config" },
     { "path": "../../packages/types" }

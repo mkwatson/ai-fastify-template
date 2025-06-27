@@ -9,7 +9,7 @@
     "pnpm": ">=10.0.0"
   },
   "scripts": {
-    "build": "tsc --build",
+    "build": "turbo build",
     "build:turbo": "turbo build",
     "dev": "turbo dev",
     "lint": "eslint .",
