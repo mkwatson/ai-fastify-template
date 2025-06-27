@@ -148,7 +148,11 @@ importers:
         specifier: ^10.4.0
         version: 10.9.2(@types/node@22.15.33)(typescript@5.8.3)
 
-  packages/config: {}
+  packages/config:
+    devDependencies:
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.4(@types/node@22.15.33)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
 
   packages/sdk: {}
 
@@ -164,6 +168,9 @@ importers:
       expect-type:
         specifier: ^0.17.3
         version: 0.17.3
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.4(@types/node@22.15.33)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0)
 
 packages:
 
