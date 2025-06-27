@@ -30,8 +30,8 @@ describe('Environment Plugin Direct Tests', () => {
 
       // Verify config was set
       expect(app.config).toBeDefined();
-      expect(app.config.NODE_ENV).toBe('test');
-      expect(app.config.PORT).toBe(3001);
+      expect(app.config?.NODE_ENV).toBe('test');
+      expect(app.config?.PORT).toBe(3001);
     } finally {
       process.env = originalEnv;
       await app.close();
@@ -55,10 +55,11 @@ describe('Environment Plugin Direct Tests', () => {
       await app.ready();
 
       // Exercise config access paths
-      expect(app.config.NODE_ENV).toBe('development');
-      expect(app.config.PORT).toBe(3000);
-      expect(app.config.HOST).toBe('localhost');
-      expect(app.config.LOG_LEVEL).toBe('info');
+      expect(app.config).toBeDefined();
+      expect(app.config?.NODE_ENV).toBe('development');
+      expect(app.config?.PORT).toBe(3000);
+      expect(app.config?.HOST).toBe('localhost');
+      expect(app.config?.LOG_LEVEL).toBe('info');
     } finally {
       process.env = originalEnv;
       await app.close();
@@ -70,20 +71,21 @@ describe('Environment Plugin Direct Tests', () => {
     process.env = { ...originalEnv };
 
     // Remove optional env vars to test defaults
-    delete process.env.NODE_ENV;
-    delete process.env.PORT;
-    delete process.env.HOST;
-    delete process.env.LOG_LEVEL;
+    delete process.env['NODE_ENV'];
+    delete process.env['PORT'];
+    delete process.env['HOST'];
+    delete process.env['LOG_LEVEL'];
 
     try {
       await app.register(envPlugin);
       await app.ready();
 
       // Check defaults are applied
-      expect(app.config.NODE_ENV).toBe('development');
-      expect(app.config.PORT).toBe(3000);
-      expect(app.config.HOST).toBe('localhost');
-      expect(app.config.LOG_LEVEL).toBe('info');
+      expect(app.config).toBeDefined();
+      expect(app.config?.NODE_ENV).toBe('development');
+      expect(app.config?.PORT).toBe(3000);
+      expect(app.config?.HOST).toBe('localhost');
+      expect(app.config?.LOG_LEVEL).toBe('info');
     } finally {
       process.env = originalEnv;
       await app.close();
@@ -101,7 +103,8 @@ describe('Environment Plugin Direct Tests', () => {
       try {
         await testApp.register(envPlugin);
         await testApp.ready();
-        expect(testApp.config.NODE_ENV).toBe(value);
+        expect(testApp.config).toBeDefined();
+        expect(testApp.config?.NODE_ENV).toBe(value);
       } finally {
         await testApp.close();
       }
@@ -124,10 +127,11 @@ describe('Environment Plugin Direct Tests', () => {
       await app.register(envPlugin);
       await app.ready();
 
-      expect(app.config.NODE_ENV).toBe('production');
-      expect(app.config.PORT).toBe(8080);
-      expect(app.config.HOST).toBe('0.0.0.0');
-      expect(app.config.LOG_LEVEL).toBe('warn');
+      expect(app.config).toBeDefined();
+      expect(app.config?.NODE_ENV).toBe('production');
+      expect(app.config?.PORT).toBe(8080);
+      expect(app.config?.HOST).toBe('0.0.0.0');
+      expect(app.config?.LOG_LEVEL).toBe('warn');
     } finally {
       process.env = originalEnv;
       await app.close();

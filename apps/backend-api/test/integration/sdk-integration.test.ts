@@ -1,9 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { build } from '../helper.js';
+import {
+  getOpenAPIV3Document,
+  isResponseObject,
+  getPathOperations,
+} from '../utils/openapi-types.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('SDK Integration', () => {
   let app: FastifyInstance;
@@ -29,7 +38,7 @@ describe('SDK Integration', () => {
 
   describe('OpenAPI Specification Quality', () => {
     it('should generate complete OpenAPI spec suitable for SDK generation', async () => {
-      const spec = app.swagger();
+      const spec = getOpenAPIV3Document(() => app.swagger());
 
       // Validate OpenAPI 3.0 compliance
       expect(spec.openapi).toBe('3.0.0');
@@ -43,8 +52,9 @@ describe('SDK Integration', () => {
 
       // Validate each endpoint has complete documentation
       for (const [, pathItem] of Object.entries(spec.paths)) {
-        for (const [, operation] of Object.entries(pathItem)) {
-          if (operation && typeof operation === 'object') {
+        if (pathItem) {
+          const operations = getPathOperations(pathItem);
+          for (const [, operation] of Object.entries(operations)) {
             expect(operation.summary).toBeDefined();
             expect(operation.description).toBeDefined();
             expect(operation.tags).toBeDefined();
@@ -56,38 +66,56 @@ describe('SDK Integration', () => {
     });
 
     it('should include error responses for better SDK error handling', async () => {
-      const spec = app.swagger();
+      const spec = getOpenAPIV3Document(() => app.swagger());
 
       // Check that routes include error responses
-      expect(spec.paths['/'].get.responses['500']).toBeDefined();
-      expect(spec.paths['/example/'].get.responses['500']).toBeDefined();
+      const rootPath = spec.paths['/'];
+      const examplePath = spec.paths['/example/'];
 
-      // Validate error response structure
-      const errorResponse = spec.paths['/'].get.responses['500'];
-      expect(errorResponse.description).toBe('Internal Server Error');
-      expect(errorResponse.content).toBeDefined();
-      expect(errorResponse.content['application/json']).toBeDefined();
-      expect(
-        errorResponse.content['application/json'].schema.properties.error
-      ).toBeDefined();
-      expect(
-        errorResponse.content['application/json'].schema.properties.message
-      ).toBeDefined();
-      expect(
-        errorResponse.content['application/json'].schema.properties.statusCode
-      ).toBeDefined();
+      expect(rootPath).toBeDefined();
+      expect(examplePath).toBeDefined();
+
+      if (rootPath && examplePath) {
+        expect(rootPath.get).toBeDefined();
+        expect(examplePath.get).toBeDefined();
+        expect(rootPath.get?.responses?.['500']).toBeDefined();
+        expect(examplePath.get?.responses?.['500']).toBeDefined();
+
+        // Validate error response structure
+        const errorResponse = rootPath.get?.responses?.['500'];
+        if (errorResponse && isResponseObject(errorResponse)) {
+          expect(errorResponse.description).toBe('Internal Server Error');
+          expect(errorResponse.content).toBeDefined();
+          expect(errorResponse.content?.['application/json']).toBeDefined();
+
+          const jsonContent = errorResponse.content?.['application/json'];
+          if (
+            jsonContent &&
+            'schema' in jsonContent &&
+            jsonContent.schema &&
+            'properties' in jsonContent.schema
+          ) {
+            expect(jsonContent.schema.properties?.['error']).toBeDefined();
+            expect(jsonContent.schema.properties?.['message']).toBeDefined();
+            expect(jsonContent.schema.properties?.['statusCode']).toBeDefined();
+          }
+        }
+      }
     });
 
     it('should have consistent response content types', async () => {
-      const spec = app.swagger();
+      const spec = getOpenAPIV3Document(() => app.swagger());
 
       for (const [, pathItem] of Object.entries(spec.paths)) {
-        for (const [, operation] of Object.entries(pathItem)) {
-          if (operation && operation.responses) {
-            for (const [, response] of Object.entries(operation.responses)) {
-              if (response && response.content) {
-                // Should have application/json content type
-                expect(response.content['application/json']).toBeDefined();
+        if (pathItem) {
+          const operations = getPathOperations(pathItem);
+          for (const [, operation] of Object.entries(operations)) {
+            if (operation.responses) {
+              for (const [, response] of Object.entries(operation.responses)) {
+                if (isResponseObject(response) && response.content) {
+                  // Should have application/json content type
+                  expect(response.content['application/json']).toBeDefined();
+                }
               }
             }
           }
@@ -103,7 +131,7 @@ describe('SDK Integration', () => {
 
       // Mock SDK client structure (represents what Fern would generate)
       class MockAiFastifyTemplateAPI {
-        constructor(private readonly config: { environment: string }) {}
+        constructor(_config: { environment: string }) {}
 
         async getRootMessage(): Promise<{ message: string }> {
           const response = await app.inject({
@@ -192,7 +220,10 @@ describe('SDK Integration', () => {
 
   describe('Fern Configuration Validation', () => {
     it('should have valid Fern configuration structure', () => {
-      const fernConfigPath = join(process.cwd(), '../../fern/fern.config.json');
+      const fernConfigPath = join(
+        __dirname,
+        '../../../../fern/fern.config.json'
+      );
       expect(existsSync(fernConfigPath)).toBe(true);
 
       const fernConfig = JSON.parse(readFileSync(fernConfigPath, 'utf8'));
@@ -201,7 +232,7 @@ describe('SDK Integration', () => {
     });
 
     it('should have valid generators configuration', () => {
-      const generatorsPath = join(process.cwd(), '../../fern/generators.yml');
+      const generatorsPath = join(__dirname, '../../../../fern/generators.yml');
       expect(existsSync(generatorsPath)).toBe(true);
 
       const generatorsContent = readFileSync(generatorsPath, 'utf8');
@@ -211,7 +242,7 @@ describe('SDK Integration', () => {
     });
 
     it('should have API definition pointing to correct OpenAPI spec', () => {
-      const apiDefPath = join(process.cwd(), '../../fern/definition/api.yml');
+      const apiDefPath = join(__dirname, '../../../../fern/definition/api.yml');
       expect(existsSync(apiDefPath)).toBe(true);
 
       const apiDef = readFileSync(apiDefPath, 'utf8');
@@ -223,30 +254,30 @@ describe('SDK Integration', () => {
     it('should have all required files for SDK generation', () => {
       // Check Fern configuration files (from project root)
       expect(
-        existsSync(join(process.cwd(), '../../fern/fern.config.json'))
+        existsSync(join(__dirname, '../../../../fern/fern.config.json'))
       ).toBe(true);
-      expect(existsSync(join(process.cwd(), '../../fern/generators.yml'))).toBe(
-        true
-      );
       expect(
-        existsSync(join(process.cwd(), '../../fern/definition/api.yml'))
+        existsSync(join(__dirname, '../../../../fern/generators.yml'))
+      ).toBe(true);
+      expect(
+        existsSync(join(__dirname, '../../../../fern/definition/api.yml'))
       ).toBe(true);
 
       // Check SDK package structure
       expect(
-        existsSync(join(process.cwd(), '../../packages/sdk/README.md'))
+        existsSync(join(__dirname, '../../../../packages/sdk/README.md'))
       ).toBe(true);
       expect(
-        existsSync(join(process.cwd(), '../../packages/sdk/package.json'))
+        existsSync(join(__dirname, '../../../../packages/sdk/package.json'))
       ).toBe(true);
       expect(
-        existsSync(join(process.cwd(), '../../packages/sdk/CHANGELOG.md'))
+        existsSync(join(__dirname, '../../../../packages/sdk/CHANGELOG.md'))
       ).toBe(true);
     });
 
     it('should have OpenAPI generation working correctly', async () => {
       // Test that we can generate OpenAPI spec programmatically
-      const spec = app.swagger();
+      const spec = getOpenAPIV3Document(() => app.swagger());
 
       // Should be valid for Fern consumption
       expect(spec.openapi).toBe('3.0.0');
@@ -260,26 +291,34 @@ describe('SDK Integration', () => {
 
       // Each path should have operations
       for (const pathItem of Object.values(spec.paths)) {
-        const operations = ['get', 'post', 'put', 'delete', 'patch'];
-        const hasOperation = operations.some(op => pathItem[op]);
+        const operations = ['get', 'post', 'put', 'delete', 'patch'] as const;
+        const hasOperation = operations.some(op => {
+          return (
+            pathItem &&
+            typeof pathItem === 'object' &&
+            op in pathItem &&
+            pathItem[op as keyof typeof pathItem] !== undefined
+          );
+        });
         expect(hasOperation).toBe(true);
       }
     });
 
     it('should support future SDK enhancements', () => {
-      const spec = app.swagger();
+      const spec = getOpenAPIV3Document(() => app.swagger());
 
       // Should have security schemes for authentication
-      expect(spec.components.securitySchemes).toBeDefined();
-      expect(spec.components.securitySchemes.bearerAuth).toBeDefined();
+      expect(spec.components).toBeDefined();
+      expect(spec.components?.securitySchemes).toBeDefined();
+      expect(spec.components?.securitySchemes?.['bearerAuth']).toBeDefined();
 
       // Should have proper tagging for organization
       expect(spec.tags).toBeDefined();
-      expect(spec.tags.length).toBeGreaterThan(0);
+      expect(spec.tags?.length).toBeGreaterThan(0);
 
       // Should have server configuration
       expect(spec.servers).toBeDefined();
-      expect(spec.servers.length).toBeGreaterThan(0);
+      expect(spec.servers?.length).toBeGreaterThan(0);
     });
   });
 

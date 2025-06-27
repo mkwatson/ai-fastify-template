@@ -10,7 +10,7 @@ describe('Support plugin', () => {
 
     beforeAll(async () => {
       fastify = Fastify({ logger: false });
-      await fastify.register(Support);
+      await fastify.register(Support, {});
       await fastify.ready();
     });
 

@@ -10,7 +10,6 @@ import {
   calculateTotal,
   calculateTotalWithTax,
   calculateDiscount,
-  type Item,
 } from '../../src/utils/calculations.js';
 
 /**

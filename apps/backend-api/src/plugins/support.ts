@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin';
 
-export type SupportPluginOptions = Record<string, never>;
+// Empty object type that allows any properties (for compatibility with Fastify's index signature)
+export type SupportPluginOptions = Record<string, unknown>;
 
 // The use of fastify-plugin is required to be able
 // to export the decorators to the outer scope

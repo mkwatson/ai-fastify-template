@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { propertyTest, generators } from '@ai-fastify-template/types';
+import { generators } from '@ai-fastify-template/types';
 import fc from 'fast-check';
 
 import {

@@ -9,11 +9,10 @@ export default defineConfig({
     environment: 'node',
     testTimeout: 10000,
     hookTimeout: 10000,
-    pool: 'threads',
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        singleThread: true,
-        isolate: false,
+      forks: {
+        singleFork: true,
       },
     },
     // Include all test files across the monorepo

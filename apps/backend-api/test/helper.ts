@@ -1,5 +1,8 @@
 // This file contains code that we reuse between our tests.
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, {
+  type FastifyInstance,
+  type LightMyRequestResponse,
+} from 'fastify';
 import fp from 'fastify-plugin';
 
 import App, { type AppOptions } from '../src/app.js';
@@ -54,13 +57,15 @@ export async function injectRequest(
   app: FastifyInstance,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
   url: string,
-  payload?: unknown
-) {
-  return app.inject({
+  payload?: string | object | Buffer | NodeJS.ReadableStream
+): Promise<LightMyRequestResponse> {
+  const options = {
     method,
     url,
-    payload,
-  });
+    ...(payload !== undefined && { payload }),
+  };
+
+  return app.inject(options);
 }
 
 // Legacy exports for backwards compatibility with existing tests

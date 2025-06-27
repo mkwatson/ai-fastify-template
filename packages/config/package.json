@@ -16,9 +16,9 @@
     "dev": "tsc --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix && prettier --write .",
-    "test": "cd ../.. && pnpm exec vitest run packages/config/test/*.test.ts",
-    "test:watch": "cd ../.. && pnpm exec vitest packages/config/test/*.test.ts",
-    "test:coverage": "cd ../.. && pnpm exec vitest run --coverage packages/config/test/*.test.ts",
+    "test": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest run packages/config/test/*.test.ts",
+    "test:watch": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest packages/config/test/*.test.ts",
+    "test:coverage": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest run --coverage packages/config/test/*.test.ts",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
     "graph:validate": "echo 'No dependency validation needed for config package'"
