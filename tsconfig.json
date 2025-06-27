@@ -13,5 +13,13 @@
       "path": "./packages/types"
     }
   ],
-  "exclude": ["node_modules", "**/dist/**", "**/build/**", ".turbo", "examples", "**/*.js", "**/*.d.ts.map"]
+  "exclude": [
+    "node_modules",
+    "**/dist/**",
+    "**/build/**",
+    ".turbo",
+    "examples",
+    "**/*.js",
+    "**/*.d.ts.map"
+  ]
 }

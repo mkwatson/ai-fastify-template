@@ -44,19 +44,16 @@ AI coding agents have fundamentally different failure modes than human developer
 ### What We Cannot Replicate from Rust
 
 1. **Compile-time Memory Safety**
-
    - No ownership system
    - No borrow checker
    - Garbage collection instead of deterministic destruction
 
 2. **Zero-Cost Abstractions**
-
    - Runtime overhead from validation
    - GC pauses
    - Dynamic dispatch costs
 
 3. **Compile-time Concurrency Safety**
-
    - No Send/Sync traits
    - Race conditions possible
    - Requires runtime synchronization
@@ -92,13 +89,11 @@ AI coding agents have fundamentally different failure modes than human developer
 ### High Impact Patterns (Implement First)
 
 1. **Result Types**
-
    - **Why**: AI often ignores error cases
    - **Impact**: Forces explicit error handling
    - **AI Benefit**: Clear patterns to follow
 
 2. **Property-Based Testing**
-
    - **Why**: AI writes happy-path tests
    - **Impact**: Automatic edge case coverage
    - **AI Benefit**: Less test code to write
@@ -111,7 +106,6 @@ AI coding agents have fundamentally different failure modes than human developer
 ### Medium Impact Patterns
 
 1. **Branded Types**
-
    - **Why**: AI mixes up ID types
    - **Impact**: Compile-time ID safety
    - **AI Benefit**: Clear type boundaries
@@ -124,7 +118,6 @@ AI coding agents have fundamentally different failure modes than human developer
 ### Lower Priority Patterns
 
 1. **Effect Systems**
-
    - Complex to implement
    - Limited TypeScript support
    - May confuse AI agents

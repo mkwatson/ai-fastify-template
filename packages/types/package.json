@@ -23,7 +23,8 @@
     "test": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest run packages/types/test/*.test.ts",
     "test:watch": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest packages/types/test/*.test.ts",
     "test:coverage": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest run --coverage packages/types/test/*.test.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepare": "husky"
   },
   "dependencies": {
     "zod": "^3.22.4"
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@ai-fastify-template/config": "workspace:*",
     "expect-type": "^0.17.3",
+    "husky": "^9.1.7",
     "vitest": "^3.2.3",
     "zod": "^3.22.4"
   },

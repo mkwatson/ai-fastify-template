@@ -48,16 +48,14 @@
     "ci:validate": "actionlint .github/workflows/*.yml",
     "ci:debug": "act --verbose",
     "doctor": "volta --version && node --version && pnpm --version",
-    "setup:dev": "pnpm install && pre-commit install && echo '🎉 Development environment setup complete!'",
-    "setup:pre-commit": "pre-commit install",
-    "setup:pre-push": "pre-commit install --hook-type pre-push",
-    "setup:hooks": "pre-commit install && pre-commit install --hook-type pre-push",
+    "setup:dev": "pnpm install && echo '🎉 Development environment setup complete!'",
     "security:scan": "gitleaks detect --source=. --verbose --no-banner --no-git",
     "openapi:generate": "turbo openapi:generate",
     "sdk:generate": "bash scripts/sdk-generate.sh",
     "sdk:check": "bash scripts/sdk-generate.sh --check",
     "fern:check": "fern check",
-    "fern:validate": "fern check && echo '✅ Fern configuration is valid'"
+    "fern:validate": "fern check && echo '✅ Fern configuration is valid'",
+    "prepare": "husky"
   },
   "keywords": [
     "fastify",
@@ -105,6 +103,7 @@
     "fast-check": "^4.1.1",
     "fern-api": "^0.64.15",
     "gitleaks": "^1.0.0",
+    "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
     "jsonlint": "^1.6.3",
     "nx": "21.2.1",

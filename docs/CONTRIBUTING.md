@@ -73,14 +73,12 @@ ai-fastify-template/
 AI agents autonomously handle complete application development with automated SDK generation:
 
 1. **Complete Application Development**
-
    - Full-stack TypeScript applications with Fastify backend
    - Zod validation for all inputs and outputs
    - Comprehensive error handling and business logic
    - Service layer architecture and data models
 
 2. **OpenAPI Specification Generation**
-
    - Structured API contracts for client integration
    - Type-safe request/response schemas
    - Documentation for automated tooling
@@ -288,7 +286,6 @@ BREAKING CHANGE: User IDs are now UUIDs instead of numbers"
    ```
 
 2. **Update documentation**
-
    - README if adding features
    - JSDoc for new public APIs
    - Architecture docs for significant changes

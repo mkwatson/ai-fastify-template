@@ -131,7 +131,6 @@ git --version     # >= 2.0.0
    ```
 
    The git hooks provide automated quality gates:
-
    - 🎨 **ESLint + Prettier** - Auto-fixes formatting issues on staged files
    - 📝 **Conventional Commits** - Enforces commit message format
    - 🔄 **Auto-staging** - Modified files are automatically re-staged after fixes
@@ -298,7 +297,6 @@ When implementing features, AI agents follow this process:
 AI agents autonomously handle the complete development cycle:
 
 1. **Code Generation**
-
    - Generate TypeScript code following strict mode requirements
    - Create comprehensive test suites (unit + integration + mutation)
    - Update documentation automatically
@@ -673,7 +671,6 @@ pnpm build --profile            # Performance profiling
    ```
 
 2. **Documentation updates**
-
    - Update README if needed
    - Update CHANGELOG
    - Verify all docs are current

@@ -18,19 +18,16 @@ This document describes the architectural decisions, patterns, and principles th
 ### Core Principles
 
 1. **AI-First Development**
-
    - Constraint-driven design that guides AI agents toward correct patterns
    - Immediate feedback loops through fail-fast pipelines
    - Clear architectural boundaries that prevent violations
 
 2. **Quality by Design**
-
    - Comprehensive validation at every layer
    - Fail-fast approach to catch issues early
    - Automated quality gates that prevent regressions
 
 3. **Developer Experience**
-
    - Zero-config setup for common use cases
    - Clear, predictable patterns
    - Excellent tooling integration
