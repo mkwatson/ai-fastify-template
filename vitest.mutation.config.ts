@@ -3,12 +3,15 @@
  * Required due to Stryker incompatibility with Vitest workspace mode
  * TODO: Remove when https://github.com/stryker-mutator/stryker-js/issues/[workspace-support] is fixed
  *
- * This config disables workspace mode and directly includes test files,
- * which allows Stryker to properly create its sandbox and run mutation tests.
+ * ⚠️  WARNING: This config MUST stay synchronized with vitest.base.config.ts
+ * 
+ * Shared properties are imported from vitest.base.config.ts to ensure consistency.
+ * Only mutation-testing-specific overrides are defined here.
+ * 
+ * Run `pnpm test:config:verify` after making changes to ensure consistency.
  */
 import { defineConfig, mergeConfig } from 'vitest/config';
-import baseConfig from './vitest.config';
-import path from 'path';
+import { baseConfig } from './vitest.base.config';
 
 export default mergeConfig(
   baseConfig,
@@ -33,23 +36,7 @@ export default mergeConfig(
       },
     },
 
-    // Module resolution for monorepo packages
-    resolve: {
-      alias: {
-        '@ai-fastify-template/config': path.resolve(
-          __dirname,
-          'packages/config/src'
-        ),
-        '@ai-fastify-template/types': path.resolve(
-          __dirname,
-          'packages/types/src'
-        ),
-      },
-      // Handle .js extensions in ESM imports
-      extensionAlias: {
-        '.js': ['.ts', '.js'],
-        '.jsx': ['.tsx', '.jsx'],
-      },
-    },
+    // Note: resolve config is inherited from baseConfig
+    // This ensures module resolution stays synchronized
   })
 );

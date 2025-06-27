@@ -27,6 +27,10 @@ pnpm affected:lint     # Lint only changed packages
 pnpm affected:test     # Test only changed packages
 pnpm affected:all      # All validation on changed packages
 
+# Test configuration validation (CRITICAL for dual configs)
+pnpm test:config:verify    # Full config validation + test execution comparison
+pnpm test:config:quick     # Quick config validation for pre-push hooks
+
 # Project management
 # Use Linear MCP tools for issue management
 # Use gh CLI for GitHub operations
@@ -77,3 +81,30 @@ pnpm ci:simulate       # Runs build first (like CI does), then full validation
 - Separate `tsconfig.build.json` files exclude test files from production builds
 - Pre-push hook uses `ci:simulate` to catch errors before they reach CI
 - This prevents the disconnect between local and CI validation
+
+## 🚨 **Test Configuration Management**
+
+**CRITICAL: We maintain two Vitest configurations for workspace vs mutation testing:**
+
+- `vitest.config.ts` - Standard workspace configuration
+- `vitest.mutation.config.ts` - Stryker-compatible configuration (no workspace mode)
+- `vitest.base.config.ts` - Shared base configuration (single source of truth)
+
+**Configuration Safety Guarantees:**
+
+1. **Shared Base**: All common settings inherited from `vitest.base.config.ts`
+2. **Automatic Validation**: Pre-commit hooks validate config consistency
+3. **CI Gate**: All PRs with config changes trigger validation workflow
+4. **Property Checking**: Script compares actual config objects, not just test results
+
+**When modifying Vitest configs:**
+
+```bash
+# 1. Edit vitest.base.config.ts for shared properties
+# 2. Edit specific configs only for workspace/mutation differences  
+# 3. Always run validation after changes
+pnpm test:config:verify
+
+# 4. Pre-commit hook will catch issues automatically
+git commit -m "update: vitest configuration"
+```

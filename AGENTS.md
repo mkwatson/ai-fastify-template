@@ -21,6 +21,10 @@ pnpm ai:check          # Standard validation (~30s): + graph validation
 pnpm ai:compliance     # Full validation (~3min): + tests + build + mutation testing + security
 pnpm ai:mutation       # Run mutation testing directly (focused on business logic)
 
+# Test configuration validation (CRITICAL)
+pnpm test:config:verify    # Full validation: property comparison + test execution
+pnpm test:config:quick     # Fast validation for pre-push hooks
+
 # Continuous validation (runs on file save)
 pnpm ai:watch          # Watch all files, run ai:quick on changes
 pnpm dev:watch         # Watch all files, run affected lint+type-check

@@ -1,1 +1,7 @@
 pnpm lint:fix
+
+# Validate Vitest config consistency if configs changed
+if git diff --cached --name-only | grep -E "vitest\.(config|mutation|base)\.ts"; then
+  echo "🔍 Vitest config changes detected, validating consistency..."
+  node scripts/validate-vitest-configs.js
+fi

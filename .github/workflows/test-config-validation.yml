@@ -5,6 +5,7 @@ on:
     paths:
       - 'vitest.config.ts'
       - 'vitest.mutation.config.ts'
+      - 'vitest.base.config.ts'
       - 'vitest.workspace.ts'
       - 'apps/*/test/**'
       - '.github/workflows/test-config-validation.yml'
@@ -58,6 +59,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Security Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate Configuration Consistency
+        run: |
+          echo "🔍 Validating Vitest configuration consistency..."
+          node scripts/validate-vitest-configs.js
 
       - name: Build dependencies
         run: pnpm build
