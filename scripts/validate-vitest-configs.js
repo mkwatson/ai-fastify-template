@@ -1,198 +1,93 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --import=tsx
 /**
- * Enhanced Vitest configuration validation
- * 
- * Compares actual configuration objects to ensure critical properties stay synchronized
- * between workspace and mutation testing configurations.
+ * Simple Vitest configuration validation
+ *
+ * Ensures critical properties stay synchronized between workspace
+ * and mutation testing configurations.
  */
 
 import { pathToFileURL } from 'url';
 import path from 'path';
-import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url);
-
-// Color output for terminal
-const colors = {
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  reset: '\x1b[0m',
-  bold: '\x1b[1m'
-};
-
-function colorize(color, text) {
-  return `${colors[color]}${text}${colors.reset}`;
-}
+// Simple color output
+const red = (text) => `\x1b[31m${text}\x1b[0m`;
+const green = (text) => `\x1b[32m${text}\x1b[0m`;
+const yellow = (text) => `\x1b[33m${text}\x1b[0m`;
+const blue = (text) => `\x1b[34m${text}\x1b[0m`;
 
 async function loadConfig(configPath) {
-  try {
-    const fullPath = path.resolve(configPath);
-    const configUrl = pathToFileURL(fullPath).href;
-    const module = await import(configUrl);
-    return module.default;
-  } catch (error) {
-    throw new Error(`Failed to load config ${configPath}: ${error.message}`);
-  }
-}
-
-function getNestedProperty(obj, path) {
-  return path.split('.').reduce((current, key) => {
-    return current && current[key] !== undefined ? current[key] : undefined;
-  }, obj);
-}
-
-function deepEqual(obj1, obj2) {
-  if (obj1 === obj2) return true;
+  const fullPath = path.resolve(configPath);
+  const configUrl = pathToFileURL(fullPath).href;
+  const module = await import(configUrl);
   
-  if (obj1 == null || obj2 == null) return obj1 === obj2;
-  
-  if (typeof obj1 !== typeof obj2) return false;
-  
-  if (typeof obj1 !== 'object') return obj1 === obj2;
-  
-  if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
-  
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-  
-  if (keys1.length !== keys2.length) return false;
-  
-  for (const key of keys1) {
-    if (!keys2.includes(key)) return false;
-    if (!deepEqual(obj1[key], obj2[key])) return false;
+  let config = module.default;
+  if (typeof config === 'function') {
+    config = await config({ command: 'build', mode: 'test' });
   }
   
-  return true;
+  return config;
+}
+
+function getValue(obj, path) {
+  return path.split('.').reduce((current, key) => current?.[key], obj);
+}
+
+function deepEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 async function validateConfigs() {
-  console.log(colorize('blue', '🔍 Validating Vitest configuration consistency...\n'));
-  
-  const configPaths = {
-    workspace: './vitest.config.ts',
-    mutation: './vitest.mutation.config.ts',
-    base: './vitest.base.config.ts'
-  };
-  
-  let workspaceConfig, mutationConfig, baseConfig;
-  
+  console.log(blue('🔍 Validating Vitest configuration consistency...\n'));
+
   try {
-    [workspaceConfig, mutationConfig, baseConfig] = await Promise.all([
-      loadConfig(configPaths.workspace),
-      loadConfig(configPaths.mutation),
-      loadConfig(configPaths.base)
+    // Load configurations
+    const [workspace, mutation, base] = await Promise.all([
+      loadConfig('./vitest.config.ts'),
+      loadConfig('./vitest.mutation.config.ts'),
+      loadConfig('./vitest.base.config.ts'),
     ]);
-  } catch (error) {
-    console.error(colorize('red', `❌ Config loading failed: ${error.message}`));
-    process.exit(1);
-  }
-  
-  // Import critical sync properties from base config
-  const { CRITICAL_SYNC_PROPERTIES } = await import(path.resolve('./vitest.base.config.ts'));
-  
-  const errors = [];
-  const warnings = [];
-  
-  console.log(colorize('yellow', 'Checking critical properties that MUST be synchronized:\n'));
-  
-  for (const propertyPath of CRITICAL_SYNC_PROPERTIES) {
-    const workspaceValue = getNestedProperty(workspaceConfig, propertyPath);
-    const mutationValue = getNestedProperty(mutationConfig, propertyPath);
-    const baseValue = getNestedProperty(baseConfig, propertyPath);
-    
-    console.log(`  ${colorize('blue', propertyPath)}:`);
-    
-    // Check if both configs match the base config
-    const workspaceMatches = deepEqual(workspaceValue, baseValue);
-    const mutationMatches = deepEqual(mutationValue, baseValue);
-    
-    if (!workspaceMatches || !mutationMatches) {
-      errors.push({
-        property: propertyPath,
-        workspace: workspaceValue,
-        mutation: mutationValue,
-        base: baseValue,
-        workspaceMatches,
-        mutationMatches
-      });
+
+    // Import critical properties list
+    const { CRITICAL_SYNC_PROPERTIES } = await import(
+      path.resolve('./vitest.base.config.ts')
+    );
+
+    // Check critical properties only
+    let errors = 0;
+    console.log(yellow('Checking critical properties:\n'));
+
+    for (const prop of CRITICAL_SYNC_PROPERTIES) {
+      const workspaceVal = getValue(workspace, prop);
+      const mutationVal = getValue(mutation, prop);
+      const baseVal = getValue(base, prop);
+
+      const wsMatch = deepEqual(workspaceVal, baseVal);
+      const mutMatch = deepEqual(mutationVal, baseVal);
+
+      console.log(`  ${prop}: ${wsMatch && mutMatch ? green('✅') : red('❌')}`);
       
-      console.log(`    ${colorize('red', '❌ MISMATCH DETECTED')}`);
-      if (!workspaceMatches) {
-        console.log(`    ${colorize('red', '  • Workspace config differs from base')}`);
+      if (!wsMatch || !mutMatch) {
+        errors++;
+        if (!wsMatch) console.log(`    ${red('• Workspace differs from base')}`);
+        if (!mutMatch) console.log(`    ${red('• Mutation differs from base')}`);
       }
-      if (!mutationMatches) {
-        console.log(`    ${colorize('red', '  • Mutation config differs from base')}`);
-      }
-    } else {
-      console.log(`    ${colorize('green', '✅ Synchronized')}`);
     }
-  }
-  
-  console.log('\n' + colorize('yellow', 'Checking configuration differences:\n'));
-  
-  // Check for unexpected differences in other properties
-  const allProperties = new Set([
-    ...Object.keys(workspaceConfig.test || {}),
-    ...Object.keys(mutationConfig.test || {}),
-    ...Object.keys(workspaceConfig.resolve || {}),
-    ...Object.keys(mutationConfig.resolve || {})
-  ]);
-  
-  for (const prop of allProperties) {
-    const fullPath = prop.includes('.') ? prop : `test.${prop}`;
-    
-    if (CRITICAL_SYNC_PROPERTIES.includes(fullPath)) continue; // Already checked
-    
-    const workspaceValue = getNestedProperty(workspaceConfig, fullPath);
-    const mutationValue = getNestedProperty(mutationConfig, fullPath);
-    
-    if (!deepEqual(workspaceValue, mutationValue)) {
-      warnings.push({
-        property: fullPath,
-        workspace: workspaceValue,
-        mutation: mutationValue
-      });
+
+    // Summary
+    console.log(`\n${errors === 0 ? green('✅ PASSED') : red('❌ FAILED')}`);
+    console.log(`Checked: ${CRITICAL_SYNC_PROPERTIES.length} properties`);
+    console.log(`Errors: ${errors}`);
+
+    if (errors > 0) {
+      console.log(red('\nConfigs are out of sync. Fix by updating vitest.base.config.ts'));
+      process.exit(1);
     }
-  }
-  
-  if (warnings.length > 0) {
-    console.log(colorize('yellow', 'Non-critical differences (may be intentional):\n'));
-    warnings.forEach(warning => {
-      console.log(`  ${colorize('yellow', warning.property)}:`);
-      console.log(`    Workspace: ${JSON.stringify(warning.workspace)}`);
-      console.log(`    Mutation:  ${JSON.stringify(warning.mutation)}`);
-    });
-  }
-  
-  // Summary
-  console.log('\n' + colorize('bold', '📊 VALIDATION SUMMARY:'));
-  console.log(`  Critical properties checked: ${CRITICAL_SYNC_PROPERTIES.length}`);
-  console.log(`  ${colorize('red', 'Synchronization errors:')} ${errors.length}`);
-  console.log(`  ${colorize('yellow', 'Non-critical differences:')} ${warnings.length}`);
-  
-  if (errors.length > 0) {
-    console.log('\n' + colorize('red', '❌ CONFIGURATION VALIDATION FAILED'));
-    console.log(colorize('red', '\nCritical properties are out of sync. This will cause test inconsistencies.'));
-    console.log(colorize('yellow', '\nTo fix:'));
-    console.log('1. Update vitest.base.config.ts with the correct shared values');
-    console.log('2. Ensure both configs import from the base config');
-    console.log('3. Run this validation again');
-    
+
+  } catch (error) {
+    console.error(red(`❌ Error: ${error.message}`));
     process.exit(1);
-  } else {
-    console.log('\n' + colorize('green', '✅ CONFIGURATION VALIDATION PASSED'));
-    console.log(colorize('green', 'All critical properties are properly synchronized.'));
-    
-    if (warnings.length > 0) {
-      console.log(colorize('yellow', '\nNote: Non-critical differences detected but are likely intentional.'));
-    }
   }
 }
 
 // Run validation
-validateConfigs().catch(error => {
-  console.error(colorize('red', `💥 Validation failed: ${error.message}`));
-  process.exit(1);
-});
+validateConfigs();

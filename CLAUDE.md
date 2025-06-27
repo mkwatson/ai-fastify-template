@@ -101,7 +101,7 @@ pnpm ci:simulate       # Runs build first (like CI does), then full validation
 
 ```bash
 # 1. Edit vitest.base.config.ts for shared properties
-# 2. Edit specific configs only for workspace/mutation differences  
+# 2. Edit specific configs only for workspace/mutation differences
 # 3. Always run validation after changes
 pnpm test:config:verify
 

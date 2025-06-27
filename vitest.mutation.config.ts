@@ -4,10 +4,10 @@
  * TODO: Remove when https://github.com/stryker-mutator/stryker-js/issues/[workspace-support] is fixed
  *
  * ⚠️  WARNING: This config MUST stay synchronized with vitest.base.config.ts
- * 
+ *
  * Shared properties are imported from vitest.base.config.ts to ensure consistency.
  * Only mutation-testing-specific overrides are defined here.
- * 
+ *
  * Run `pnpm test:config:verify` after making changes to ensure consistency.
  */
 import { defineConfig, mergeConfig } from 'vitest/config';

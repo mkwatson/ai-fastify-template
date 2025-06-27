@@ -1,13 +1,16 @@
 /**
  * Shared Vitest configuration base
- * 
+ *
  * ⚠️  CRITICAL: This is the single source of truth for shared Vitest settings.
  * Any changes to these properties MUST be synchronized across all configs.
- * 
+ *
  * Run `pnpm test:config:verify` after making changes to ensure consistency.
  */
 import path from 'path';
+import { fileURLToPath } from 'url';
 import type { InlineConfig } from 'vitest';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const baseConfig: InlineConfig = {
   test: {
@@ -32,7 +35,7 @@ export const baseConfig: InlineConfig = {
       'apps/*/src/**/*.test.ts',
       'packages/*/src/**/*.test.ts',
     ],
-    
+
     exclude: [
       'node_modules/',
       'dist/',
