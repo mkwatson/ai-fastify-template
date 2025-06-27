@@ -47,7 +47,7 @@ jobs:
       - name: Run CI validation with Nx
         run: |
           echo "🔍 Running CI validation with Nx..."
-          pnpm ci:check
+          pnpm ci:simulate
 
       - name: Validate test configurations
         run: |
