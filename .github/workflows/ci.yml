@@ -44,10 +44,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build all packages first
+        run: |
+          echo "🏗️ Building all packages to generate declaration files..."
+          pnpm build
+
       - name: Run CI validation with Nx
         run: |
           echo "🔍 Running CI validation with Nx..."
-          pnpm ci:simulate
+          pnpm ci:check
 
       - name: Validate test configurations
         run: |
