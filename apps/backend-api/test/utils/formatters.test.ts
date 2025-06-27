@@ -222,7 +222,8 @@ describe('formatCurrency - Property Tests', () => {
 
   it('should work with all supported currencies', () => {
     propertyTest(
-      ([amount, currency]) => formatCurrency(amount, currency),
+      ([amount, currency]: [number, Currency]) =>
+        formatCurrency(amount, currency),
       fc.tuple(
         generators.money(),
         fc.constantFrom<Currency>('USD', 'EUR', 'GBP', 'JPY')
@@ -243,7 +244,8 @@ describe('formatPercentage - Property Tests', () => {
 
   it('should handle all valid decimal places', () => {
     propertyTest(
-      ([value, decimals]) => formatPercentage(value / 100, decimals),
+      ([value, decimals]: [number, number]) =>
+        formatPercentage(value / 100, decimals),
       fc.tuple(generators.percentage(), fc.integer({ min: 0, max: 10 })),
       ['nonEmptyString']
     );

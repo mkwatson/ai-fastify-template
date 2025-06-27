@@ -180,7 +180,7 @@ describe('Enhanced Property Tests - calculateTotalWithTax', () => {
   describe('Tax Calculation Properties', () => {
     it('should maintain tax relationship invariants', () => {
       propertyTest(
-        ([items, taxRate]) => {
+        ([items, taxRate]: [Item[], number]) => {
           const baseTotal = calculateTotal(items);
           const totalWithTax = calculateTotalWithTax(items, taxRate);
 
@@ -225,7 +225,7 @@ describe('Enhanced Property Tests - calculateTotalWithTax', () => {
   describe('Composition with Base Calculation', () => {
     it('should compose correctly with calculateTotal', () => {
       propertyTest(
-        ([items, taxRate]) => {
+        ([items, taxRate]: [Item[], number]) => {
           const directCalculation = calculateTotalWithTax(items, taxRate);
           const composedCalculation = calculateTotal(items) * (1 + taxRate);
 
@@ -246,7 +246,7 @@ describe('Enhanced Property Tests - calculateDiscount', () => {
   describe('Discount Calculation Properties', () => {
     it('should maintain discount invariants', () => {
       propertyTest(
-        ([amount, discountPercent]) => {
+        ([amount, discountPercent]: [number, number]) => {
           const discount = calculateDiscount(amount, discountPercent);
 
           // Discount never exceeds original amount
@@ -310,7 +310,7 @@ describe('Enhanced Property Tests - calculateDiscount', () => {
 describe('Cross-Function Integration Properties', () => {
   it('should maintain consistency across all calculation functions', () => {
     propertyTest(
-      ([items, taxRate, discountPercent]) => {
+      ([items, taxRate, discountPercent]: [Item[], number, number]) => {
         const baseTotal = calculateTotal(items);
         const totalWithTax = calculateTotalWithTax(items, taxRate);
         const discount = calculateDiscount(baseTotal, discountPercent);

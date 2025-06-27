@@ -20,6 +20,7 @@ pnpm ai:compliance     # Full quality pipeline
 
 # CI Validation (CRITICAL: Run before pushing)
 pnpm ci:check          # Same validation as GitHub Actions (lint + type-check + test)
+pnpm ci:simulate       # EXACT CI simulation: builds first, then runs ci:check (use when CI fails but local passes)
 
 # Nx affected commands - only run on changed packages
 pnpm affected:lint     # Lint only changed packages
@@ -57,3 +58,22 @@ git push
 ```
 
 **Key Rule**: Never push code that fails `pnpm ci:check` - it will fail in CI and waste time.
+
+## 🚨 **Troubleshooting CI Failures**
+
+**If CI fails but local validation passes:**
+
+```bash
+# Use ci:simulate to exactly replicate CI behavior
+pnpm ci:simulate       # Runs build first (like CI does), then full validation
+
+# Common cause: TypeScript errors in test files
+# CI runs 'pnpm build' which compiles ALL files including tests
+# Local 'ci:check' doesn't build first, missing these errors
+```
+
+**Solution implemented:**
+
+- Separate `tsconfig.build.json` files exclude test files from production builds
+- Pre-push hook uses `ci:simulate` to catch errors before they reach CI
+- This prevents the disconnect between local and CI validation

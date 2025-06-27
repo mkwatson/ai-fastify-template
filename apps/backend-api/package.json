@@ -18,7 +18,7 @@
   },
   "scripts": {
     "dev": "fastify start -l info src/server.ts -w",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix && prettier --write .",

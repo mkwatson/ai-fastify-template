@@ -33,6 +33,7 @@
     "ai:watch": "nx watch --all -- pnpm ai:quick",
     "dev:watch": "nx watch --all -- nx affected -t lint,type-check --base=HEAD~1",
     "ci:check": "nx run-many -t lint,type-check,test,build",
+    "ci:simulate": "pnpm build && pnpm ci:check",
     "affected:lint": "nx affected -t lint --base=main",
     "affected:test": "nx affected -t test --base=main",
     "affected:build": "nx affected -t build --base=main",
