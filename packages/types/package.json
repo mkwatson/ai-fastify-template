@@ -7,12 +7,12 @@
   "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
     },
     "./property-testing-simple": {
-      "import": "./dist/src/property-testing-simple.js",
-      "types": "./dist/src/property-testing-simple.d.ts"
+      "types": "./dist/src/property-testing-simple.d.ts",
+      "import": "./dist/src/property-testing-simple.js"
     }
   },
   "scripts": {
