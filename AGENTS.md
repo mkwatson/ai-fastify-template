@@ -1,20 +1,29 @@
 # AI Coding Guidelines for ai-fastify-template
 
-## 🚨 CRITICAL: Commands That Prevent CI Failures
+## 🚨 CRITICAL: Zero CI Failures Guaranteed
 
-**ALWAYS run before committing:**
+**Three-Layer Defense System** prevents any CI failures:
 
-```bash
-pnpm ci:check          # Matches GitHub Actions exactly (~30s)
-```
+1. **During Development**:
+   - Manual: `pnpm ai:quick` (run frequently, <5s)
+   - Automatic: `pnpm ai:watch` (continuous validation on file save)
+2. **Before Commit**: Pre-commit hooks (automatic, ~30s)
+3. **Before Push**: Pre-push validation (mandatory, matches CI exactly)
+
+**You CANNOT push code that will fail CI** - the pre-push hook runs full validation.
 
 **Development validation pipeline:**
 
 ```bash
+# Manual validation
 pnpm ai:quick          # Fast feedback during coding (~5s): lint + type-check (Nx cached)
 pnpm ai:check          # Standard validation (~30s): + graph validation
 pnpm ai:compliance     # Full validation (~3min): + tests + build + mutation testing + security
 pnpm ai:mutation       # Run mutation testing directly (focused on business logic)
+
+# Continuous validation (runs on file save)
+pnpm ai:watch          # Watch all files, run ai:quick on changes
+pnpm dev:watch         # Watch all files, run affected lint+type-check
 
 # Nx affected commands - only run on changed packages
 pnpm affected:lint     # Lint only changed packages
@@ -29,11 +38,11 @@ pnpm affected:all      # Run all tasks on changed packages
 pnpm lint:fix          # Auto-fix formatting and linting
 ```
 
-**Key Rule**: Never push code that fails `pnpm ci:check` - it will fail in CI.
+**Key Rule**: The pre-push hook automatically runs `pnpm ci:check` - you literally cannot push failing code.
 
 ## Quick Start Essentials
 
-**Tech Stack**: Fastify + TypeScript + Zod + TurboRepo monorepo with comprehensive quality guardrails
+**Tech Stack**: Fastify + TypeScript + Zod + Nx monorepo with comprehensive quality guardrails
 
 **Project Structure**:
 
@@ -43,6 +52,9 @@ pnpm lint:fix          # Auto-fix formatting and linting
 **Essential Development Flow**:
 
 ```bash
+# One-time setup (for pre-push validation)
+pnpm setup:hooks       # Installs both pre-commit and pre-push hooks
+
 # Start feature
 git checkout main && git pull origin main
 git checkout -b feature/your-feature-name
@@ -50,12 +62,25 @@ git checkout -b feature/your-feature-name
 # Develop with instant feedback
 pnpm ai:quick          # Run constantly during coding (Nx cached for speed)
 
-# Before commit
-pnpm ci:check          # Must pass before pushing
+# Commit (pre-commit hooks run automatically)
 git add . && git commit -m "feat(scope): description"
 
-# Or use affected commands for large changes
-pnpm affected:all      # Only test/lint/build changed packages
+# Push (pre-push validation runs automatically)
+git push               # Will run full CI validation before push
+```
+
+**If Validation Fails During Push:**
+
+```bash
+# The push will be blocked with clear error messages
+# Fix the issues locally:
+pnpm lint:fix          # Auto-fix formatting
+pnpm type-check        # See TypeScript errors
+pnpm test              # Run failing tests
+
+# Then commit fixes and push again
+git add . && git commit -m "fix: resolve validation errors"
+git push               # Pre-push will run again
 ```
 
 ## 🚨 MANDATORY Architecture Rules

@@ -37,3 +37,15 @@ repos:
         language: system
         files: \.(ts|tsx)$
         pass_filenames: false
+
+  # Pre-push hooks - run full CI validation
+  - repo: local
+    hooks:
+      - id: ci-validation
+        name: 'CI Validation (Must Pass Before Push)'
+        entry: bash -c 'echo "🔍 Running full CI validation before push (this may take a minute)..." && pnpm ci:check'
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [push]
+        verbose: true

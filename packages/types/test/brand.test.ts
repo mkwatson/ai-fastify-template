@@ -63,30 +63,30 @@ describe('Core Brand Utilities', () => {
   describe('Unbranded utility type', () => {
     it('should extract underlying type from branded type', () => {
       type UnbrandedUserId = Unbranded<TestUserId>;
-      expectTypeOf({} as UnbrandedUserId).toEqualTypeOf<string>();
+      expectTypeOf<UnbrandedUserId>().toEqualTypeOf<string>();
 
       type UnbrandedNumberId = Unbranded<TestNumberId>;
-      expectTypeOf({} as UnbrandedNumberId).toEqualTypeOf<number>();
+      expectTypeOf<UnbrandedNumberId>().toEqualTypeOf<number>();
     });
 
     it('should return original type for non-branded types', () => {
       type UnbrandedString = Unbranded<string>;
-      expectTypeOf({} as UnbrandedString).toEqualTypeOf<string>();
+      expectTypeOf<UnbrandedString>().toEqualTypeOf<string>();
     });
   });
 
   describe('ExtractBrand utility type', () => {
     it('should extract brand from branded type', () => {
       type UserIdBrand = ExtractBrand<TestUserId>;
-      expectTypeOf({} as UserIdBrand).toEqualTypeOf<'TestUserId'>();
+      expectTypeOf<UserIdBrand>().toEqualTypeOf<'TestUserId'>();
 
       type OrderIdBrand = ExtractBrand<TestOrderId>;
-      expectTypeOf({} as OrderIdBrand).toEqualTypeOf<'TestOrderId'>();
+      expectTypeOf<OrderIdBrand>().toEqualTypeOf<'TestOrderId'>();
     });
 
     it('should return never for non-branded types', () => {
       type StringBrand = ExtractBrand<string>;
-      expectTypeOf({} as StringBrand).toEqualTypeOf<never>();
+      expectTypeOf<StringBrand>().toEqualTypeOf<never>();
     });
   });
 

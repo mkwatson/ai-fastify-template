@@ -9,66 +9,43 @@ import { describe, it, expect } from 'vitest';
 import { expectTypeOf } from 'expect-type';
 import {
   // User Management Domain
-  type UserId,
   UserId,
   UnsafeUserId,
-  type SessionId,
   SessionId,
-  UnsafeSessionId,
-  type RoleId,
   RoleId,
   UnsafeRoleId,
 
   // E-commerce Domain
-  type ProductId,
   ProductId,
   UnsafeProductId,
-  type OrderId,
   OrderId,
   UnsafeOrderId,
-  type CustomerId,
   CustomerId,
-  UnsafeCustomerId,
-  type CategoryId,
   CategoryId,
   UnsafeCategoryId,
 
   // Content Management Domain
-  type ArticleId,
   ArticleId,
-  UnsafeArticleId,
-  type CommentId,
   CommentId,
-  UnsafeCommentId,
-  type AuthorId,
   AuthorId,
-  UnsafeAuthorId,
 
   // System Resource Domain
-  type RequestId,
   RequestId,
-  UnsafeRequestId,
-  type TransactionId,
   TransactionId,
-  UnsafeTransactionId,
-  type LogId,
   LogId,
-  UnsafeLogId,
 
   // Alternative ID Types
-  type EmailAddress,
   EmailAddress,
   UnsafeEmailAddress,
-  type Slug,
   Slug,
   UnsafeSlug,
 
   // Utilities
-  type AnyEntityId,
   isEntityId,
   EntityIdConstructors,
   UnsafeEntityIdConstructors,
 } from '../src/entity-ids.js';
+import type { AnyEntityId } from '../src/entity-ids.js';
 import { BrandValidationError, unwrap } from '../src/brand.js';
 
 // Test UUIDs

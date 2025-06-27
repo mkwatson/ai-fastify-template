@@ -6,7 +6,6 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { propertyTest, generators } from '../src/index.js';
 import fc from 'fast-check';
 
 import {
@@ -261,15 +260,15 @@ describe('Validation Utilities', () => {
 
   describe('createOrValidator', () => {
     it('should require any validator to pass', () => {
-      const stringOrNumber = createOrValidator(
-        isString,
-        (value): value is number => typeof value === 'number'
+      const emptyOrNonEmpty = createOrValidator(
+        (value): value is string => typeof value === 'string' && value === '',
+        isNonEmptyString
       );
 
-      expect(stringOrNumber('hello')).toBe(true);
-      expect(stringOrNumber(123)).toBe(true);
-      expect(stringOrNumber(null)).toBe(false);
-      expect(stringOrNumber({})).toBe(false);
+      expect(emptyOrNonEmpty('')).toBe(true);
+      expect(emptyOrNonEmpty('hello')).toBe(true);
+      expect(emptyOrNonEmpty(null)).toBe(false);
+      expect(emptyOrNonEmpty({})).toBe(false);
     });
 
     it('should work with multiple options', () => {

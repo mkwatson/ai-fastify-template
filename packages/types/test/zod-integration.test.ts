@@ -9,7 +9,6 @@ import { describe, it, expect } from 'vitest';
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import {
-  type BrandedZodType,
   createBrandedZodSchema,
   brandedString,
   brandedUuid,
@@ -563,7 +562,7 @@ describe('Zod Integration', () => {
         z.string(), // Passes
         {
           name: 'TestType',
-          validate: () => false, // Always fails
+          validate: (_value): _value is string => false, // Always fails
         }
       );
 
