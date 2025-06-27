@@ -49,6 +49,15 @@ jobs:
           echo "🏗️ Building all packages to generate declaration files..."
           pnpm build
 
+      - name: Debug build outputs
+        run: |
+          echo "🔍 Checking if declaration files were generated..."
+          ls -la packages/config/dist/src/ 2>/dev/null || echo "❌ Config dist/src not found"
+          ls -la packages/types/dist/src/ 2>/dev/null || echo "❌ Types dist/src not found"
+          echo "📦 Checking package.json exports..."
+          cat packages/config/package.json | grep -A 5 '"exports"'
+          cat packages/types/package.json | grep -A 5 '"exports"'
+
       - name: Run CI validation with Nx
         run: |
           echo "🔍 Running CI validation with Nx..."
