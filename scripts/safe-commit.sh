@@ -2,7 +2,7 @@
 set -e
 
 # 🛡️ Safe Commit Script - Prevents Accidental Bypasses
-# 
+#
 # This script ensures you always validate before committing and provides
 # clear guidance when bypassing is truly necessary.
 
@@ -26,10 +26,10 @@ if [[ "$*" == *"--no-verify"* ]]; then
     echo "  ❌ \"It's just a small change\" (small changes can break things)"
     echo "  ❌ \"CI will catch it\" (CI should never be the first place to catch issues)"
     echo ""
-    
+
     read -p "Are you sure you need to bypass validation? (y/N): " -n 1 -r
     echo
-    
+
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "✅ Good choice! Run 'pnpm ci:check' to see what needs fixing."
         echo ""
@@ -39,7 +39,7 @@ if [[ "$*" == *"--no-verify"* ]]; then
         echo ""
         exit 1
     fi
-    
+
     echo "⚠️  Proceeding with bypass. Please fix issues ASAP after commit."
     echo ""
 fi
@@ -48,7 +48,7 @@ fi
 if [[ -z "$BYPASS_FLAG" ]]; then
     echo "🚀 Running quick pre-commit validation..."
     echo ""
-    
+
     # Quick validation check
     if ! pnpm ai:quick; then
         echo ""
@@ -61,7 +61,7 @@ if [[ -z "$BYPASS_FLAG" ]]; then
         echo "Then run: git commit [your-message]"
         exit 1
     fi
-    
+
     echo ""
     echo "✅ Quick validation passed! Proceeding with commit..."
 fi

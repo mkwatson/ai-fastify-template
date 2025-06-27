@@ -3,9 +3,9 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      // Build only after all quality gates pass - prevents broken artifacts
-      "dependsOn": ["^build", "test:mutation"],
-      "outputs": ["dist/**", "build/**"]
+      // Build after core quality gates - mutation testing is strategic/optional
+      "dependsOn": ["^build", "type-check"],
+      "outputs": ["dist/**"]
     },
     "dev": {
       // Development server - never cache, always run fresh
@@ -13,7 +13,7 @@
       "persistent": true
     },
     "lint": {
-      // Code formatting and style checks - fastest feedback first
+      // Code formatting and style checks - fastest feedback, no dependencies
       "outputs": []
     },
     "clean": {
@@ -21,8 +21,8 @@
       "cache": false
     },
     "test": {
-      // Unit and integration tests - run after architecture validation
-      "dependsOn": ["graph:validate"],
+      // Unit and integration tests - run in parallel with other checks
+      "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
     "test:watch": {
@@ -32,23 +32,25 @@
     },
     "test:coverage": {
       // Coverage analysis - same dependencies as regular tests
-      "dependsOn": ["graph:validate"],
+      "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
     "test:mutation": {
-      // Mutation testing - always run fresh to detect real logic changes
+      // Strategic mutation testing - runs independently when needed
       "dependsOn": ["test"],
-      "outputs": ["reports/**", ".stryker-tmp/**"],
-      "cache": false
+      "outputs": ["reports/**", ".stryker-tmp/**", "stryker.log"],
+      "cache": true,
+      "inputs": ["src/**/*.ts", "test/**/*.test.ts", "stryker.config.mjs"],
+      "env": ["NODE_ENV"]
     },
     "type-check": {
-      // TypeScript compilation check - run after dependencies built and code formatted
-      "dependsOn": ["^build", "lint"],
+      // TypeScript compilation check - can run independently
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "graph:validate": {
-      // Dependency graph validation - run after type safety confirmed
-      "dependsOn": ["type-check"],
+      // Dependency graph validation - can run in parallel with other checks
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "openapi:generate": {

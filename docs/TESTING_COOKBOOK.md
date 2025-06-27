@@ -439,8 +439,8 @@ describe('Database Migrations', () => {
 
     // Verify schema
     const tables = await db.raw(`
-      SELECT table_name 
-      FROM information_schema.tables 
+      SELECT table_name
+      FROM information_schema.tables
       WHERE table_schema = 'public'
     `);
 
@@ -449,8 +449,8 @@ describe('Database Migrations', () => {
 
     // Verify indexes
     const indexes = await db.raw(`
-      SELECT indexname 
-      FROM pg_indexes 
+      SELECT indexname
+      FROM pg_indexes
       WHERE tablename = 'users'
     `);
 

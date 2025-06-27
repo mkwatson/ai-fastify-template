@@ -70,7 +70,7 @@ USAGE INSTRUCTIONS:
 
 3. Adjust thresholds based on project maturity:
    - New projects: Start with break: 60, work up to 90
-   - Mature projects: Aim for break: 90+ 
+   - Mature projects: Aim for break: 90+
    - Critical systems: Consider break: 95+
 
 4. Add to package.json scripts:
@@ -92,7 +92,7 @@ COMMON PITFALLS TO AVOID:
 ❌ Don't test configuration/bootstrap code - focus on business logic
 ❌ Don't write fake tests just to improve scores
 
-✅ Do focus on business logic validation  
+✅ Do focus on business logic validation
 ✅ Do use property-based testing for edge cases
 ✅ Do document exclusion rationale
 ✅ Do start with lower thresholds and improve systematically

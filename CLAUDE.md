@@ -14,12 +14,17 @@ Claude-specific guidelines can be added here if needed in the future. For now, a
 
 ```bash
 # Development workflow
-pnpm ai:quick          # Fast validation during coding
+pnpm ai:quick          # Fast validation during coding (Nx cached)
 pnpm ai:check          # Pre-commit validation
 pnpm ai:compliance     # Full quality pipeline
 
 # CI Validation (CRITICAL: Run before pushing)
 pnpm ci:check          # Same validation as GitHub Actions (lint + type-check + test)
+
+# Nx affected commands - only run on changed packages
+pnpm affected:lint     # Lint only changed packages
+pnpm affected:test     # Test only changed packages
+pnpm affected:all      # All validation on changed packages
 
 # Project management
 # Use Linear MCP tools for issue management
@@ -29,6 +34,9 @@ pnpm ci:check          # Same validation as GitHub Actions (lint + type-check + 
 pnpm lint:fix          # Auto-fix formatting
 pnpm test              # Run tests
 pnpm build             # Production build
+
+# Environment check
+pnpm doctor            # Check Node/pnpm versions
 ```
 
 ## 🚨 **Critical Workflow: Prevent CI Failures**

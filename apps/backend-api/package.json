@@ -3,29 +3,33 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Production-ready Fastify backend API with TypeScript and comprehensive validation",
-  "main": "build/server.js",
-  "types": "build/server.d.ts",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
   "exports": {
     ".": {
-      "types": "./build/server.d.ts",
-      "import": "./build/server.js"
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
     }
   },
   "directories": {
     "src": "src",
-    "build": "build",
+    "build": "dist",
     "test": "test"
   },
   "scripts": {
     "dev": "fastify start -l info src/server.ts -w",
     "build": "tsc",
-    "start": "node build/server.js",
-    "lint": "eslint . && prettier --check .",
+    "start": "node dist/server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix && prettier --write .",
     "test": "NODE_OPTIONS='--import tsx/esm' vitest run",
     "test:watch": "NODE_OPTIONS='--import tsx/esm' vitest",
     "test:coverage": "NODE_OPTIONS='--import tsx/esm' vitest run --coverage",
+    "test:workspace": "cd ../.. && NODE_OPTIONS='--import tsx/esm' vitest run --reporter=json --outputFile=test-results/workspace-results.json apps/backend-api/test/utils/*.test.ts",
+    "test:mutation-config": "cd ../.. && NODE_OPTIONS='--import tsx/esm' vitest run -c vitest.mutation.config.ts --reporter=json --outputFile=test-results/mutation-results.json apps/backend-api/test/utils/*.test.ts",
+    "test:verify-configs": "cd ../.. && node -e \"const w=require('./test-results/workspace-results.json');const m=require('./test-results/mutation-results.json');const fail=[];if(w.numTotalTests!==m.numTotalTests)fail.push('Total tests: '+w.numTotalTests+' vs '+m.numTotalTests);if(w.numPassedTests!==m.numPassedTests)fail.push('Passed tests: '+w.numPassedTests+' vs '+m.numPassedTests);if(w.numFailedTests!==m.numFailedTests)fail.push('Failed tests: '+w.numFailedTests+' vs '+m.numFailedTests);if(fail.length){console.error('❌ Config mismatch!\\n'+fail.join('\\n'));process.exit(1);}console.log('✅ Configs match: '+w.numTotalTests+' tests')\"",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf build",
+    "clean": "rm -rf dist",
     "graph:validate": "depcruise src --config ../../.dependency-cruiser.js --validate",
     "openapi:generate": "pnpm build && node scripts/generate-openapi-build.js"
   },
@@ -59,19 +63,13 @@
   },
   "devDependencies": {
     "@ai-fastify-template/types": "workspace:*",
-    "@types/node": "^22.1.0",
-    "@vitest/coverage-v8": "^3.2.3",
+    "@stryker-mutator/core": "^9.0.1",
+    "@stryker-mutator/vitest-runner": "^9.0.1",
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
     "fastify-cli": "^7.4.0",
     "fastify-tsconfig": "^3.0.0",
-    "husky": "^9.1.7",
-    "js-yaml": "^4.1.0",
-    "lint-staged": "^16.1.2",
     "pino-pretty": "^13.0.0",
-    "ts-node": "^10.4.0",
-    "tsx": "^4.20.3",
-    "typescript": "~5.8.2",
-    "vitest": "^3.2.3"
+    "ts-node": "^10.4.0"
   }
 }

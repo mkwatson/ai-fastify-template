@@ -1,0 +1,39 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+        exclude: ^(turbo\.json|tsconfig.*\.json)$
+      - id: check-added-large-files
+        args: ['--maxkb=1024'] # 1MB limit, replacing check-file-size.js
+      - id: check-merge-conflict
+      - id: check-case-conflict
+
+  # GitLeaks security scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # Local hooks for project-specific checks
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        entry: bash -c 'pnpm lint:fix'
+        language: system
+        files: \.(js|jsx|ts|tsx)$
+        pass_filenames: false
+
+      - id: type-check
+        name: TypeScript Check
+        entry: bash -c 'pnpm type-check'
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false

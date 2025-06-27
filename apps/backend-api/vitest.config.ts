@@ -1,20 +1,28 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'build/',
-        'dist/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/coverage/**',
-      ],
+    include: ['test/**/*.test.ts'],
+    exclude: ['.stryker-tmp/**', 'node_modules/**'],
+    pool: 'threads',
+  },
+  resolve: {
+    alias: {
+      '@ai-fastify-template/config': path.resolve(
+        __dirname,
+        '../../packages/config/src'
+      ),
+      '@ai-fastify-template/types': path.resolve(
+        __dirname,
+        '../../packages/types/src'
+      ),
+    },
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+      '.jsx': ['.tsx', '.jsx'],
     },
   },
 });

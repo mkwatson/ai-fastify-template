@@ -6,7 +6,7 @@
     "composite": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["src/**/*", "vitest.config.ts"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": []
 }

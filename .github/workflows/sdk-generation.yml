@@ -54,8 +54,8 @@ jobs:
       - name: Determine if SDK generation should run
         id: should-generate
         run: |
-          if [[ "${{ steps.changes.outputs.api_changed }}" == "true" || 
-                "${{ steps.changes.outputs.fern_changed }}" == "true" || 
+          if [[ "${{ steps.changes.outputs.api_changed }}" == "true" ||
+                "${{ steps.changes.outputs.fern_changed }}" == "true" ||
                 "${{ github.event.inputs.force_generation }}" == "true" ]]; then
             echo "result=true" >> "$GITHUB_OUTPUT"
             echo "🚀 SDK generation will run due to detected changes or manual trigger"
@@ -145,13 +145,13 @@ jobs:
           if [ -f "package.json" ]; then
             # Install SDK dependencies if package.json exists
             pnpm install
-            
+
             # Check if there's a build script
             if pnpm run --if-present build; then
               echo "✅ SDK builds successfully"
             else
               echo "ℹ️ No build script found, checking TypeScript compilation"
-              
+
               # Try TypeScript compilation if available
               if command -v tsc &> /dev/null && [ -f "tsconfig.json" ]; then
                 tsc --noEmit
@@ -198,7 +198,7 @@ jobs:
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
             echo "✅ SDK changes detected"
-            
+
             # Show what changed
             echo "📝 Changed files:"
             git diff --name-only HEAD -- packages/sdk/ apps/backend-api/openapi.json

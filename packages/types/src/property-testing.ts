@@ -329,7 +329,7 @@ fc.assert(
     (operations) => {
       const model = createModel();
       const real = createReal();
-      
+
       for (const op of operations) {
         executeOperation(op, model, real);
         verifyInvariant(model, real);

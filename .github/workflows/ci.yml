@@ -44,22 +44,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate pipeline consistency
+      - name: Run CI validation with Nx
         run: |
-          echo "🔍 Verifying local 'pnpm ci:check' uses same pipeline as CI..."
+          echo "🔍 Running CI validation with Nx..."
+          pnpm ci:check
 
-          # Check that ci:check script uses validation pipeline
-          if ! grep -q "node scripts/validation-pipeline.mjs --preset ci" package.json; then
-            echo "❌ ERROR: package.json ci:check script not using validation pipeline!"
-            echo "Expected: node scripts/validation-pipeline.mjs --preset ci"
-            echo "Found: $(grep -A1 'ci:check' package.json | tail -1)"
-            exit 1
-          fi
+      - name: Validate test configurations
+        run: |
+          echo "🔍 Validating test configurations are compatible..."
+          pnpm test:config:verify
 
-          echo "✅ Pipeline consistency verified"
-
-      - name: Run validation pipeline
-        run: node scripts/validation-pipeline.mjs --preset ci --force --verbose
+      - name: Run mutation testing on business logic
+        run: |
+          echo "🧬 Running mutation testing on critical business logic..."
+          pnpm test:mutation
+        continue-on-error: false # Make it a hard gate
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -79,4 +78,6 @@ jobs:
           path: |
             coverage/
             reports/
+            apps/*/reports/
+            apps/*/.stryker-tmp/reports/
           retention-days: 30

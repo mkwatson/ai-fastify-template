@@ -212,7 +212,7 @@ propertyTest(
 );`,
 
   array: `
-// Test an array processing function  
+// Test an array processing function
 testArrayFunction(
   calculateTotal,
   fc.record({ price: generators.money(), quantity: generators.quantity() })

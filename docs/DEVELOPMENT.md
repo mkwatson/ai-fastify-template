@@ -502,7 +502,7 @@ pnpm clean                 # Clear cache and build artifacts
 ```json
 {
   "tasks": {
-    "build": { "outputs": ["dist/**", "build/**"] },
+    "build": { "outputs": ["dist/**"] },
     "dev": { "cache": false, "persistent": true },
     "lint": { "outputs": [] },
     "clean": { "cache": false }
@@ -510,19 +510,19 @@ pnpm clean                 # Clear cache and build artifacts
 }
 ```
 
-**Future pipeline** (coming with MAR-11+):
+**Optimized pipeline** (current):
 
 ```json
 {
   "tasks": {
     "lint": { "outputs": [] },
-    "type-check": { "dependsOn": ["lint"], "outputs": [] },
-    "graph": { "dependsOn": ["type-check"], "outputs": [] },
-    "test": { "dependsOn": ["graph"], "outputs": ["coverage/**"] },
-    "mutation": { "dependsOn": ["test"], "outputs": [] },
+    "type-check": { "dependsOn": ["^build"], "outputs": [] },
+    "graph:validate": { "dependsOn": ["^build"], "outputs": [] },
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:mutation": { "dependsOn": ["test"], "outputs": ["reports/**"] },
     "build": {
-      "dependsOn": ["mutation"],
-      "outputs": ["dist/**", "build/**"]
+      "dependsOn": ["^build", "type-check"],
+      "outputs": ["dist/**"]
     }
   }
 }
