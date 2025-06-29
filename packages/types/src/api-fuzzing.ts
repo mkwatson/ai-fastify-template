@@ -502,10 +502,10 @@ export const apiInvariants = {
 export const exampleFuzzingTest = `
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { 
-  fuzzingTestData, 
+import {
+  fuzzingTestData,
   apiInvariants,
-  securityAttackPayloads 
+  securityAttackPayloads
 } from '@ai-fastify-template/types';
 
 describe('API Fuzzing Tests', () => {

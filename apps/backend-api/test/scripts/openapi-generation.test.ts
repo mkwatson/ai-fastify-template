@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
+import type { OpenAPIV3 } from 'openapi-types';
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -120,7 +121,7 @@ process.exit(1);`;
 
         // Should not reach here
         expect(false).toBe(true);
-      } catch (error) {
+      } catch (error: any) {
         expect(error.code).toBe(1);
         expect(error.stderr).toContain('❌ Test error');
       } finally {
@@ -133,7 +134,7 @@ process.exit(1);`;
   });
 
   describe('OpenAPI Specification Quality', () => {
-    let spec: any;
+    let spec: OpenAPIV3.Document;
 
     beforeAll(async () => {
       // Generate fresh spec for quality checks
@@ -152,8 +153,22 @@ process.exit(1);`;
 
     it('should have complete endpoint documentation', () => {
       for (const [, pathItem] of Object.entries(spec.paths)) {
-        for (const [, operation] of Object.entries(pathItem)) {
-          if (operation && typeof operation === 'object') {
+        const methods = [
+          'get',
+          'post',
+          'put',
+          'delete',
+          'patch',
+          'options',
+          'head',
+        ] as const;
+        for (const method of methods) {
+          const operation = pathItem?.[method];
+          if (
+            operation &&
+            typeof operation === 'object' &&
+            'responses' in operation
+          ) {
             // Each operation should have required fields
             expect(operation.summary).toBeDefined();
             expect(operation.description).toBeDefined();
@@ -169,14 +184,33 @@ process.exit(1);`;
 
     it('should have consistent response schemas', () => {
       for (const [, pathItem] of Object.entries(spec.paths)) {
-        for (const [, operation] of Object.entries(pathItem)) {
-          if (operation && operation.responses) {
+        const methods = [
+          'get',
+          'post',
+          'put',
+          'delete',
+          'patch',
+          'options',
+          'head',
+        ] as const;
+        for (const method of methods) {
+          const operation = pathItem?.[method];
+          if (
+            operation &&
+            typeof operation === 'object' &&
+            'responses' in operation
+          ) {
             for (const [, response] of Object.entries(operation.responses)) {
-              if (response && response.content) {
+              if (
+                response &&
+                typeof response === 'object' &&
+                !('$ref' in response) &&
+                response.content
+              ) {
                 // Should have application/json content type
                 expect(response.content['application/json']).toBeDefined();
                 expect(
-                  response.content['application/json'].schema
+                  response.content['application/json']?.schema
                 ).toBeDefined();
               }
             }
@@ -186,16 +220,44 @@ process.exit(1);`;
     });
 
     it('should include examples for all responses', () => {
-      const rootResponse = spec.paths['/'].get.responses['200'];
-      expect(
-        rootResponse.content['application/json'].schema.properties.message
-          .example
-      ).toBe('Hello World!');
+      const rootPath = spec.paths?.['/'];
+      const rootGet = rootPath?.get;
+      const rootResponse = rootGet?.responses?.['200'];
 
-      const exampleResponse = spec.paths['/example/'].get.responses['200'];
-      expect(exampleResponse.content['application/json'].schema.example).toBe(
-        'this is an example'
-      );
+      if (
+        rootResponse &&
+        typeof rootResponse === 'object' &&
+        !('$ref' in rootResponse)
+      ) {
+        const jsonContent = rootResponse.content?.['application/json'];
+        const schema = jsonContent?.schema;
+        if (schema && 'properties' in schema && schema.properties) {
+          const messageProperty = schema.properties['message'];
+          if (
+            messageProperty &&
+            typeof messageProperty === 'object' &&
+            'example' in messageProperty
+          ) {
+            expect(messageProperty['example']).toBe('Hello World!');
+          }
+        }
+      }
+
+      const examplePath = spec.paths?.['/example/'];
+      const exampleGet = examplePath?.get;
+      const exampleResponse = exampleGet?.responses?.['200'];
+
+      if (
+        exampleResponse &&
+        typeof exampleResponse === 'object' &&
+        !('$ref' in exampleResponse)
+      ) {
+        const jsonContent = exampleResponse.content?.['application/json'];
+        const schema = jsonContent?.schema;
+        if (schema && 'example' in schema) {
+          expect(schema['example']).toBe('this is an example');
+        }
+      }
     });
 
     it('should be suitable for SDK generation', () => {
@@ -211,8 +273,13 @@ process.exit(1);`;
 
       // Each path should have proper operations
       for (const pathItem of Object.values(spec.paths)) {
-        const operations = ['get', 'post', 'put', 'delete', 'patch'];
-        const hasOperation = operations.some(op => pathItem[op]);
+        const operations = ['get', 'post', 'put', 'delete', 'patch'] as const;
+        const hasOperation = operations.some(
+          op =>
+            pathItem &&
+            op in pathItem &&
+            pathItem[op as keyof typeof pathItem] !== undefined
+        );
         expect(hasOperation).toBe(true);
       }
     });

@@ -131,7 +131,6 @@ git --version     # >= 2.0.0
    ```
 
    The git hooks provide automated quality gates:
-
    - 🎨 **ESLint + Prettier** - Auto-fixes formatting issues on staged files
    - 📝 **Conventional Commits** - Enforces commit message format
    - 🔄 **Auto-staging** - Modified files are automatically re-staged after fixes
@@ -298,7 +297,6 @@ When implementing features, AI agents follow this process:
 AI agents autonomously handle the complete development cycle:
 
 1. **Code Generation**
-
    - Generate TypeScript code following strict mode requirements
    - Create comprehensive test suites (unit + integration + mutation)
    - Update documentation automatically
@@ -502,7 +500,7 @@ pnpm clean                 # Clear cache and build artifacts
 ```json
 {
   "tasks": {
-    "build": { "outputs": ["dist/**", "build/**"] },
+    "build": { "outputs": ["dist/**"] },
     "dev": { "cache": false, "persistent": true },
     "lint": { "outputs": [] },
     "clean": { "cache": false }
@@ -510,19 +508,19 @@ pnpm clean                 # Clear cache and build artifacts
 }
 ```
 
-**Future pipeline** (coming with MAR-11+):
+**Optimized pipeline** (current):
 
 ```json
 {
   "tasks": {
     "lint": { "outputs": [] },
-    "type-check": { "dependsOn": ["lint"], "outputs": [] },
-    "graph": { "dependsOn": ["type-check"], "outputs": [] },
-    "test": { "dependsOn": ["graph"], "outputs": ["coverage/**"] },
-    "mutation": { "dependsOn": ["test"], "outputs": [] },
+    "type-check": { "dependsOn": ["^build"], "outputs": [] },
+    "graph:validate": { "dependsOn": ["^build"], "outputs": [] },
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:mutation": { "dependsOn": ["test"], "outputs": ["reports/**"] },
     "build": {
-      "dependsOn": ["mutation"],
-      "outputs": ["dist/**", "build/**"]
+      "dependsOn": ["^build", "type-check"],
+      "outputs": ["dist/**"]
     }
   }
 }
@@ -673,7 +671,6 @@ pnpm build --profile            # Performance profiling
    ```
 
 2. **Documentation updates**
-
    - Update README if needed
    - Update CHANGELOG
    - Verify all docs are current

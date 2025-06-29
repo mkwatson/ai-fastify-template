@@ -6,8 +6,8 @@
 
 This roadmap outlines the strategic path to transform the AI Fastify Template into a production-ready, enterprise-grade development platform. The plan is structured in phases, with each phase building upon the previous to ensure systematic quality improvements.
 
-**Target Timeline**: 6-8 weeks  
-**Investment Level**: High-value, sustainable quality infrastructure  
+**Target Timeline**: 6-8 weeks
+**Investment Level**: High-value, sustainable quality infrastructure
 **ROI**: Reduced bugs, faster development cycles, improved developer confidence
 
 ---

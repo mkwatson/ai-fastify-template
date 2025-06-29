@@ -39,7 +39,8 @@ describe('Simplified Property Tests - calculateTotal', () => {
 describe('Simplified Property Tests - calculateTotalWithTax', () => {
   it('should maintain tax calculation invariants', () => {
     propertyTest(
-      ([items, taxRate]) => calculateTotalWithTax(items, taxRate),
+      ([items, taxRate]: [Item[], number]) =>
+        calculateTotalWithTax(items, taxRate),
       // Combine generators with fc.tuple
       fc.tuple(generators.items(), generators.taxRate()),
       ['nonNegative', 'finite', 'reasonable']
@@ -50,7 +51,8 @@ describe('Simplified Property Tests - calculateTotalWithTax', () => {
 describe('Simplified Property Tests - calculateDiscount', () => {
   it('should maintain discount calculation invariants', () => {
     propertyTest(
-      ([amount, percentage]) => calculateDiscount(amount, percentage),
+      ([amount, percentage]: [number, number]) =>
+        calculateDiscount(amount, percentage),
       fc.tuple(generators.money(), generators.percentage()),
       ['nonNegative', 'finite'],
       { iterations: 500 } // Custom iteration count
@@ -62,7 +64,7 @@ describe('Integration: Multiple Functions Together', () => {
   it('should maintain consistency across calculation chain', () => {
     // Test complete business logic flow
     propertyTest(
-      ([items, taxRate, discountPercent]) => {
+      ([items, taxRate, discountPercent]: [Item[], number, number]) => {
         const subtotal = calculateTotal(items);
         const withTax = calculateTotalWithTax(items, taxRate);
         const discount = calculateDiscount(subtotal, discountPercent);

@@ -3,27 +3,28 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Configuration utilities for the AI Fastify Template monorepo",
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./build/src/index.d.ts",
-      "import": "./build/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "tsc --watch",
-    "lint": "eslint . && prettier --check .",
-    "test": "NODE_OPTIONS='--import tsx/esm' vitest run",
-    "test:watch": "NODE_OPTIONS='--import tsx/esm' vitest",
-    "test:coverage": "NODE_OPTIONS='--import tsx/esm' vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "test": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest run packages/config/test/*.test.ts",
+    "test:watch": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest packages/config/test/*.test.ts",
+    "test:coverage": "cd ../.. && NODE_OPTIONS='--import tsx' pnpm exec vitest run --coverage packages/config/test/*.test.ts",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf build",
+    "clean": "rm -rf dist",
     "graph:validate": "echo 'No dependency validation needed for config package'"
   },
   "files": [
-    "build/**/*",
+    "dist/**/*",
     "src/**/*"
   ],
   "keywords": [
@@ -42,10 +43,6 @@
     "pnpm": ">=10.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.1.0",
-    "@vitest/coverage-v8": "^3.2.3",
-    "tsx": "^4.20.3",
-    "typescript": "~5.8.2",
     "vitest": "^3.2.3"
   }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
 
 // Import the schema directly for unit testing
 // This tests the validation logic without the Fastify plugin overhead
@@ -128,7 +128,10 @@ describe('Environment Schema Validation', () => {
         EnvSchema.parse({ PORT: 'invalid' });
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.errors[0].path).toContain('PORT');
+        expect(error).toBeInstanceOf(ZodError);
+        if (error instanceof ZodError) {
+          expect(error.errors[0]?.path).toContain('PORT');
+        }
       }
     });
 
@@ -137,9 +140,16 @@ describe('Environment Schema Validation', () => {
         EnvSchema.parse({ NODE_ENV: 'invalid', PORT: 'also-invalid' });
         expect.fail('Should have thrown an error');
       } catch (error) {
-        expect(error.errors.length).toBeGreaterThan(0);
-        expect(error.errors.some(e => e.path.includes('NODE_ENV'))).toBe(true);
-        expect(error.errors.some(e => e.path.includes('PORT'))).toBe(true);
+        expect(error).toBeInstanceOf(ZodError);
+        if (error instanceof ZodError) {
+          expect(error.errors.length).toBeGreaterThan(0);
+          expect(
+            error.errors.some((e: any) => e.path.includes('NODE_ENV'))
+          ).toBe(true);
+          expect(error.errors.some((e: any) => e.path.includes('PORT'))).toBe(
+            true
+          );
+        }
       }
     });
   });

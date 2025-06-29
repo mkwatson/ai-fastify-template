@@ -32,13 +32,13 @@ log_error() {
 # Check if Docker is available and running
 check_docker() {
     log_info "Checking Docker availability..."
-    
+
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
         log_info "Please install Docker from: https://docs.docker.com/get-docker/"
         return 1
     fi
-    
+
     if ! docker info &> /dev/null; then
         log_error "Docker is not running"
         log_info "Please start Docker Desktop or Docker daemon"
@@ -46,7 +46,7 @@ check_docker() {
         log_info "On Linux: sudo systemctl start docker"
         return 1
     fi
-    
+
     log_success "Docker is available and running"
     return 0
 }
@@ -54,28 +54,28 @@ check_docker() {
 # Check if OpenAPI spec exists
 check_openapi_spec() {
     local openapi_file="apps/backend-api/openapi.json"
-    
+
     if [[ ! -f "$openapi_file" ]]; then
         log_warning "OpenAPI specification not found at $openapi_file"
         log_info "Generating OpenAPI specification first..."
-        
+
         if ! pnpm openapi:generate; then
             log_error "Failed to generate OpenAPI specification"
             return 1
         fi
-        
+
         log_success "OpenAPI specification generated"
     else
         log_info "OpenAPI specification found at $openapi_file"
     fi
-    
+
     return 0
 }
 
 # Validate Fern configuration
 validate_fern_config() {
     log_info "Validating Fern configuration..."
-    
+
     if ! pnpm fern:check; then
         log_error "Fern configuration validation failed"
         log_info "Please check your Fern configuration files:"
@@ -84,7 +84,7 @@ validate_fern_config() {
         log_info "  - fern/definition/api.yml"
         return 1
     fi
-    
+
     log_success "Fern configuration is valid"
     return 0
 }
@@ -92,10 +92,10 @@ validate_fern_config() {
 # Generate SDK
 generate_sdk() {
     log_info "Generating SDK with Fern..."
-    
+
     # Create SDK directory if it doesn't exist
     mkdir -p packages/sdk
-    
+
     # Run Fern generation with local Docker
     if fern generate --local; then
         log_success "SDK generated successfully"
@@ -114,15 +114,15 @@ generate_sdk() {
 # Validate generated SDK
 validate_sdk() {
     log_info "Validating generated SDK..."
-    
+
     local sdk_dir="packages/sdk"
-    
+
     # Check if SDK directory exists and has content
     if [[ ! -d "$sdk_dir" ]]; then
         log_error "SDK directory not found at $sdk_dir"
         return 1
     fi
-    
+
     # Check for essential files
     local essential_files=("package.json")
     for file in "${essential_files[@]}"; do
@@ -130,28 +130,28 @@ validate_sdk() {
             log_warning "Expected file not found: $sdk_dir/$file"
         fi
     done
-    
+
     # Check for TypeScript files
     if find "$sdk_dir" -name "*.ts" -o -name "*.js" | head -1 | read; then
         log_success "SDK contains generated code files"
     else
         log_warning "No TypeScript/JavaScript files found in generated SDK"
     fi
-    
+
     # Try to install SDK dependencies if package.json exists
     if [[ -f "$sdk_dir/package.json" ]]; then
         log_info "Installing SDK dependencies..."
         cd "$sdk_dir"
-        
+
         if pnpm install --frozen-lockfile 2>/dev/null || pnpm install; then
             log_success "SDK dependencies installed"
         else
             log_warning "Failed to install SDK dependencies (this may be normal for generated SDKs)"
         fi
-        
+
         cd - > /dev/null
     fi
-    
+
     log_success "SDK validation completed"
     return 0
 }
@@ -182,17 +182,17 @@ cleanup() {
 main() {
     log_info "Starting SDK generation process..."
     echo ""
-    
+
     # Set up cleanup trap
     trap cleanup EXIT
-    
+
     # Run all checks and generation steps
     if check_docker && \
        check_openapi_spec && \
        validate_fern_config && \
        generate_sdk && \
        validate_sdk; then
-        
+
         echo ""
         log_success "SDK generation completed successfully! 🎉"
         echo ""

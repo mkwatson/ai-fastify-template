@@ -429,10 +429,10 @@ class TransferCommand {
     // Update model
     const fromBalance = model.accounts.get(this.from)!;
     const toBalance = model.accounts.get(this.to)!;
-    
+
     model.accounts.set(this.from, fromBalance - this.amount);
     model.accounts.set(this.to, toBalance + this.amount);
-    
+
     model.transactions.push({
       id: \`tx_\${Date.now()}_\${Math.random()}\`,
       from: this.from,
@@ -448,7 +448,7 @@ class TransferCommand {
     // Verify consistency
     const realFromBalance = await real.getBalance(this.from);
     const realToBalance = await real.getBalance(this.to);
-    
+
     expect(realFromBalance).toBeCloseTo(model.accounts.get(this.from)!, 2);
     expect(realToBalance).toBeCloseTo(model.accounts.get(this.to)!, 2);
     expect(transactionId).toBeTruthy();

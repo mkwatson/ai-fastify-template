@@ -5,7 +5,7 @@
     // Module system configuration (required, not in strictest)
     "target": "ES2022",
     "module": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "lib": ["ES2022"],
 
     // Additional safety beyond strictest preset
@@ -21,6 +21,10 @@
 
     // Extra strictness not in preset
     "noEmitOnError": true,
-    "removeComments": false
+    "removeComments": false,
+
+    // Explicitly disable JavaScript checking to prevent CI failures
+    "allowJs": false,
+    "checkJs": false
   }
 }

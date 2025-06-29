@@ -9,13 +9,11 @@ This guide documents the enterprise-grade GitHub Actions CI/CD pipeline implemen
 ### Core Components
 
 1. **GitHub Actions Workflow** (`.github/workflows/ci.yml`)
-
    - Comprehensive quality validation pipeline
    - Automatic caching and optimization
    - Artifact management for reports and builds
 
 2. **Local Testing Infrastructure**
-
    - `act` for local GitHub Actions simulation
    - `actionlint` for workflow syntax validation
    - Environment parity validation
@@ -64,25 +62,21 @@ pnpm ai:compliance
 The CI pipeline enforces the following quality gates in order:
 
 1. **Code Formatting & Linting** (`pnpm lint`)
-
    - ESLint with comprehensive rules
    - Prettier formatting validation
    - Security pattern enforcement
 
 2. **Type Safety** (`pnpm type-check`)
-
    - TypeScript strict mode validation
    - Cross-package type checking
    - Build-time error prevention
 
 3. **Test Suite** (`pnpm test`)
-
    - Unit and integration tests
    - 80%+ coverage requirement
    - Property-based testing validation
 
 4. **Mutation Testing** (`pnpm test:mutation`)
-
    - 90%+ mutation score requirement
    - Business logic validation
    - Test quality assurance

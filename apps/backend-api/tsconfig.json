@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "build",
+    "outDir": "dist",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
@@ -10,8 +10,8 @@
     "composite": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["src/**/*", "vitest.config.ts"],
-  "exclude": ["node_modules", "build"],
+  "include": ["src/**/*", "test/**/*", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "**/dist/**", "**/*.js", "**/*.d.ts.map"],
   "references": [
     { "path": "../../packages/config" },
     { "path": "../../packages/types" }
