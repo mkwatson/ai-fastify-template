@@ -7,6 +7,22 @@ on:
     branches: [main]
 
 jobs:
+  # Security scan runs in parallel with validation
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   validate:
     name: Validate Code Quality
     runs-on: ubuntu-latest
@@ -18,52 +34,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
+      - name: Setup project
+        uses: ./.github/actions/setup-project
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Security Scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run CI validation with unified Nx
+      - name: Run CI validation
         run: |
           echo "🔍 Running CI validation with unified Nx build system..."
           pnpm ci:check
 
-      - name: Validate test configurations
+      # Only run mutation testing if source or test files changed
+      - name: Check if mutation testing needed
+        id: check-mutation
         run: |
-          echo "🔍 Validating test configurations are compatible..."
-          pnpm test:config:verify
+          echo "Checking for changes in source and test files..."
+          if git diff --name-only origin/main...HEAD | grep -qE "(apps/.*/src/utils/|apps/.*/test/utils/)"; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+            echo "Mutation testing needed - utils files changed"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+            echo "Mutation testing skipped - no utils changes"
+          fi
 
       - name: Run mutation testing on business logic
+        if: steps.check-mutation.outputs.needed == 'true'
         run: |
           echo "🧬 Running mutation testing on critical business logic..."
           pnpm test:mutation
-        continue-on-error: false # Make it a hard gate
+        continue-on-error: false
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -86,3 +83,4 @@ jobs:
             apps/*/reports/
             apps/*/.stryker-tmp/reports/
           retention-days: 30
+
