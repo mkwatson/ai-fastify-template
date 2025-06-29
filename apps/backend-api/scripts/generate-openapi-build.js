@@ -20,8 +20,16 @@ async function generateOpenAPISpec() {
       process.exit(1);
     }
 
+    // Validate build output exists
+    const appPath = join(distPath, 'app.js');
+    if (!existsSync(appPath)) {
+      console.error(`❌ app.js not found at: ${appPath}`);
+      console.error('Ensure the build completed successfully.');
+      process.exit(1);
+    }
+
     // Import the built app
-    const { default: App } = await import('../dist/app.js');
+    const { default: App } = await import(appPath);
 
     // Build the Fastify app
     const app = Fastify({
