@@ -113,13 +113,12 @@ async function runBenchmarks() {
 
   await clearCaches();
   // Ensure dependencies are installed first (not part of benchmark)
-  console.log(`${colorize('cyan', '📦')} Ensuring dependencies are installed...`);
-  await execAsync('pnpm install');
-  
-  results.coldBuild = await timeCommand(
-    'pnpm build',
-    'Cold build (no cache)'
+  console.log(
+    `${colorize('cyan', '📦')} Ensuring dependencies are installed...`
   );
+  await execAsync('pnpm install');
+
+  results.coldBuild = await timeCommand('pnpm build', 'Cold build (no cache)');
 
   console.log();
 

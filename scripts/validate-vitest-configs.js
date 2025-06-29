@@ -1,4 +1,4 @@
-#!/usr/bin/env node --import=tsx
+#!/usr/bin/env node
 /**
  * Simple Vitest configuration validation
  *
@@ -10,21 +10,21 @@ import { pathToFileURL } from 'url';
 import path from 'path';
 
 // Simple color output
-const red = (text) => `\x1b[31m${text}\x1b[0m`;
-const green = (text) => `\x1b[32m${text}\x1b[0m`;
-const yellow = (text) => `\x1b[33m${text}\x1b[0m`;
-const blue = (text) => `\x1b[34m${text}\x1b[0m`;
+const red = text => `\x1b[31m${text}\x1b[0m`;
+const green = text => `\x1b[32m${text}\x1b[0m`;
+const yellow = text => `\x1b[33m${text}\x1b[0m`;
+const blue = text => `\x1b[34m${text}\x1b[0m`;
 
 async function loadConfig(configPath) {
   const fullPath = path.resolve(configPath);
   const configUrl = pathToFileURL(fullPath).href;
   const module = await import(configUrl);
-  
+
   let config = module.default;
   if (typeof config === 'function') {
     config = await config({ command: 'build', mode: 'test' });
   }
-  
+
   return config;
 }
 
@@ -41,11 +41,14 @@ async function validateConfigs() {
 
   try {
     // Load configurations
-    const [workspace, mutation, base] = await Promise.all([
+    const [workspace, mutation] = await Promise.all([
       loadConfig('./vitest.config.ts'),
       loadConfig('./vitest.mutation.config.ts'),
-      loadConfig('./vitest.base.config.ts'),
     ]);
+
+    // Load base config (it's a named export, not default)
+    const baseModule = await import(path.resolve('./vitest.base.config.ts'));
+    const base = baseModule.baseConfig;
 
     // Import critical properties list
     const { CRITICAL_SYNC_PROPERTIES } = await import(
@@ -64,12 +67,16 @@ async function validateConfigs() {
       const wsMatch = deepEqual(workspaceVal, baseVal);
       const mutMatch = deepEqual(mutationVal, baseVal);
 
-      console.log(`  ${prop}: ${wsMatch && mutMatch ? green('✅') : red('❌')}`);
-      
+      console.log(
+        `  ${prop}: ${wsMatch && mutMatch ? green('✅') : red('❌')}`
+      );
+
       if (!wsMatch || !mutMatch) {
         errors++;
-        if (!wsMatch) console.log(`    ${red('• Workspace differs from base')}`);
-        if (!mutMatch) console.log(`    ${red('• Mutation differs from base')}`);
+        if (!wsMatch)
+          console.log(`    ${red('• Workspace differs from base')}`);
+        if (!mutMatch)
+          console.log(`    ${red('• Mutation differs from base')}`);
       }
     }
 
@@ -79,10 +86,11 @@ async function validateConfigs() {
     console.log(`Errors: ${errors}`);
 
     if (errors > 0) {
-      console.log(red('\nConfigs are out of sync. Fix by updating vitest.base.config.ts'));
+      console.log(
+        red('\nConfigs are out of sync. Fix by updating vitest.base.config.ts')
+      );
       process.exit(1);
     }
-
   } catch (error) {
     console.error(red(`❌ Error: ${error.message}`));
     process.exit(1);
