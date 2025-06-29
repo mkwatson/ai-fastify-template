@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   test-configs:
-    name: Run Tests with ${{ matrix.config }}
+    name: Run Tests with ${{ matrix.config.name }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
