@@ -68,7 +68,7 @@ jobs:
       - name: Validate Configuration Consistency
         run: |
           echo "🔍 Validating Vitest configuration consistency..."
-          node scripts/validate-vitest-configs.js
+          NODE_OPTIONS='--import tsx' node scripts/validate-vitest-configs.js
 
       - name: Build dependencies
         run: pnpm build
