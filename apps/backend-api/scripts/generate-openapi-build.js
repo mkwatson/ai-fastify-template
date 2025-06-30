@@ -11,17 +11,25 @@ const __dirname = dirname(__filename);
 
 async function generateOpenAPISpec() {
   try {
-    // Check if build directory exists
-    const buildPath = join(__dirname, '..', 'build');
-    if (!existsSync(buildPath)) {
+    // Check if dist directory exists
+    const distPath = join(__dirname, '..', 'dist');
+    if (!existsSync(distPath)) {
       console.error(
-        '❌ Build directory not found. Please run "pnpm build" first.'
+        '❌ Dist directory not found. Please run "pnpm build" first.'
       );
       process.exit(1);
     }
 
+    // Validate build output exists
+    const appPath = join(distPath, 'app.js');
+    if (!existsSync(appPath)) {
+      console.error(`❌ app.js not found at: ${appPath}`);
+      console.error('Ensure the build completed successfully.');
+      process.exit(1);
+    }
+
     // Import the built app
-    const { default: App } = await import('../build/src/app.js');
+    const { default: App } = await import(appPath);
 
     // Build the Fastify app
     const app = Fastify({
