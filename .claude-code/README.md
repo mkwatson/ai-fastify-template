@@ -16,22 +16,26 @@ The hooks in `settings.json` implement a "Fourth Layer" of defense that compleme
 ### 🔄 PostToolUse Hooks
 
 #### 1. **Validation Hook** (Edit|Write|MultiEdit)
+
 - Runs `pnpm ai:quick` with a 10-second timeout after code changes
 - Shows specific errors/warnings when validation fails
 - Non-blocking to maintain development flow
 
 #### 2. **Consolidated File Processing** (Edit|Write)
+
 - **Prettier Formatting**: Auto-formats TypeScript/JavaScript files
 - **Utils Alert**: Notifies when business logic requires mutation testing
 - **Test Quality Reminder**: Ensures tests validate logic, not just coverage
 - Skips generated/vendor files for performance
 
 #### 3. **Command Logging** (Bash)
+
 - Records all executed commands for audit trails and debugging
 
 ### 🔒 PreToolUse Hooks
 
 #### 1. **Secrets Protection** (Edit|Write)
+
 - Blocks direct modification of:
   - `.env` files and environment configurations
   - Files in `secrets/`, `credentials/`, `private/`, or `keys/` directories
@@ -39,6 +43,7 @@ The hooks in `settings.json` implement a "Fourth Layer" of defense that compleme
 - Uses `realpath` to resolve symlinks and prevent bypass attempts
 
 #### 2. **System Directory Protection** (Write)
+
 - Prevents writes to:
   - `node_modules/` - Package installations
   - `dist/`, `build/` - Build outputs
@@ -129,6 +134,7 @@ pnpm claude:validate
 ```
 
 This checks:
+
 - All referenced scripts exist in package.json
 - File patterns match project structure
 - Security patterns are comprehensive
@@ -144,3 +150,7 @@ These hooks are designed to work seamlessly with AI coding assistants by:
 4. **Maintaining audit trails** for learning and debugging
 
 The hooks complement but don't replace human judgment and the existing validation pipeline.
+
+## Metrics & Learning
+
+See [METRICS.md](./METRICS.md) for details on the privacy-first metrics collection plan that will help improve AI coding patterns over time.

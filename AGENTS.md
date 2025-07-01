@@ -488,6 +488,7 @@ When using Claude Code, you get additional real-time feedback through hooks conf
 #### 🚫 Security Blocks
 
 Claude Code will prevent you from:
+
 - Modifying `.env` files directly (use Zod schemas)
 - Writing to `node_modules/`, `dist/`, `.git/`
 - Creating files with path traversal (`../`)

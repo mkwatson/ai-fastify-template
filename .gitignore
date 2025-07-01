@@ -81,3 +81,5 @@ test-results/
 # Claude Code session logs
 *.commands.log
 *.notifications.log
+*.metrics.jsonl
+.claude-last-check
