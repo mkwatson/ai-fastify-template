@@ -55,6 +55,7 @@
     "sdk:check": "bash scripts/sdk-generate.sh --check",
     "fern:check": "fern check",
     "fern:validate": "fern check && echo '✅ Fern configuration is valid'",
+    "claude:validate": "NODE_OPTIONS='--import tsx' node scripts/validate-claude-hooks.js",
     "prepare": "husky"
   },
   "keywords": [

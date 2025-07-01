@@ -2,15 +2,19 @@
 
 ## 🚨 CRITICAL: Zero CI Failures Guaranteed
 
-**Three-Layer Defense System** prevents any CI failures:
+**Four-Layer Defense System** prevents any CI failures:
 
-1. **During Development**:
+1. **Immediate Feedback** (Claude Code hooks):
+   - Automatic: Validates on every file edit (<2s)
+   - Shows errors/warnings inline during AI sessions
+   - Auto-formats code and provides contextual alerts
+2. **During Development**:
    - Manual: `pnpm ai:quick` (run frequently, <5s)
    - Automatic: `pnpm ai:watch` (continuous validation on file save)
-2. **Before Commit**: Pre-commit hooks (automatic, ~30s)
-3. **Before Push**: Pre-push validation (mandatory, matches CI exactly)
+3. **Before Commit**: Pre-commit hooks (automatic, ~30s)
+4. **Before Push**: Pre-push validation (mandatory, matches CI exactly)
 
-**You CANNOT push code that will fail CI** - the pre-push hook runs full validation.
+**You CANNOT push code that will fail CI** - multiple layers ensure quality.
 
 **Development validation pipeline:**
 
@@ -454,3 +458,46 @@ pnpm build             # Check build issues
 - ✅ Clean separation of concerns
 
 Remember: These guidelines exist to help AI agents generate high-quality, maintainable code that passes all quality gates on the first try (or at least minimize the number of iterations to pass all quality gates).
+
+## Claude Code Specific Features
+
+### Automatic Hooks Integration
+
+When using Claude Code, you get additional real-time feedback through hooks configured in `.claude-code/settings.json`:
+
+#### 🔄 What Happens Automatically
+
+1. **After Every Edit**:
+   - Runs `ai:quick` validation (10s timeout)
+   - Auto-formats TypeScript/JavaScript files with Prettier
+   - Alerts when utils require mutation testing
+   - Reminds about test quality for test files
+
+2. **Before File Modifications**:
+   - Blocks direct env/secrets modifications
+   - Prevents writes to system directories
+   - Detects and blocks path traversal attempts
+   - Protects against symlink bypasses
+
+3. **During Your Session**:
+   - Logs all bash commands for audit trail
+   - Records notifications with timestamps
+   - Provides session summary on completion
+   - Suggests next steps based on git status
+
+#### 🚫 Security Blocks
+
+Claude Code will prevent you from:
+- Modifying `.env` files directly (use Zod schemas)
+- Writing to `node_modules/`, `dist/`, `.git/`
+- Creating files with path traversal (`../`)
+- Modifying symbolic links
+
+#### 💡 Working with Hooks
+
+- **Hooks are non-blocking**: Validation has a 10s timeout
+- **Smart skipping**: Generated/vendor files are ignored
+- **Immediate feedback**: Errors shown inline as you work
+- **Learn from patterns**: Hooks teach best practices
+
+See `.claude-code/README.md` for detailed hook documentation and troubleshooting.

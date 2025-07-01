@@ -83,4 +83,3 @@ jobs:
             apps/*/reports/
             apps/*/.stryker-tmp/reports/
           retention-days: 30
-

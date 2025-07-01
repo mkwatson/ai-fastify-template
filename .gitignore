@@ -77,3 +77,7 @@ reports/performance/
 .github/instructions/nx.instructions.md
 # Test result comparison files
 test-results/
+
+# Claude Code session logs
+*.commands.log
+*.notifications.log
