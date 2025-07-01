@@ -1,0 +1,123 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$SESSION_WORKING_DIRECTORY\" && timeout 10s pnpm ai:quick --silent 2>/dev/null || echo '⚠️  Validation issues detected - run: pnpm lint:fix'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$TOOL_FILE_PATH\" == *.ts ]] || [[ \"$TOOL_FILE_PATH\" == *.js ]]; then cd \"$SESSION_WORKING_DIRECTORY\" && pnpm prettier --write \"$TOOL_FILE_PATH\" --log-level=error 2>/dev/null; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$TOOL_FILE_PATH\" == */backend-api/src/utils/* ]]; then echo '🧬 Utils modified - mutation testing required (85% threshold)'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$TOOL_FILE_PATH\" == */test/* ]] || [[ \"$TOOL_FILE_PATH\" == *.test.ts ]]; then echo '🧪 Test modified - ensure it validates business logic, not just coverage'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"📝 Command: $TOOL_COMMAND\" >> \"$SESSION_TRANSCRIPT_PATH.commands.log\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$TOOL_FILE_PATH\" == *.env* ]] || [[ \"$TOOL_FILE_PATH\" == */secrets/* ]]; then echo '🚨 BLOCKED: Direct env/secrets modification - use Zod schemas for env validation' && exit 1; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$TOOL_FILE_PATH\" == */node_modules/* ]] || [[ \"$TOOL_FILE_PATH\" == */dist/* ]] || [[ \"$TOOL_FILE_PATH\" == */.git/* ]]; then echo '🚨 BLOCKED: Cannot modify generated/system directories' && exit 1; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$SESSION_WORKING_DIRECTORY\" && echo '📊 Session Summary:' && git status --short 2>/dev/null | head -10 && echo '' && git diff --stat 2>/dev/null | tail -5"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$SESSION_WORKING_DIRECTORY\" && if git diff --quiet 2>/dev/null; then echo '✅ Working directory clean'; else echo '💡 Next steps:' && echo '  1. pnpm ci:check    # Validate changes' && echo '  2. git add -A      # Stage changes' && echo '  3. git commit      # Commit (hooks will validate)'; fi"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f \"$SESSION_TRANSCRIPT_PATH.commands.log\" ]; then echo '' && echo '📜 Commands executed this session:' && tail -5 \"$SESSION_TRANSCRIPT_PATH.commands.log\" | sed 's/^/  /'; fi"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date '+%H:%M:%S')] $NOTIFICATION_MESSAGE\" >> \"$SESSION_TRANSCRIPT_PATH.notifications.log\""
+          }
+        ]
+      }
+    ]
+  },
+  "tools": {
+    "enabled": [
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "Bash",
+      "TodoRead",
+      "TodoWrite",
+      "WebSearch",
+      "WebFetch",
+      "Grep",
+      "Glob",
+      "LS"
+    ]
+  }
+}
