@@ -94,7 +94,7 @@ git --version     # >= 2.0.0
 1. **Clone and install**
 
    ```bash
-   git clone https://github.com/mkwatson/ai-fastify-template.git
+   git clone https://github.com/Airbolt-AI/airbolt.git
    cd ai-fastify-template
    pnpm install
    ```
