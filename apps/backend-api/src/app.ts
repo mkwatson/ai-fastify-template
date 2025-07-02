@@ -6,6 +6,7 @@ import type { AutoloadPluginOptions } from '@fastify/autoload';
 import type { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
 
 import envPlugin from './plugins/env.js';
+import jwtPlugin from './plugins/jwt.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,6 +24,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // Register env plugin first
   await fastify.register(envPlugin);
 
+  // Register JWT plugin after env (it depends on JWT_SECRET from env)
+  await fastify.register(jwtPlugin);
+
   // Place here your custom code!
 
   // Do not touch the following lines
@@ -32,7 +36,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    ignorePattern: /.*env\.(ts|js)$/,
+    ignorePattern: /.*(env|jwt)\.(ts|js)$/,
     options: opts,
   });
 
