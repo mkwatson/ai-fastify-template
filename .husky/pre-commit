@@ -1,4 +1,4 @@
-pnpm lint:fix
+pnpm exec lint-staged
 
 # Validate Vitest config consistency if configs changed
 if git diff --cached --name-only | grep -E "vitest\.(config|mutation|base)\.ts"; then
