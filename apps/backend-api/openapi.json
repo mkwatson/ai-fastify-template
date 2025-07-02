@@ -27,7 +27,9 @@
     "/": {
       "get": {
         "summary": "Get welcome message",
-        "tags": ["Root"],
+        "tags": [
+          "Root"
+        ],
         "description": "Returns a hello world message for API health check",
         "responses": {
           "200": {
@@ -44,7 +46,9 @@
                       "example": "Hello World!"
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               }
             }
@@ -73,7 +77,11 @@
                       "example": 400
                     }
                   },
-                  "required": ["error", "message", "statusCode"]
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -84,7 +92,9 @@
     "/example/": {
       "get": {
         "summary": "Get example message",
-        "tags": ["Example"],
+        "tags": [
+          "Example"
+        ],
         "description": "Returns an example string response",
         "responses": {
           "200": {
@@ -123,7 +133,11 @@
                       "example": 400
                     }
                   },
-                  "required": ["error", "message", "statusCode"]
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
