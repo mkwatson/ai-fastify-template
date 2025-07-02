@@ -73,13 +73,13 @@
     "email": "mark@example.com"
   },
   "license": "MIT",
-  "homepage": "https://github.com/mkwatson/ai-fastify-template#readme",
+  "homepage": "https://github.com/Airbolt-AI/airbolt#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mkwatson/ai-fastify-template.git"
+    "url": "https://github.com/Airbolt-AI/airbolt.git"
   },
   "bugs": {
-    "url": "https://github.com/mkwatson/ai-fastify-template/issues"
+    "url": "https://github.com/Airbolt-AI/airbolt/issues"
   },
   "packageManager": "pnpm@10.8.0",
   "volta": {
