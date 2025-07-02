@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import fp from 'fastify-plugin';
 import { z } from 'zod';
 
@@ -35,9 +36,78 @@ const EnvSchema = z.object({
       }),
     })
     .default('info'),
+
+  // MVP-specific environment variables
+  OPENAI_API_KEY: z
+    .string({
+      required_error: 'OPENAI_API_KEY is required for AI functionality',
+      invalid_type_error: 'OPENAI_API_KEY must be a string',
+    })
+    .min(1, 'OPENAI_API_KEY cannot be empty')
+    .regex(
+      /^sk-[A-Za-z0-9_-]+$/,
+      'OPENAI_API_KEY must be a valid OpenAI API key format (sk-...)'
+    ),
+
+  JWT_SECRET: z
+    .string({
+      invalid_type_error: 'JWT_SECRET must be a string',
+    })
+    .min(32, 'JWT_SECRET must be at least 32 characters for security')
+    .optional(),
+
+  ALLOWED_ORIGIN: z
+    .string({
+      required_error: 'ALLOWED_ORIGIN is required for CORS configuration',
+      invalid_type_error: 'ALLOWED_ORIGIN must be a string',
+    })
+    .min(1, 'ALLOWED_ORIGIN cannot be empty')
+    .default('http://localhost:5173')
+    .transform(origins => {
+      // Support comma-separated origins and trim whitespace
+      return origins.split(',').map(origin => origin.trim());
+    })
+    .refine(
+      origins => origins.every(origin => {
+        try {
+          // Validate each origin is a valid URL
+          const url = new URL(origin);
+          return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      }),
+      'ALLOWED_ORIGIN must contain valid HTTP(S) URLs (comma-separated if multiple)'
+    ),
+
+  SYSTEM_PROMPT: z
+    .string({
+      invalid_type_error: 'SYSTEM_PROMPT must be a string',
+    })
+    .optional()
+    .default(''),
+
+  RATE_LIMIT_MAX: z
+    .string({
+      invalid_type_error: 'RATE_LIMIT_MAX must be a string',
+    })
+    .regex(/^\d+$/, 'RATE_LIMIT_MAX must be a positive integer')
+    .transform(Number)
+    .refine(n => n > 0, 'RATE_LIMIT_MAX must be greater than 0')
+    .default('60'),
+
+  RATE_LIMIT_TIME_WINDOW: z
+    .string({
+      invalid_type_error: 'RATE_LIMIT_TIME_WINDOW must be a string',
+    })
+    .regex(/^\d+$/, 'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)')
+    .transform(Number)
+    .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
+    .default('100000'),
 });
 
-export type Env = z.infer<typeof EnvSchema>;
+// Use z.output to get the type after transformations
+export type Env = z.output<typeof EnvSchema>;
 
 // List of sensitive environment variable patterns to redact from logs
 const SENSITIVE_PATTERNS = [
@@ -70,9 +140,26 @@ declare module 'fastify' {
 }
 
 export default fp(
-  fastify => {
+  async fastify => {
     try {
-      const config = EnvSchema.parse(process.env);
+      let config = EnvSchema.parse(process.env);
+
+      // Auto-generate JWT_SECRET in development if not provided
+      if (!config.JWT_SECRET && config.NODE_ENV === 'development') {
+        const generatedSecret = randomBytes(32).toString('hex');
+        config = { ...config, JWT_SECRET: generatedSecret };
+        
+        fastify.log.warn(
+          { JWT_SECRET: '[REDACTED - auto-generated]' },
+          'JWT_SECRET not provided. Auto-generated for development use only. ' +
+          'Set JWT_SECRET environment variable in production for stable tokens across restarts.'
+        );
+      } else if (!config.JWT_SECRET && config.NODE_ENV === 'production') {
+        throw new Error(
+          'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32'
+        );
+      }
+
       fastify.decorate('config', config);
 
       // Log safe config (sensitive fields redacted)
