@@ -4,117 +4,116 @@ import { randomBytes } from 'node:crypto';
 
 // Import the schema directly for unit testing
 // This tests the validation logic without the Fastify plugin overhead
-const EnvSchema = z.object({
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'], {
-      errorMap: () => ({
-        message: 'NODE_ENV must be one of: development, production, test',
-      }),
-    })
-    .default('development'),
-  PORT: z
-    .string({
-      required_error: 'PORT environment variable is required',
-      invalid_type_error: 'PORT must be a string',
-    })
-    .regex(/^\d+$/, 'PORT must contain only numeric characters')
-    .transform(Number)
-    .refine(n => n > 0 && n < 65536, 'PORT must be between 1-65535')
-    .default('3000'),
-  HOST: z
-    .string({
-      invalid_type_error: 'HOST must be a string',
-    })
-    .min(1, 'HOST cannot be empty')
-    .default('localhost'),
-  LOG_LEVEL: z
-    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], {
-      errorMap: () => ({
-        message:
-          'LOG_LEVEL must be one of: fatal, error, warn, info, debug, trace',
-      }),
-    })
-    .default('info'),
-
-  // MVP-specific environment variables
-  OPENAI_API_KEY: z
-    .string({
-      required_error: 'OPENAI_API_KEY is required for AI functionality',
-      invalid_type_error: 'OPENAI_API_KEY must be a string',
-    })
-    .min(1, 'OPENAI_API_KEY cannot be empty')
-    .regex(
-      /^sk-[A-Za-z0-9_-]+$/,
-      'OPENAI_API_KEY must be a valid OpenAI API key format (sk-...)'
-    ),
-
-  JWT_SECRET: z
-    .string({
-      invalid_type_error: 'JWT_SECRET must be a string',
-    })
-    .min(32, 'JWT_SECRET must be at least 32 characters for security')
-    .optional(),
-
-  ALLOWED_ORIGIN: z
-    .string({
-      required_error: 'ALLOWED_ORIGIN is required for CORS configuration',
-      invalid_type_error: 'ALLOWED_ORIGIN must be a string',
-    })
-    .min(1, 'ALLOWED_ORIGIN cannot be empty')
-    .default('http://localhost:5173')
-    .transform(origins => {
-      // Support comma-separated origins and trim whitespace
-      return origins.split(',').map(origin => origin.trim());
-    })
-    .refine(
-      origins =>
-        origins.every(origin => {
-          try {
-            // Validate each origin is a valid URL
-            const url = new URL(origin);
-            return url.protocol === 'http:' || url.protocol === 'https:';
-          } catch {
-            return false;
-          }
+const EnvSchema = z
+  .object({
+    NODE_ENV: z
+      .enum(['development', 'production', 'test'], {
+        errorMap: () => ({
+          message: 'NODE_ENV must be one of: development, production, test',
         }),
-      'ALLOWED_ORIGIN must contain valid HTTP(S) URLs (comma-separated if multiple)'
-    ),
+      })
+      .default('development'),
+    PORT: z
+      .string({
+        required_error: 'PORT environment variable is required',
+        invalid_type_error: 'PORT must be a string',
+      })
+      .regex(/^\d+$/, 'PORT must contain only numeric characters')
+      .transform(Number)
+      .refine(n => n > 0 && n < 65536, 'PORT must be between 1-65535')
+      .default('3000'),
+    HOST: z
+      .string({
+        invalid_type_error: 'HOST must be a string',
+      })
+      .min(1, 'HOST cannot be empty')
+      .default('localhost'),
+    LOG_LEVEL: z
+      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], {
+        errorMap: () => ({
+          message:
+            'LOG_LEVEL must be one of: fatal, error, warn, info, debug, trace',
+        }),
+      })
+      .default('info'),
 
-  SYSTEM_PROMPT: z
-    .string({
-      invalid_type_error: 'SYSTEM_PROMPT must be a string',
-    })
-    .optional()
-    .default(''),
+    // MVP-specific environment variables
+    OPENAI_API_KEY: z
+      .string({
+        required_error: 'OPENAI_API_KEY is required for AI functionality',
+        invalid_type_error: 'OPENAI_API_KEY must be a string',
+      })
+      .min(1, 'OPENAI_API_KEY cannot be empty')
+      .regex(
+        /^sk-[A-Za-z0-9_-]+$/,
+        'OPENAI_API_KEY must be a valid OpenAI API key format (sk-...)'
+      ),
 
-  RATE_LIMIT_MAX: z
-    .string({
-      invalid_type_error: 'RATE_LIMIT_MAX must be a string',
-    })
-    .regex(/^\d+$/, 'RATE_LIMIT_MAX must be a positive integer')
-    .transform(Number)
-    .refine(n => n > 0, 'RATE_LIMIT_MAX must be greater than 0')
-    .default('60'),
+    JWT_SECRET: z
+      .string({
+        invalid_type_error: 'JWT_SECRET must be a string',
+      })
+      .min(32, 'JWT_SECRET must be at least 32 characters for security')
+      .optional(),
 
-  RATE_LIMIT_TIME_WINDOW: z
-    .string({
-      invalid_type_error: 'RATE_LIMIT_TIME_WINDOW must be a string',
-    })
-    .regex(
-      /^\d+$/,
-      'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)'
-    )
-    .transform(Number)
-    .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
-    .default('60000'), // 1 minute default
-}).refine(
-  data => data.NODE_ENV !== 'production' || data.JWT_SECRET,
-  {
+    ALLOWED_ORIGIN: z
+      .string({
+        required_error: 'ALLOWED_ORIGIN is required for CORS configuration',
+        invalid_type_error: 'ALLOWED_ORIGIN must be a string',
+      })
+      .min(1, 'ALLOWED_ORIGIN cannot be empty')
+      .default('http://localhost:5173')
+      .transform(origins => {
+        // Support comma-separated origins and trim whitespace
+        return origins.split(',').map(origin => origin.trim());
+      })
+      .refine(
+        origins =>
+          origins.every(origin => {
+            try {
+              // Validate each origin is a valid URL
+              const url = new URL(origin);
+              return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch {
+              return false;
+            }
+          }),
+        'ALLOWED_ORIGIN must contain valid HTTP(S) URLs (comma-separated if multiple)'
+      ),
+
+    SYSTEM_PROMPT: z
+      .string({
+        invalid_type_error: 'SYSTEM_PROMPT must be a string',
+      })
+      .optional()
+      .default(''),
+
+    RATE_LIMIT_MAX: z
+      .string({
+        invalid_type_error: 'RATE_LIMIT_MAX must be a string',
+      })
+      .regex(/^\d+$/, 'RATE_LIMIT_MAX must be a positive integer')
+      .transform(Number)
+      .refine(n => n > 0, 'RATE_LIMIT_MAX must be greater than 0')
+      .default('60'),
+
+    RATE_LIMIT_TIME_WINDOW: z
+      .string({
+        invalid_type_error: 'RATE_LIMIT_TIME_WINDOW must be a string',
+      })
+      .regex(
+        /^\d+$/,
+        'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)'
+      )
+      .transform(Number)
+      .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
+      .default('60000'), // 1 minute default
+  })
+  .refine(data => data.NODE_ENV !== 'production' || data.JWT_SECRET, {
     message:
       'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32',
     path: ['JWT_SECRET'],
-  }
-);
+  });
 
 describe('Environment Schema Validation', () => {
   const validApiKey = 'sk-test1234567890abcdef';
@@ -315,7 +314,9 @@ describe('Environment Schema Validation', () => {
           NODE_ENV: 'production',
           // No JWT_SECRET provided
         })
-      ).toThrow('JWT_SECRET is required in production. Generate one with: openssl rand -hex 32');
+      ).toThrow(
+        'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32'
+      );
     });
 
     it('should reject JWT_SECRET shorter than 32 characters', () => {
