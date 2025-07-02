@@ -26,32 +26,31 @@ All environment variables are validated using Zod schemas for type safety and ru
 
 ### Required Variables
 
-| Variable | Description | Format | Example |
-|----------|-------------|--------|---------|
+| Variable         | Description                         | Format   | Example               |
+| ---------------- | ----------------------------------- | -------- | --------------------- |
 | `OPENAI_API_KEY` | OpenAI API key for AI functionality | `sk-...` | `sk-1234567890abcdef` |
 
 ### Optional Variables with Defaults
 
-| Variable | Description | Default | Valid Values |
-|----------|-------------|---------|--------------|
-| `NODE_ENV` | Application environment | `development` | `development`, `production`, `test` |
-| `PORT` | Server port | `3000` | 1-65535 |
-| `HOST` | Server host | `localhost` | Any valid hostname |
-| `LOG_LEVEL` | Logging verbosity | `info` | `fatal`, `error`, `warn`, `info`, `debug`, `trace` |
-| `JWT_SECRET` | Secret for JWT signing (auto-generated in dev) | Auto-generated | Min 32 characters |
-| `ALLOWED_ORIGIN` | CORS allowed origins (comma-separated) | `http://localhost:5173` | Valid HTTP(S) URLs |
-| `SYSTEM_PROMPT` | Custom AI system prompt | `""` (empty) | Any string |
-| `RATE_LIMIT_MAX` | Max requests per window | `60` | Positive integer |
-| `RATE_LIMIT_TIME_WINDOW` | Rate limit window (ms) | `100000` | Positive integer |
+| Variable                 | Description                                    | Default                 | Valid Values                                       |
+| ------------------------ | ---------------------------------------------- | ----------------------- | -------------------------------------------------- |
+| `NODE_ENV`               | Application environment                        | `development`           | `development`, `production`, `test`                |
+| `PORT`                   | Server port                                    | `3000`                  | 1-65535                                            |
+| `HOST`                   | Server host                                    | `localhost`             | Any valid hostname                                 |
+| `LOG_LEVEL`              | Logging verbosity                              | `info`                  | `fatal`, `error`, `warn`, `info`, `debug`, `trace` |
+| `JWT_SECRET`             | Secret for JWT signing (auto-generated in dev) | Auto-generated          | Min 32 characters                                  |
+| `ALLOWED_ORIGIN`         | CORS allowed origins (comma-separated)         | `http://localhost:5173` | Valid HTTP(S) URLs                                 |
+| `SYSTEM_PROMPT`          | Custom AI system prompt                        | `""` (empty)            | Any string                                         |
+| `RATE_LIMIT_MAX`         | Max requests per window                        | `60`                    | Positive integer                                   |
+| `RATE_LIMIT_TIME_WINDOW` | Rate limit window (ms)                         | `100000`                | Positive integer                                   |
 
 ### Security Notes
 
-- **JWT_SECRET**: 
+- **JWT_SECRET**:
   - Automatically generated in development mode if not provided
   - **REQUIRED** in production - generate with: `openssl rand -hex 32`
   - Must be at least 32 characters for security
-  
-- **Sensitive Values**: 
+- **Sensitive Values**:
   - All sensitive environment variables (API keys, secrets) are automatically redacted in logs
   - Never commit `.env` files to version control
 
@@ -123,9 +122,11 @@ backend-api/
 ## API Documentation
 
 When running in development, Swagger UI is available at:
+
 - http://localhost:3000/documentation
 
 OpenAPI specification is automatically generated and available at:
+
 - http://localhost:3000/documentation/json
 
 ## Error Handling

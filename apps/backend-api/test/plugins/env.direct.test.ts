@@ -272,14 +272,14 @@ describe('Environment Plugin Direct Tests', () => {
     const stream = {
       write(msg: string) {
         logs.push(JSON.parse(msg));
-      }
+      },
     };
 
-    const app = Fastify({ 
+    const app = Fastify({
       logger: {
         level: 'info',
-        stream
-      }
+        stream,
+      },
     });
     const jwtSecret = randomBytes(32).toString('hex');
     const originalEnv = process.env;
@@ -313,7 +313,7 @@ describe('Environment Plugin Direct Tests', () => {
 
   it('should validate ALLOWED_ORIGIN contains valid URLs', async () => {
     const originalEnv = process.env;
-    
+
     const invalidOrigins = [
       'not-a-url',
       'ftp://invalid-protocol.com',
@@ -334,7 +334,7 @@ describe('Environment Plugin Direct Tests', () => {
       await expect(app.register(envPlugin).ready()).rejects.toThrow(
         /ALLOWED_ORIGIN.*valid HTTP\(S\) URLs/
       );
-      
+
       await app.close();
     }
 
@@ -360,7 +360,7 @@ describe('Environment Plugin Direct Tests', () => {
 
   it('should validate PORT is within valid range', async () => {
     const originalEnv = process.env;
-    
+
     const invalidPorts = ['0', '65536', '-1', '99999', 'abc', '12.34'];
 
     for (const invalidPort of invalidPorts) {
@@ -380,7 +380,7 @@ describe('Environment Plugin Direct Tests', () => {
 
   it('should validate RATE_LIMIT_MAX is positive integer', async () => {
     const originalEnv = process.env;
-    
+
     const invalidValues = ['0', '-1', 'abc', '12.34', ''];
 
     for (const invalidValue of invalidValues) {
@@ -400,7 +400,7 @@ describe('Environment Plugin Direct Tests', () => {
 
   it('should validate RATE_LIMIT_TIME_WINDOW is positive integer', async () => {
     const originalEnv = process.env;
-    
+
     const invalidValues = ['0', '-1000', 'abc', '12.34', ''];
 
     for (const invalidValue of invalidValues) {
@@ -420,7 +420,7 @@ describe('Environment Plugin Direct Tests', () => {
 
   it('should reject empty values for required fields', async () => {
     const originalEnv = process.env;
-    
+
     // Test empty OPENAI_API_KEY
     const app1 = Fastify({ logger: false });
     process.env = {
@@ -452,7 +452,7 @@ describe('Environment Plugin Direct Tests', () => {
   it('should provide detailed validation error messages', async () => {
     const app = Fastify({ logger: false });
     const originalEnv = process.env;
-    
+
     process.env = {
       ...originalEnv,
       NODE_ENV: 'invalid-env',
@@ -469,7 +469,8 @@ describe('Environment Plugin Direct Tests', () => {
       expect(true).toBe(false);
     } catch (error) {
       // Verify error contains information about multiple validation failures
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       expect(errorMessage).toContain('NODE_ENV');
       expect(errorMessage).toContain('PORT');
       expect(errorMessage).toContain('OPENAI_API_KEY');
@@ -487,14 +488,14 @@ describe('Environment Plugin Direct Tests', () => {
     const stream = {
       write(msg: string) {
         logs.push(JSON.parse(msg));
-      }
+      },
     };
 
-    const app = Fastify({ 
+    const app = Fastify({
       logger: {
         level: 'warn', // Set to warn to capture warning
-        stream
-      }
+        stream,
+      },
     });
     const originalEnv = process.env;
     process.env = {
@@ -528,7 +529,7 @@ describe('Environment Plugin Direct Tests', () => {
   it('should accept valid edge case values', async () => {
     const app = Fastify({ logger: false });
     const originalEnv = process.env;
-    
+
     process.env = {
       NODE_ENV: 'test',
       PORT: '1', // Minimum valid port
