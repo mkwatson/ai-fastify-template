@@ -3,7 +3,6 @@
  */
 
 export const DEFAULT_PORT = 3000; // Standard HTTP port
-export const DEFAULT_HOST = 'localhost';
 
 /**
  * Gets the server port from environment or default
@@ -21,14 +20,4 @@ export function getPort(): number {
   }
 
   return port;
-}
-
-/**
- * Gets the server host from environment or default
- * @returns The host to bind to
- */
-export function getHost(): string {
-  // Use || instead of ?? because empty string should be treated as "not set"
-
-  return process.env['HOST'] || DEFAULT_HOST;
 }

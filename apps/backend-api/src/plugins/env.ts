@@ -22,13 +22,6 @@ const EnvSchema = z
       .refine(n => n > 0 && n < 65536, 'PORT must be between 1-65535')
       .default('3000'),
 
-    HOST: z
-      .string({
-        invalid_type_error: 'HOST must be a string',
-      })
-      .min(1, 'HOST cannot be empty')
-      .default('localhost'),
-
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], {
         errorMap: () => ({

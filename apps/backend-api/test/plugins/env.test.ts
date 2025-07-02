@@ -22,12 +22,6 @@ const EnvSchema = z
       .transform(Number)
       .refine(n => n > 0 && n < 65536, 'PORT must be between 1-65535')
       .default('3000'),
-    HOST: z
-      .string({
-        invalid_type_error: 'HOST must be a string',
-      })
-      .min(1, 'HOST cannot be empty')
-      .default('localhost'),
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], {
         errorMap: () => ({
@@ -125,7 +119,6 @@ describe('Environment Schema Validation', () => {
       });
       expect(result.NODE_ENV).toBe('development');
       expect(result.PORT).toBe(3000);
-      expect(result.HOST).toBe('localhost');
       expect(result.LOG_LEVEL).toBe('info');
       expect(result.ALLOWED_ORIGIN).toEqual(['http://localhost:5173']);
       expect(result.SYSTEM_PROMPT).toBe('');
@@ -244,25 +237,6 @@ describe('Environment Schema Validation', () => {
         });
         expect(result.LOG_LEVEL).toBe(level);
       }
-    });
-  });
-
-  describe('HOST validation', () => {
-    it('should reject empty HOST', () => {
-      expect(() =>
-        EnvSchema.parse({
-          OPENAI_API_KEY: validApiKey,
-          HOST: '',
-        })
-      ).toThrow();
-    });
-
-    it('should accept custom HOST', () => {
-      const result = EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        HOST: '0.0.0.0',
-      });
-      expect(result.HOST).toBe('0.0.0.0');
     });
   });
 

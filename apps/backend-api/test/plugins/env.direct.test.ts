@@ -14,7 +14,6 @@ describe('Environment Plugin Direct Tests', () => {
     const env = {
       NODE_ENV: 'test',
       PORT: '3001',
-      HOST: 'localhost',
       LOG_LEVEL: 'info',
       OPENAI_API_KEY: validApiKey,
       JWT_SECRET: randomBytes(32).toString('hex'),
@@ -54,7 +53,6 @@ describe('Environment Plugin Direct Tests', () => {
     const env = {
       NODE_ENV: 'development',
       PORT: '3000',
-      HOST: 'localhost',
       LOG_LEVEL: 'info',
       OPENAI_API_KEY: validApiKey,
       // JWT_SECRET will be auto-generated in development
@@ -71,7 +69,6 @@ describe('Environment Plugin Direct Tests', () => {
       expect(app.config).toBeDefined();
       expect(app.config?.NODE_ENV).toBe('development');
       expect(app.config?.PORT).toBe(3000);
-      expect(app.config?.HOST).toBe('localhost');
       expect(app.config?.LOG_LEVEL).toBe('info');
       expect(app.config?.OPENAI_API_KEY).toBe(validApiKey);
       expect(app.config?.JWT_SECRET).toBeDefined(); // Auto-generated
@@ -93,7 +90,6 @@ describe('Environment Plugin Direct Tests', () => {
     // Remove optional env vars to test defaults
     delete process.env['NODE_ENV'];
     delete process.env['PORT'];
-    delete process.env['HOST'];
     delete process.env['LOG_LEVEL'];
     delete process.env['JWT_SECRET'];
     delete process.env['ALLOWED_ORIGIN'];
@@ -109,7 +105,6 @@ describe('Environment Plugin Direct Tests', () => {
       expect(app.config).toBeDefined();
       expect(app.config?.NODE_ENV).toBe('development');
       expect(app.config?.PORT).toBe(3000);
-      expect(app.config?.HOST).toBe('localhost');
       expect(app.config?.LOG_LEVEL).toBe('info');
       expect(app.config?.JWT_SECRET).toBeDefined(); // Auto-generated in dev
       expect(app.config?.ALLOWED_ORIGIN).toEqual(['http://localhost:5173']);
@@ -157,7 +152,6 @@ describe('Environment Plugin Direct Tests', () => {
       ...originalEnv,
       NODE_ENV: 'production',
       PORT: '8080',
-      HOST: '0.0.0.0',
       LOG_LEVEL: 'warn',
       OPENAI_API_KEY: validApiKey,
       JWT_SECRET: jwtSecret, // Required in production
@@ -171,7 +165,6 @@ describe('Environment Plugin Direct Tests', () => {
       expect(app.config).toBeDefined();
       expect(app.config?.NODE_ENV).toBe('production');
       expect(app.config?.PORT).toBe(8080);
-      expect(app.config?.HOST).toBe('0.0.0.0');
       expect(app.config?.LOG_LEVEL).toBe('warn');
       expect(app.config?.JWT_SECRET).toBe(jwtSecret);
       expect(app.config?.ALLOWED_ORIGIN).toEqual([
@@ -570,7 +563,6 @@ describe('Environment Plugin Direct Tests', () => {
     process.env = {
       NODE_ENV: 'test',
       PORT: '1', // Minimum valid port
-      HOST: 'localhost',
       LOG_LEVEL: 'info',
       OPENAI_API_KEY: validApiKey,
       JWT_SECRET: 'a'.repeat(32), // Exactly 32 chars
@@ -598,7 +590,6 @@ describe('Environment Plugin Direct Tests', () => {
     process.env = {
       NODE_ENV: 'test',
       PORT: '65535', // Maximum valid port
-      HOST: 'localhost',
       LOG_LEVEL: 'info',
       OPENAI_API_KEY: validApiKey,
       JWT_SECRET: 'b'.repeat(32),

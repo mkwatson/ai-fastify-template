@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  getPort,
-  getHost,
-  DEFAULT_PORT,
-  DEFAULT_HOST,
-} from '../src/server-config.js';
+import { getPort, DEFAULT_PORT } from '../src/server-config.js';
 
 describe('server-config', () => {
   const originalEnv = process.env;
@@ -51,23 +46,6 @@ describe('server-config', () => {
 
       process.env['PORT'] = '65535';
       expect(getPort()).toBe(65535);
-    });
-  });
-
-  describe('getHost', () => {
-    it('should return default host when HOST is not set', () => {
-      delete process.env['HOST'];
-      expect(getHost()).toBe(DEFAULT_HOST);
-    });
-
-    it('should return environment host when set', () => {
-      process.env['HOST'] = '0.0.0.0';
-      expect(getHost()).toBe('0.0.0.0');
-    });
-
-    it('should handle empty HOST value', () => {
-      process.env['HOST'] = '';
-      expect(getHost()).toBe(DEFAULT_HOST);
     });
   });
 });
