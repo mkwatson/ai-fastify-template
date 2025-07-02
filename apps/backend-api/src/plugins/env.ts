@@ -1,43 +1,118 @@
+import { randomBytes } from 'node:crypto';
 import fp from 'fastify-plugin';
 import { z } from 'zod';
 
-const EnvSchema = z.object({
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'], {
-      errorMap: () => ({
-        message: 'NODE_ENV must be one of: development, production, test',
+const EnvSchema = z
+  .object({
+    NODE_ENV: z
+      .enum(['development', 'production', 'test'], {
+        errorMap: () => ({
+          message: 'NODE_ENV must be one of: development, production, test',
+        }),
+      })
+      .default('development'),
+
+    PORT: z.coerce
+      .number({
+        required_error: 'PORT must be a valid number',
+        invalid_type_error: 'PORT must be a number',
+      })
+      .int('PORT must be an integer')
+      .min(1, 'PORT must be at least 1')
+      .max(65535, 'PORT must be at most 65535')
+      .default(3000),
+
+    LOG_LEVEL: z
+      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], {
+        errorMap: () => ({
+          message:
+            'LOG_LEVEL must be one of: fatal, error, warn, info, debug, trace',
+        }),
+      })
+      .default('info'),
+
+    // MVP-specific environment variables
+    OPENAI_API_KEY: z
+      .string({
+        required_error: 'OPENAI_API_KEY is required for AI functionality',
+        invalid_type_error: 'OPENAI_API_KEY must be a string',
+      })
+      .min(1, 'OPENAI_API_KEY cannot be empty')
+      .regex(
+        /^sk-[A-Za-z0-9_-]+$/,
+        'OPENAI_API_KEY must be a valid OpenAI API key format (sk-...)'
+      ),
+
+    JWT_SECRET: z
+      .string({
+        invalid_type_error: 'JWT_SECRET must be a string',
+      })
+      .min(32, 'JWT_SECRET must be at least 32 characters for security')
+      .default(() => {
+        // Auto-generate in development mode only
+        if (process.env['NODE_ENV'] === 'development') {
+          return randomBytes(32).toString('hex');
+        }
+        // In production, this will fail validation if not provided due to the refine below
+        return '';
       }),
-    })
-    .default('development'),
 
-  PORT: z
-    .string({
-      required_error: 'PORT environment variable is required',
-      invalid_type_error: 'PORT must be a string',
-    })
-    .regex(/^\d+$/, 'PORT must contain only numeric characters')
-    .transform(Number)
-    .refine(n => n > 0 && n < 65536, 'PORT must be between 1-65535')
-    .default('3000'),
+    ALLOWED_ORIGIN: z
+      .string({
+        required_error: 'ALLOWED_ORIGIN is required for CORS configuration',
+        invalid_type_error: 'ALLOWED_ORIGIN must be a string',
+      })
+      .min(1, 'ALLOWED_ORIGIN cannot be empty')
+      .default('http://localhost:5173')
+      .transform(origins => {
+        // Support comma-separated origins and trim whitespace
+        return origins.split(',').map(origin => origin.trim());
+      })
+      .refine(
+        origins =>
+          origins.every(origin => {
+            try {
+              // Validate each origin is a valid URL
+              const url = new URL(origin);
+              return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch {
+              return false;
+            }
+          }),
+        'ALLOWED_ORIGIN must contain valid HTTP(S) URLs (comma-separated if multiple)'
+      ),
 
-  HOST: z
-    .string({
-      invalid_type_error: 'HOST must be a string',
-    })
-    .min(1, 'HOST cannot be empty')
-    .default('localhost'),
+    SYSTEM_PROMPT: z
+      .string({
+        invalid_type_error: 'SYSTEM_PROMPT must be a string',
+      })
+      .optional()
+      .default(''),
 
-  LOG_LEVEL: z
-    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'], {
-      errorMap: () => ({
-        message:
-          'LOG_LEVEL must be one of: fatal, error, warn, info, debug, trace',
-      }),
-    })
-    .default('info'),
-});
+    RATE_LIMIT_MAX: z.coerce
+      .number({
+        invalid_type_error: 'RATE_LIMIT_MAX must be a number',
+      })
+      .int('RATE_LIMIT_MAX must be an integer')
+      .min(1, 'RATE_LIMIT_MAX must be greater than 0')
+      .default(60),
 
-export type Env = z.infer<typeof EnvSchema>;
+    RATE_LIMIT_TIME_WINDOW: z.coerce
+      .number({
+        invalid_type_error: 'RATE_LIMIT_TIME_WINDOW must be a number',
+      })
+      .int('RATE_LIMIT_TIME_WINDOW must be an integer')
+      .min(1000, 'RATE_LIMIT_TIME_WINDOW must be at least 1000ms (1 second)')
+      .default(60000), // 1 minute default
+  })
+  .refine(data => data.NODE_ENV !== 'production' || data.JWT_SECRET, {
+    message:
+      'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32',
+    path: ['JWT_SECRET'],
+  });
+
+// Use z.output to get the type after transformations
+export type Env = z.output<typeof EnvSchema>;
 
 // List of sensitive environment variable patterns to redact from logs
 const SENSITIVE_PATTERNS = [
@@ -70,9 +145,19 @@ declare module 'fastify' {
 }
 
 export default fp(
-  fastify => {
+  async fastify => {
     try {
       const config = EnvSchema.parse(process.env);
+
+      // Log if JWT_SECRET was auto-generated (check if it's the expected length and NODE_ENV is development)
+      if (config.NODE_ENV === 'development' && !process.env['JWT_SECRET']) {
+        fastify.log.warn(
+          { JWT_SECRET: '[REDACTED - auto-generated]' },
+          'JWT_SECRET not provided. Auto-generated for development use only. ' +
+            'Set JWT_SECRET environment variable in production for stable tokens across restarts.'
+        );
+      }
+
       fastify.decorate('config', config);
 
       // Log safe config (sensitive fields redacted)

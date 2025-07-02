@@ -20,6 +20,9 @@ export const baseConfig: InlineConfig = {
     testTimeout: 10000,
     hookTimeout: 10000,
 
+    // Setup files to run before tests
+    setupFiles: ['./apps/backend-api/test/setup.ts'],
+
     // Pool configuration for test execution
     pool: 'forks',
     poolOptions: {
@@ -73,6 +76,7 @@ export const CRITICAL_SYNC_PROPERTIES = [
   'test.environment',
   'test.testTimeout',
   'test.hookTimeout',
+  'test.setupFiles',
   'resolve.alias',
   'resolve.extensionAlias',
 ] as const;
