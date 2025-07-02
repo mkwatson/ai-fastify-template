@@ -26,6 +26,7 @@ regexes = [
 
 # Custom rule to ensure we still catch real keys
 [[rules]]
+id = "openai-api-key"
 description = "OpenAI API Key"
 regex = '''sk-[A-Za-z0-9]{48}'''
 tags = ["key", "openai"]
