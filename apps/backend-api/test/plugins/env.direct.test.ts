@@ -526,6 +526,43 @@ describe('Environment Plugin Direct Tests', () => {
     }
   });
 
+  it('should generate cryptographically secure JWT_SECRET', async () => {
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'development',
+      OPENAI_API_KEY: validApiKey,
+      // No JWT_SECRET provided
+    };
+    delete process.env['JWT_SECRET'];
+
+    // Create two separate apps to test uniqueness
+    const app1 = Fastify({ logger: false });
+    const app2 = Fastify({ logger: false });
+
+    try {
+      await app1.register(envPlugin);
+      await app1.ready();
+      await app2.register(envPlugin);
+      await app2.ready();
+
+      // Both should have JWT_SECRET
+      expect(app1.config?.JWT_SECRET).toBeDefined();
+      expect(app2.config?.JWT_SECRET).toBeDefined();
+
+      // They should be different (cryptographically secure random)
+      expect(app1.config?.JWT_SECRET).not.toBe(app2.config?.JWT_SECRET);
+
+      // They should be the correct length (32 bytes = 64 hex chars)
+      expect(app1.config?.JWT_SECRET?.length).toBe(64);
+      expect(app2.config?.JWT_SECRET?.length).toBe(64);
+    } finally {
+      process.env = originalEnv;
+      await app1.close();
+      await app2.close();
+    }
+  });
+
   it('should accept valid edge case values', async () => {
     const app = Fastify({ logger: false });
     const originalEnv = process.env;
