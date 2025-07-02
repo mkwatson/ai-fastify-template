@@ -7,6 +7,7 @@ import type { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
 
 import envPlugin from './plugins/env.js';
 import jwtPlugin from './plugins/jwt.js';
+import openaiService from './services/openai.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,6 +27,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   // Register JWT plugin after env (it depends on JWT_SECRET from env)
   await fastify.register(jwtPlugin);
+
+  // Register OpenAI service after env (it depends on OPENAI_API_KEY from env)
+  await fastify.register(openaiService);
 
   // Place here your custom code!
 
