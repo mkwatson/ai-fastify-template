@@ -10,7 +10,11 @@ describe('Rate Limit Plugin Integration', () => {
     vi.clearAllMocks();
   });
 
-  const createApp = async (rateLimitMax = 3, rateLimitTimeWindow = 1000) => {
+  const createApp = async (
+    rateLimitMax = 3,
+    rateLimitTimeWindow = 1000,
+    trustProxy = false
+  ) => {
     const app = Fastify({
       logger: false,
     });
@@ -19,6 +23,7 @@ describe('Rate Limit Plugin Integration', () => {
     process.env['OPENAI_API_KEY'] = 'sk-test123';
     process.env['RATE_LIMIT_MAX'] = String(rateLimitMax);
     process.env['RATE_LIMIT_TIME_WINDOW'] = String(rateLimitTimeWindow);
+    process.env['TRUST_PROXY'] = String(trustProxy);
 
     await app.register(envPlugin);
     await app.register(rateLimitPlugin);
@@ -107,8 +112,8 @@ describe('Rate Limit Plugin Integration', () => {
   });
 
   describe('IP-based rate limiting', () => {
-    it('should track limits per IP address', async () => {
-      const app = await createApp(1, 1000);
+    it('should track limits per IP address when TRUST_PROXY is enabled', async () => {
+      const app = await createApp(1, 1000, true); // Enable TRUST_PROXY
 
       // Request from first IP
       const response1 = await app.inject({
@@ -143,8 +148,52 @@ describe('Rate Limit Plugin Integration', () => {
       await app.close();
     });
 
+    it('should ignore X-Forwarded-For when TRUST_PROXY is disabled', async () => {
+      const app = await createApp(2, 60000, false); // Disable TRUST_PROXY
+
+      // Mock different remoteAddress values for each request
+      const originalInject = app.inject.bind(app);
+      let requestCount = 0;
+
+      // @ts-expect-error - Mocking inject for testing
+      app.inject = function (opts: any) {
+        requestCount++;
+        // Override remoteAddress for each request
+        const modifiedOpts = {
+          ...opts,
+          remoteAddress: `127.0.0.${requestCount}`,
+        };
+        return originalInject(modifiedOpts);
+      };
+
+      // When TRUST_PROXY is false, X-Forwarded-For headers are ignored
+      // Requests from different IPs should be tracked separately
+
+      // First request from IP 127.0.0.1 should succeed
+      const response1 = await app.inject({
+        method: 'GET',
+        url: '/test',
+        headers: {
+          'x-forwarded-for': '192.168.1.1',
+        },
+      });
+      expect(response1.statusCode).toBe(200);
+
+      // Second request from IP 127.0.0.2 should also succeed (different IP)
+      const response2 = await app.inject({
+        method: 'GET',
+        url: '/test',
+        headers: {
+          'x-forwarded-for': '192.168.1.2',
+        },
+      });
+      expect(response2.statusCode).toBe(200);
+
+      await app.close();
+    });
+
     it('should handle multiple IPs in x-forwarded-for header', async () => {
-      const app = await createApp(1, 1000);
+      const app = await createApp(1, 1000, true); // Enable TRUST_PROXY
 
       // Request with multiple IPs (common with proxies)
       const response1 = await app.inject({

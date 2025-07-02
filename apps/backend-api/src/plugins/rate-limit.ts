@@ -23,15 +23,21 @@ export default fp(
       },
       hook: 'onRequest',
       keyGenerator: request => {
-        // Use X-Forwarded-For header if present (for proxied requests), otherwise use remoteAddress
-        return (
-          request.headers['x-forwarded-for']
-            ?.toString()
-            .split(',')[0]
-            ?.trim() ??
-          request.ip ??
-          'anonymous'
-        );
+        // Only trust X-Forwarded-For header if TRUST_PROXY is enabled
+        const forwardedFor = request.headers['x-forwarded-for'];
+        if (fastify.config?.TRUST_PROXY && forwardedFor) {
+          // Handle both string and array cases
+          const forwardedIp: string | undefined = Array.isArray(forwardedFor)
+            ? forwardedFor[0]
+            : forwardedFor;
+          if (forwardedIp) {
+            const firstIp = forwardedIp.split(',')[0];
+            return firstIp ? firstIp.trim() : 'anonymous';
+          }
+        }
+
+        // Otherwise use the direct IP address
+        return request.ip ?? 'anonymous';
       },
     };
 
