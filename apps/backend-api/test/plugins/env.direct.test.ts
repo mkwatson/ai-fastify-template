@@ -115,7 +115,7 @@ describe('Environment Plugin Direct Tests', () => {
       expect(app.config?.ALLOWED_ORIGIN).toEqual(['http://localhost:5173']);
       expect(app.config?.SYSTEM_PROMPT).toBe('');
       expect(app.config?.RATE_LIMIT_MAX).toBe(60);
-      expect(app.config?.RATE_LIMIT_TIME_WINDOW).toBe(100000);
+      expect(app.config?.RATE_LIMIT_TIME_WINDOW).toBe(60000);
     } finally {
       process.env = originalEnv;
       await app.close();
@@ -220,7 +220,7 @@ describe('Environment Plugin Direct Tests', () => {
     delete process.env['JWT_SECRET'];
 
     await expect(app.register(envPlugin).ready()).rejects.toThrow(
-      'JWT_SECRET is required in production'
+      'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32'
     );
 
     process.env = originalEnv;

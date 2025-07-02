@@ -42,7 +42,7 @@ All environment variables are validated using Zod schemas for type safety and ru
 | `ALLOWED_ORIGIN`         | CORS allowed origins (comma-separated)         | `http://localhost:5173` | Valid HTTP(S) URLs                                 |
 | `SYSTEM_PROMPT`          | Custom AI system prompt                        | `""` (empty)            | Any string                                         |
 | `RATE_LIMIT_MAX`         | Max requests per window                        | `60`                    | Positive integer                                   |
-| `RATE_LIMIT_TIME_WINDOW` | Rate limit window (ms)                         | `100000`                | Positive integer                                   |
+| `RATE_LIMIT_TIME_WINDOW` | Rate limit window (ms)                         | `60000` (1 minute)      | Positive integer (milliseconds)                    |
 
 ### Security Notes
 
@@ -63,6 +63,41 @@ ALLOWED_ORIGIN=https://example.com
 # Multiple origins (comma-separated)
 ALLOWED_ORIGIN=https://example.com,https://app.example.com,http://localhost:3000
 ```
+
+### Rate Limiting Examples
+
+```bash
+# 60 requests per minute (default)
+RATE_LIMIT_MAX=60
+RATE_LIMIT_TIME_WINDOW=60000
+
+# 100 requests per 5 minutes
+RATE_LIMIT_MAX=100
+RATE_LIMIT_TIME_WINDOW=300000
+
+# 1000 requests per hour
+RATE_LIMIT_MAX=1000
+RATE_LIMIT_TIME_WINDOW=3600000
+```
+
+### Migration Guide
+
+If you're upgrading from a previous version:
+
+1. **New Required Variables**:
+   - `OPENAI_API_KEY` is now required - obtain from [OpenAI Platform](https://platform.openai.com/api-keys)
+
+2. **Changed Defaults**:
+   - `RATE_LIMIT_TIME_WINDOW` default changed from 100000ms to 60000ms (1 minute)
+   - Adjust your configuration if you relied on the old default
+
+3. **Production Requirements**:
+   - `JWT_SECRET` is now enforced in production environments
+   - Generate a secure secret: `openssl rand -hex 32`
+
+4. **Validation Changes**:
+   - All environment variables now have strict validation
+   - Check logs for validation errors on startup
 
 ## Available Scripts
 

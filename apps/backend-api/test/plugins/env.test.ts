@@ -106,8 +106,15 @@ const EnvSchema = z.object({
     )
     .transform(Number)
     .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
-    .default('100000'),
-});
+    .default('60000'), // 1 minute default
+}).refine(
+  data => data.NODE_ENV !== 'production' || data.JWT_SECRET,
+  {
+    message:
+      'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32',
+    path: ['JWT_SECRET'],
+  }
+);
 
 describe('Environment Schema Validation', () => {
   const validApiKey = 'sk-test1234567890abcdef';
@@ -124,7 +131,7 @@ describe('Environment Schema Validation', () => {
       expect(result.ALLOWED_ORIGIN).toEqual(['http://localhost:5173']);
       expect(result.SYSTEM_PROMPT).toBe('');
       expect(result.RATE_LIMIT_MAX).toBe(60);
-      expect(result.RATE_LIMIT_TIME_WINDOW).toBe(100000);
+      expect(result.RATE_LIMIT_TIME_WINDOW).toBe(60000);
     });
 
     it('should parse custom PORT value', () => {
@@ -139,6 +146,7 @@ describe('Environment Schema Validation', () => {
       const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
         NODE_ENV: 'production',
+        JWT_SECRET: 'a'.repeat(32), // Required in production
       });
       expect(result.NODE_ENV).toBe('production');
     });
@@ -292,11 +300,22 @@ describe('Environment Schema Validation', () => {
   });
 
   describe('JWT_SECRET validation', () => {
-    it('should accept missing JWT_SECRET (optional)', () => {
+    it('should accept missing JWT_SECRET in development', () => {
       const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
+        NODE_ENV: 'development',
       });
       expect(result.JWT_SECRET).toBeUndefined();
+    });
+
+    it('should require JWT_SECRET in production', () => {
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          NODE_ENV: 'production',
+          // No JWT_SECRET provided
+        })
+      ).toThrow('JWT_SECRET is required in production. Generate one with: openssl rand -hex 32');
     });
 
     it('should reject JWT_SECRET shorter than 32 characters', () => {
@@ -430,11 +449,11 @@ describe('Environment Schema Validation', () => {
   });
 
   describe('RATE_LIMIT_TIME_WINDOW validation', () => {
-    it('should default to 100000', () => {
+    it('should default to 60000 (1 minute)', () => {
       const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
       });
-      expect(result.RATE_LIMIT_TIME_WINDOW).toBe(100000);
+      expect(result.RATE_LIMIT_TIME_WINDOW).toBe(60000);
     });
 
     it('should accept custom time window', () => {

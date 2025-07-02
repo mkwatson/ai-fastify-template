@@ -107,8 +107,15 @@ const EnvSchema = z.object({
     )
     .transform(Number)
     .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
-    .default('100000'),
-});
+    .default('60000'), // 1 minute default
+}).refine(
+  data => data.NODE_ENV !== 'production' || data.JWT_SECRET,
+  {
+    message:
+      'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32',
+    path: ['JWT_SECRET'],
+  }
+);
 
 // Use z.output to get the type after transformations
 export type Env = z.output<typeof EnvSchema>;
@@ -157,10 +164,6 @@ export default fp(
           { JWT_SECRET: '[REDACTED - auto-generated]' },
           'JWT_SECRET not provided. Auto-generated for development use only. ' +
             'Set JWT_SECRET environment variable in production for stable tokens across restarts.'
-        );
-      } else if (!config.JWT_SECRET && config.NODE_ENV === 'production') {
-        throw new Error(
-          'JWT_SECRET is required in production. Generate one with: openssl rand -hex 32'
         );
       }
 
