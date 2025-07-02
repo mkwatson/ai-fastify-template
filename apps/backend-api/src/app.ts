@@ -7,6 +7,7 @@ import type { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
 
 import envPlugin from './plugins/env.js';
 import jwtPlugin from './plugins/jwt.js';
+import rateLimitPlugin from './plugins/rate-limit.js';
 import openaiService from './services/openai.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // Register JWT plugin after env (it depends on JWT_SECRET from env)
   await fastify.register(jwtPlugin);
 
+  // Register rate limit plugin after env (it depends on RATE_LIMIT_* from env)
+  await fastify.register(rateLimitPlugin);
+
   // Register OpenAI service after env (it depends on OPENAI_API_KEY from env)
   await fastify.register(openaiService);
 
@@ -40,7 +44,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    ignorePattern: /.*(env|jwt)\.(ts|js)$/,
+    ignorePattern: /.*(env|jwt|rate-limit)\.(ts|js)$/,
     options: opts,
   });
 
