@@ -6,6 +6,8 @@ import type { AutoloadPluginOptions } from '@fastify/autoload';
 import type { FastifyPluginAsync, FastifyServerOptions } from 'fastify';
 
 import envPlugin from './plugins/env.js';
+import corsPlugin from './plugins/cors.js';
+import rateLimitPlugin from './plugins/rate-limit.js';
 import jwtPlugin from './plugins/jwt.js';
 import openaiService from './services/openai.js';
 
@@ -25,6 +27,12 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // Register env plugin first
   await fastify.register(envPlugin);
 
+  // Register CORS plugin after env (it depends on ALLOWED_ORIGIN from env)
+  await fastify.register(corsPlugin);
+
+  // Register rate limit plugin after env (it depends on RATE_LIMIT_* from env)
+  await fastify.register(rateLimitPlugin);
+
   // Register JWT plugin after env (it depends on JWT_SECRET from env)
   await fastify.register(jwtPlugin);
 
@@ -40,7 +48,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    ignorePattern: /.*(env|jwt)\.(ts|js)$/,
+    ignorePattern: /.*(env|jwt|cors|rate-limit)\.(ts|js)$/,
     options: opts,
   });
 
