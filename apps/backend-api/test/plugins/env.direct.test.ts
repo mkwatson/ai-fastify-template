@@ -265,4 +265,48 @@ describe('Environment Plugin Direct Tests', () => {
 
     process.env = originalEnv;
   });
+
+  it('should redact sensitive configuration values in logs', async () => {
+    // Create a custom logger to capture log output
+    const logs: any[] = [];
+    const logger = {
+      fatal: (obj: any, msg?: string) => logs.push({ level: 'fatal', obj, msg }),
+      error: (obj: any, msg?: string) => logs.push({ level: 'error', obj, msg }),
+      warn: (obj: any, msg?: string) => logs.push({ level: 'warn', obj, msg }),
+      info: (obj: any, msg?: string) => logs.push({ level: 'info', obj, msg }),
+      debug: (obj: any, msg?: string) => logs.push({ level: 'debug', obj, msg }),
+      trace: (obj: any, msg?: string) => logs.push({ level: 'trace', obj, msg }),
+      child: () => logger,
+    };
+
+    const app = Fastify({ logger });
+    const jwtSecret = randomBytes(32).toString('hex');
+    const originalEnv = process.env;
+    
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'test',
+      OPENAI_API_KEY: validApiKey,
+      JWT_SECRET: jwtSecret,
+    };
+
+    try {
+      await app.register(envPlugin);
+      await app.ready();
+
+      // Find the log entry with config
+      const configLog = logs.find(
+        log => log.msg === 'Environment configuration loaded' && log.obj?.config
+      );
+
+      expect(configLog).toBeDefined();
+      expect(configLog.obj.config.OPENAI_API_KEY).toBe('[REDACTED]');
+      expect(configLog.obj.config.JWT_SECRET).toBe('[REDACTED]');
+      expect(configLog.obj.config.NODE_ENV).toBe('test'); // Non-sensitive should not be redacted
+      expect(configLog.obj.config.PORT).toBe(3000); // Non-sensitive should not be redacted
+    } finally {
+      process.env = originalEnv;
+      await app.close();
+    }
+  });
 });
