@@ -248,7 +248,7 @@ declare module 'fastify' {
 }
 
 export default fp(
-  async fastify => {
+  fastify => {
     const apiKey = fastify.config?.OPENAI_API_KEY;
 
     if (!apiKey) {
