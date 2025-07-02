@@ -27,7 +27,9 @@ describe('POST /api/token', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.payload);
       expect(body).toHaveProperty('token');
+      expect(body).toHaveProperty('tokenType');
       expect(body).toHaveProperty('expiresIn');
+      expect(body.tokenType).toBe('Bearer');
       expect(body.expiresIn).toBe(900);
       expect(typeof body.token).toBe('string');
       expect(body.token.split('.')).toHaveLength(3);
@@ -78,7 +80,7 @@ describe('POST /api/token', () => {
       expect(response.statusCode).toBe(403);
       const body = JSON.parse(response.payload);
       expect(body).toEqual({
-        error: 'Forbidden',
+        error: 'ORIGIN_NOT_ALLOWED',
         message: 'Origin header is required',
         statusCode: 403,
       });
@@ -96,8 +98,8 @@ describe('POST /api/token', () => {
       expect(response.statusCode).toBe(403);
       const body = JSON.parse(response.payload);
       expect(body).toEqual({
-        error: 'Forbidden',
-        message: 'Origin not allowed',
+        error: 'ORIGIN_NOT_ALLOWED',
+        message: 'The request origin is not in the allowed list',
         statusCode: 403,
       });
     });
@@ -114,7 +116,7 @@ describe('POST /api/token', () => {
       expect(response.statusCode).toBe(403);
       const body = JSON.parse(response.payload);
       expect(body).toEqual({
-        error: 'Forbidden',
+        error: 'ORIGIN_NOT_ALLOWED',
         message: 'Origin header is required',
         statusCode: 403,
       });
@@ -135,8 +137,8 @@ describe('POST /api/token', () => {
       const verified = app.jwt.verify(body.token);
 
       expect(verified).toBeTruthy();
-      expect(verified.iat).toBeDefined();
-      expect(verified.exp).toBeDefined();
+      expect((verified as any).iat).toBeDefined();
+      expect((verified as any).exp).toBeDefined();
     });
   });
 
@@ -154,7 +156,7 @@ describe('POST /api/token', () => {
       expect(response.headers['content-type']).toContain('application/json');
 
       const body = JSON.parse(response.payload);
-      expect(Object.keys(body).sort()).toEqual(['expiresIn', 'token'].sort());
+      expect(Object.keys(body).sort()).toEqual(['expiresIn', 'token', 'tokenType'].sort());
     });
   });
 
@@ -191,9 +193,9 @@ describe('POST /api/token', () => {
       const rateLimitedResponse = responses.find(r => r.statusCode === 429);
       if (rateLimitedResponse) {
         const body = JSON.parse(rateLimitedResponse.payload);
-        expect(body.error).toBe('RateLimitExceeded');
+        expect(body.error).toBe('RATE_LIMIT_EXCEEDED');
         expect(body.message).toContain(
-          'You have exceeded the allowed number of requests'
+          'Too many requests'
         );
         expect(body.statusCode).toBe(429);
       }
