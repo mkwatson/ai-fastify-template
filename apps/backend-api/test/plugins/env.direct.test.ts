@@ -267,22 +267,23 @@ describe('Environment Plugin Direct Tests', () => {
   });
 
   it('should redact sensitive configuration values in logs', async () => {
-    // Create a custom logger to capture log output
+    // Create a logger that captures output
     const logs: any[] = [];
-    const logger = {
-      fatal: (obj: any, msg?: string) => logs.push({ level: 'fatal', obj, msg }),
-      error: (obj: any, msg?: string) => logs.push({ level: 'error', obj, msg }),
-      warn: (obj: any, msg?: string) => logs.push({ level: 'warn', obj, msg }),
-      info: (obj: any, msg?: string) => logs.push({ level: 'info', obj, msg }),
-      debug: (obj: any, msg?: string) => logs.push({ level: 'debug', obj, msg }),
-      trace: (obj: any, msg?: string) => logs.push({ level: 'trace', obj, msg }),
-      child: () => logger,
+    const stream = {
+      write(msg: string) {
+        logs.push(JSON.parse(msg));
+      }
     };
 
-    const app = Fastify({ logger });
+    const app = Fastify({ 
+      logger: {
+        level: 'info',
+        stream
+      }
+    });
     const jwtSecret = randomBytes(32).toString('hex');
     const originalEnv = process.env;
-    
+
     process.env = {
       ...originalEnv,
       NODE_ENV: 'test',
@@ -296,17 +297,287 @@ describe('Environment Plugin Direct Tests', () => {
 
       // Find the log entry with config
       const configLog = logs.find(
-        log => log.msg === 'Environment configuration loaded' && log.obj?.config
+        log => log.msg === 'Environment configuration loaded' && log.config
       );
 
       expect(configLog).toBeDefined();
-      expect(configLog.obj.config.OPENAI_API_KEY).toBe('[REDACTED]');
-      expect(configLog.obj.config.JWT_SECRET).toBe('[REDACTED]');
-      expect(configLog.obj.config.NODE_ENV).toBe('test'); // Non-sensitive should not be redacted
-      expect(configLog.obj.config.PORT).toBe(3000); // Non-sensitive should not be redacted
+      expect(configLog.config.OPENAI_API_KEY).toBe('[REDACTED]');
+      expect(configLog.config.JWT_SECRET).toBe('[REDACTED]');
+      expect(configLog.config.NODE_ENV).toBe('test'); // Non-sensitive should not be redacted
+      expect(configLog.config.PORT).toBe(3000); // Non-sensitive should not be redacted
     } finally {
       process.env = originalEnv;
       await app.close();
+    }
+  });
+
+  it('should validate ALLOWED_ORIGIN contains valid URLs', async () => {
+    const originalEnv = process.env;
+    
+    const invalidOrigins = [
+      'not-a-url',
+      'ftp://invalid-protocol.com',
+      'javascript:alert(1)',
+      'file:///etc/passwd',
+      'http://,https://example.com', // Empty origin
+      'http://example.com, , https://app.com', // Contains empty
+    ];
+
+    for (const invalidOrigin of invalidOrigins) {
+      const app = Fastify({ logger: false });
+      process.env = {
+        ...originalEnv,
+        OPENAI_API_KEY: validApiKey,
+        ALLOWED_ORIGIN: invalidOrigin,
+      };
+
+      await expect(app.register(envPlugin).ready()).rejects.toThrow(
+        /ALLOWED_ORIGIN.*valid HTTP\(S\) URLs/
+      );
+      
+      await app.close();
+    }
+
+    process.env = originalEnv;
+  });
+
+  it('should validate JWT_SECRET minimum length', async () => {
+    const app = Fastify({ logger: false });
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'test', // Not development, so no auto-generation
+      OPENAI_API_KEY: validApiKey,
+      JWT_SECRET: 'too-short-secret', // Less than 32 characters
+    };
+
+    await expect(app.register(envPlugin).ready()).rejects.toThrow(
+      /JWT_SECRET.*at least 32 characters/
+    );
+
+    process.env = originalEnv;
+  });
+
+  it('should validate PORT is within valid range', async () => {
+    const originalEnv = process.env;
+    
+    const invalidPorts = ['0', '65536', '-1', '99999', 'abc', '12.34'];
+
+    for (const invalidPort of invalidPorts) {
+      const app = Fastify({ logger: false });
+      process.env = {
+        ...originalEnv,
+        OPENAI_API_KEY: validApiKey,
+        PORT: invalidPort,
+      };
+
+      await expect(app.register(envPlugin).ready()).rejects.toThrow();
+      await app.close();
+    }
+
+    process.env = originalEnv;
+  });
+
+  it('should validate RATE_LIMIT_MAX is positive integer', async () => {
+    const originalEnv = process.env;
+    
+    const invalidValues = ['0', '-1', 'abc', '12.34', ''];
+
+    for (const invalidValue of invalidValues) {
+      const app = Fastify({ logger: false });
+      process.env = {
+        ...originalEnv,
+        OPENAI_API_KEY: validApiKey,
+        RATE_LIMIT_MAX: invalidValue,
+      };
+
+      await expect(app.register(envPlugin).ready()).rejects.toThrow();
+      await app.close();
+    }
+
+    process.env = originalEnv;
+  });
+
+  it('should validate RATE_LIMIT_TIME_WINDOW is positive integer', async () => {
+    const originalEnv = process.env;
+    
+    const invalidValues = ['0', '-1000', 'abc', '12.34', ''];
+
+    for (const invalidValue of invalidValues) {
+      const app = Fastify({ logger: false });
+      process.env = {
+        ...originalEnv,
+        OPENAI_API_KEY: validApiKey,
+        RATE_LIMIT_TIME_WINDOW: invalidValue,
+      };
+
+      await expect(app.register(envPlugin).ready()).rejects.toThrow();
+      await app.close();
+    }
+
+    process.env = originalEnv;
+  });
+
+  it('should reject empty values for required fields', async () => {
+    const originalEnv = process.env;
+    
+    // Test empty OPENAI_API_KEY
+    const app1 = Fastify({ logger: false });
+    process.env = {
+      ...originalEnv,
+      OPENAI_API_KEY: '',
+    };
+
+    await expect(app1.register(envPlugin).ready()).rejects.toThrow(
+      /OPENAI_API_KEY.*empty/
+    );
+    await app1.close();
+
+    // Test empty ALLOWED_ORIGIN
+    const app2 = Fastify({ logger: false });
+    process.env = {
+      ...originalEnv,
+      OPENAI_API_KEY: validApiKey,
+      ALLOWED_ORIGIN: '',
+    };
+
+    await expect(app2.register(envPlugin).ready()).rejects.toThrow(
+      /ALLOWED_ORIGIN.*empty/
+    );
+    await app2.close();
+
+    process.env = originalEnv;
+  });
+
+  it('should provide detailed validation error messages', async () => {
+    const app = Fastify({ logger: false });
+    const originalEnv = process.env;
+    
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'invalid-env',
+      PORT: 'not-a-number',
+      OPENAI_API_KEY: 'wrong-format',
+      JWT_SECRET: 'short',
+      ALLOWED_ORIGIN: 'not-a-url',
+      RATE_LIMIT_MAX: '-10',
+    };
+
+    try {
+      await app.register(envPlugin).ready();
+      // Should not reach here
+      expect(true).toBe(false);
+    } catch (error) {
+      // Verify error contains information about multiple validation failures
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      expect(errorMessage).toContain('NODE_ENV');
+      expect(errorMessage).toContain('PORT');
+      expect(errorMessage).toContain('OPENAI_API_KEY');
+      expect(errorMessage).toContain('JWT_SECRET');
+      expect(errorMessage).toContain('ALLOWED_ORIGIN');
+      expect(errorMessage).toContain('RATE_LIMIT_MAX');
+    }
+
+    process.env = originalEnv;
+  });
+
+  it('should handle JWT_SECRET auto-generation with proper logging', async () => {
+    // Create a logger that captures output
+    const logs: any[] = [];
+    const stream = {
+      write(msg: string) {
+        logs.push(JSON.parse(msg));
+      }
+    };
+
+    const app = Fastify({ 
+      logger: {
+        level: 'warn', // Set to warn to capture warning
+        stream
+      }
+    });
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'development',
+      OPENAI_API_KEY: validApiKey,
+      // No JWT_SECRET
+    };
+    delete process.env['JWT_SECRET'];
+
+    try {
+      await app.register(envPlugin);
+      await app.ready();
+
+      // Find the warning log about auto-generation
+      // Pino uses numeric levels: 30 = warn
+      const warningLog = logs.find(
+        log => log.msg && log.msg.includes('JWT_SECRET not provided')
+      );
+
+      expect(warningLog).toBeDefined();
+      expect(warningLog.JWT_SECRET).toBe('[REDACTED - auto-generated]');
+      expect(warningLog.msg).toContain('development use only');
+      expect(warningLog.msg).toContain('stable tokens across restarts');
+    } finally {
+      process.env = originalEnv;
+      await app.close();
+    }
+  });
+
+  it('should accept valid edge case values', async () => {
+    const app = Fastify({ logger: false });
+    const originalEnv = process.env;
+    
+    process.env = {
+      NODE_ENV: 'test',
+      PORT: '1', // Minimum valid port
+      HOST: 'localhost',
+      LOG_LEVEL: 'info',
+      OPENAI_API_KEY: validApiKey,
+      JWT_SECRET: 'a'.repeat(32), // Exactly 32 chars
+      ALLOWED_ORIGIN: 'http://localhost', // No port
+      RATE_LIMIT_MAX: '1', // Minimum
+      RATE_LIMIT_TIME_WINDOW: '1', // Minimum
+      SYSTEM_PROMPT: '', // Empty is valid
+    };
+
+    try {
+      await app.register(envPlugin);
+      await app.ready();
+
+      expect(app.config).toBeDefined();
+      expect(app.config?.PORT).toBe(1);
+      expect(app.config?.JWT_SECRET).toBe('a'.repeat(32));
+      expect(app.config?.RATE_LIMIT_MAX).toBe(1);
+      expect(app.config?.RATE_LIMIT_TIME_WINDOW).toBe(1);
+    } finally {
+      process.env = originalEnv;
+      await app.close();
+    }
+
+    // Test maximum valid port
+    process.env = {
+      NODE_ENV: 'test',
+      PORT: '65535', // Maximum valid port
+      HOST: 'localhost',
+      LOG_LEVEL: 'info',
+      OPENAI_API_KEY: validApiKey,
+      JWT_SECRET: 'b'.repeat(32),
+      ALLOWED_ORIGIN: 'http://localhost:5173',
+      RATE_LIMIT_MAX: '60',
+      RATE_LIMIT_TIME_WINDOW: '100000',
+      SYSTEM_PROMPT: '',
+    };
+
+    const app2 = Fastify({ logger: false });
+    try {
+      await app2.register(envPlugin);
+      await app2.ready();
+      expect(app2.config?.PORT).toBe(65535);
+    } finally {
+      process.env = originalEnv;
+      await app2.close();
     }
   });
 });
