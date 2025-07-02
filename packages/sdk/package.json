@@ -39,12 +39,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mkwatson/ai-fastify-template.git",
+    "url": "https://github.com/Airbolt-AI/airbolt.git",
     "directory": "packages/sdk"
   },
-  "homepage": "https://github.com/mkwatson/ai-fastify-template#readme",
+  "homepage": "https://github.com/Airbolt-AI/airbolt#readme",
   "bugs": {
-    "url": "https://github.com/mkwatson/ai-fastify-template/issues"
+    "url": "https://github.com/Airbolt-AI/airbolt/issues"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -91,7 +91,7 @@ This eliminates the traditional bottleneck where backend teams must manually wri
 
 ```bash
 # Clone the repository
-git clone https://github.com/mkwatson/ai-fastify-template.git
+git clone https://github.com/Airbolt-AI/airbolt.git
 cd ai-fastify-template
 
 # Setup development environment (includes GitLeaks security scanner)
@@ -434,8 +434,8 @@ _Always edit AGENTS.md for shared guidelines. Tool-specific files should remain 
 
 - 📖 [Documentation](docs/)
 - 🦀 [Rust Patterns Analysis](docs/RUST_PATTERNS_ANALYSIS.md) - How we achieve Rust-like safety in TypeScript
-- 🐛 [Issue Tracker](https://github.com/mkwatson/ai-fastify-template/issues)
-- 💬 [Discussions](https://github.com/mkwatson/ai-fastify-template/discussions)
+- 🐛 [Issue Tracker](https://github.com/Airbolt-AI/airbolt/issues)
+- 💬 [Discussions](https://github.com/Airbolt-AI/airbolt/discussions)
 
 ## Contributing
 
