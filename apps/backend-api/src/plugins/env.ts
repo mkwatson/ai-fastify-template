@@ -68,15 +68,16 @@ const EnvSchema = z.object({
       return origins.split(',').map(origin => origin.trim());
     })
     .refine(
-      origins => origins.every(origin => {
-        try {
-          // Validate each origin is a valid URL
-          const url = new URL(origin);
-          return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch {
-          return false;
-        }
-      }),
+      origins =>
+        origins.every(origin => {
+          try {
+            // Validate each origin is a valid URL
+            const url = new URL(origin);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+          } catch {
+            return false;
+          }
+        }),
       'ALLOWED_ORIGIN must contain valid HTTP(S) URLs (comma-separated if multiple)'
     ),
 
@@ -100,7 +101,10 @@ const EnvSchema = z.object({
     .string({
       invalid_type_error: 'RATE_LIMIT_TIME_WINDOW must be a string',
     })
-    .regex(/^\d+$/, 'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)')
+    .regex(
+      /^\d+$/,
+      'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)'
+    )
     .transform(Number)
     .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
     .default('100000'),
@@ -148,11 +152,11 @@ export default fp(
       if (!config.JWT_SECRET && config.NODE_ENV === 'development') {
         const generatedSecret = randomBytes(32).toString('hex');
         config = { ...config, JWT_SECRET: generatedSecret };
-        
+
         fastify.log.warn(
           { JWT_SECRET: '[REDACTED - auto-generated]' },
           'JWT_SECRET not provided. Auto-generated for development use only. ' +
-          'Set JWT_SECRET environment variable in production for stable tokens across restarts.'
+            'Set JWT_SECRET environment variable in production for stable tokens across restarts.'
         );
       } else if (!config.JWT_SECRET && config.NODE_ENV === 'production') {
         throw new Error(

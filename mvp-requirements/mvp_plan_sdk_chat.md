@@ -1,4 +1,4 @@
-**Open‑source MVP:** a tiny Fastify proxy + TypeScript SDK that lets any front‑end‑only app call OpenAI safely.  We hide your provider key on the server, issue short‑lived JWTs, throttle by IP & Origin, and ship a one‑line `<ChatWidget />` (or `useChat`/`chat`) for instant ChatGPT‑style UIs.  Deploy on Railway with just `OPENAI_API_KEY` and (optionally) `JWT_SECRET`; everything else has sensible defaults and room to grow.
+**Open‑source MVP:** a tiny Fastify proxy + TypeScript SDK that lets any front‑end‑only app call OpenAI safely. We hide your provider key on the server, issue short‑lived JWTs, throttle by IP & Origin, and ship a one‑line `<ChatWidget />` (or `useChat`/`chat`) for instant ChatGPT‑style UIs. Deploy on Railway with just `OPENAI_API_KEY` and (optionally) `JWT_SECRET`; everything else has sensible defaults and room to grow.
 
 ## Minimal MVP Plan for LLM Backend & Client SDK
 
@@ -17,14 +17,16 @@
   ```
 - Handling the signing secret (`JWT_SECRET`):
   - **Prod recommended** – set `JWT_SECRET` explicitly in env vars so multiple instances share the same key and tokens survive restarts.
-  - **Dev convenience** – if `JWT_SECRET` is *unset*, the server auto‑generates a 32‑byte random string at boot and logs a warning.\
-    *Pros*: zero config for quick local runs.\
-    *Cons*: tokens become invalid every restart and clustering won’t work.
+  - **Dev convenience** – if `JWT_SECRET` is _unset_, the server auto‑generates a 32‑byte random string at boot and logs a warning.\
+    _Pros_: zero config for quick local runs.\
+    _Cons_: tokens become invalid every restart and clustering won’t work.
 - Example usage:
   ```typescript
   import jwt from 'jsonwebtoken';
   // Generate 15‑minute token
-  const token = jwt.sign({ userId: 'user123' }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+  const token = jwt.sign({ userId: 'user123' }, process.env.JWT_SECRET!, {
+    expiresIn: '15m',
+  });
   // Verify token
   const decoded = jwt.verify(token, process.env.JWT_SECRET!);
   ```
@@ -82,12 +84,12 @@ app.get('/api/token', async (req, res) => {
 
 | Variable            | Required | Default (MVP)                       | Purpose                                                                                      |
 | ------------------- | -------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`    | ✅        | —                                   | Secret key for OpenAI.                                                                       |
-| `JWT_SECRET`        | ⬜        | *auto‑generate at startup if unset* | Signs/validates JWTs. **Set explicitly in prod for stable tokens & multi‑instance deploys.** |
-| `ALLOWED_ORIGIN`    | ✅        | `http://localhost:5173`             | Front‑end domain allowed to hit token/chat routes.                                           |
-| `SYSTEM_PROMPT`     | ⬜        | *(empty string)*                    | Global system prompt injected server‑side when client omits one.                             |
-| `RATE_LIMIT_MAX`    | ⬜        | `60`                                | Requests per IP in `RATE_LIMIT_WINDOW`.                                                      |
-| `RATE_LIMIT_WINDOW` | ⬜        | `1 minute`                          | Time window for IP rate limit.                                                               |
+| `OPENAI_API_KEY`    | ✅       | —                                   | Secret key for OpenAI.                                                                       |
+| `JWT_SECRET`        | ⬜       | _auto‑generate at startup if unset_ | Signs/validates JWTs. **Set explicitly in prod for stable tokens & multi‑instance deploys.** |
+| `ALLOWED_ORIGIN`    | ✅       | `http://localhost:5173`             | Front‑end domain allowed to hit token/chat routes.                                           |
+| `SYSTEM_PROMPT`     | ⬜       | _(empty string)_                    | Global system prompt injected server‑side when client omits one.                             |
+| `RATE_LIMIT_MAX`    | ⬜       | `60`                                | Requests per IP in `RATE_LIMIT_WINDOW`.                                                      |
+| `RATE_LIMIT_WINDOW` | ⬜       | `1 minute`                          | Time window for IP rate limit.                                                               |
 
 > **Sane defaults** let a dev run `pnpm dev` locally with only two secrets:
 >
@@ -111,19 +113,21 @@ app.get('/api/token', async (req, res) => {
 - Recommended: **Railway.app**
 
   **Why Railway first?**
-  | Factor                        | Railway Advantage                                                               |
+  | Factor | Railway Advantage |
   | ----------------------------- | ------------------------------------------------------------------------------- |
-  | **Zero‑config**               | Detects Node.js, runs `pnpm install` automatically; no Dockerfile needed.       |
-  | **Monorepo friendly**         | Lets you set custom root, build, and start commands—ideal for NX + PNPM.        |
-  | **Environment variables UI**  | Simple toggle UI for secrets (`OPENAI_API_KEY`, `JWT_SECRET`, `SYSTEM_PROMPT`). |
-  | **Free tier & fast builds**   | Enough resources for demos, spins up in seconds.                                |
-  | **"Deploy to Railway" badge** | Open‑source users click once to fork + deploy their own copy.                   |
-  | **Easy logs & metrics**       | Built‑in log viewer; no extra setup for basic monitoring.                       |
-  | **Minimal setup commands**    |                                                                                 |
+  | **Zero‑config** | Detects Node.js, runs `pnpm install` automatically; no Dockerfile needed. |
+  | **Monorepo friendly** | Lets you set custom root, build, and start commands—ideal for NX + PNPM. |
+  | **Environment variables UI** | Simple toggle UI for secrets (`OPENAI_API_KEY`, `JWT_SECRET`, `SYSTEM_PROMPT`). |
+  | **Free tier & fast builds** | Enough resources for demos, spins up in seconds. |
+  | **"Deploy to Railway" badge** | Open‑source users click once to fork + deploy their own copy. |
+  | **Easy logs & metrics** | Built‑in log viewer; no extra setup for basic monitoring. |
+  | **Minimal setup commands** | |
+
   ```bash
   pnpm install && pnpm nx run your-backend-project:build   # Build
   pnpm nx run your-backend-project:serve                   # Start
   ```
+
   > You can migrate to Vercel/K8s later—the code stays the same; only the deploy script changes.
 
 ### Client SDK Integration
@@ -156,7 +160,7 @@ AI: ${reply}
 </html>
 ```
 
-*No React, no state libraries—just call **`chat()`** and append strings.*  You can of course bundle with Vite/Webpack instead of using a CDN.
+_No React, no state libraries—just call **`chat()`** and append strings._ You can of course bundle with Vite/Webpack instead of using a CDN.
 
 ---
 
@@ -200,10 +204,9 @@ import { chat } from '@yourorg/sdk';
 const reply = await chat([{ role: 'user', content: 'Hello' }]);
 
 // with custom system prompt
-const reply2 = await chat(
-  [{ role: 'user', content: 'Summarize this text.' }],
-  { system: 'You are a concise summarizer.' }
-);
+const reply2 = await chat([{ role: 'user', content: 'Summarize this text.' }], {
+  system: 'You are a concise summarizer.',
+});
 ```
 
 That's it.
@@ -213,7 +216,7 @@ That's it.
 #### How `chat`, `useChat`, and `<ChatWidget />` fit together
 
 1. `` – stateless helper: expects the **entire message history** each call and returns the assistant’s next reply. Framework‑agnostic.
-2. ``** hook** – **stateful wrapper**: internally collects every user/assistant turn and feeds the full array to `chat()` for you, so your component just reads `messages`, `input`, `send`.
+2. ``** hook** – **stateful wrapper**: internally collects every user/assistant turn and feeds the full array to `chat()`for you, so your component just reads`messages`, `input`, `send`.
 3. `` – prebuilt UI that **uses the hook**, giving you a fully‑styled panel. No message‑array management required.
 
 > **Key point:** Even though the OpenAI/LLM endpoint wants the whole conversation each time, the developer never has to juggle it—`useChat` and `ChatWidget` keep the running history under the hood.
@@ -222,19 +225,15 @@ Developers can therefore:
 
 - **Drop in **`` for instant ChatGPT‑style UX.
 - **Switch to **`` for custom layouts yet still avoid manual history bookkeeping.
-- **Fall back to **`` in non‑React contexts, managing a simple `messages` array themselves.  (We plan a future `createChatSession()` helper for vanilla JS to hide that too.)
+- **Fall back to **``in non‑React contexts, managing a simple`messages`array themselves.  (We plan a future`createChatSession()` helper for vanilla JS to hide that too.)
 
 This hierarchy preserves simplicity while keeping a clear migration path for more control whenever it’s needed. We can layer full `LLM` interface later without breaking changes by exporting a richer client alongside this helper.
-
-
-
-
 
 ### Simple Client‑side Chat UI (React/TypeScript)
 
 #### Option A – **useChat hook** (current)
 
-*Keeps UI responsibility in your app while hiding state logic.*
+_Keeps UI responsibility in your app while hiding state logic._
 
 ```tsx
 import { useChat } from '@yourorg/sdk/react';
@@ -257,7 +256,7 @@ export default function ChatApp() {
 
 #### Option B – \*\* drop‑in\*\* (even simpler)
 
-*Zero state management or UI wiring—ideal for prototypes.*
+_Zero state management or UI wiring—ideal for prototypes._
 
 ```tsx
 import { ChatWidget } from '@yourorg/sdk/react';
@@ -315,4 +314,3 @@ Pick the level that matches your project’s needs. Both live in the same SDK so
 - Fully open-source immediately, allowing community contributions and easy replication
 
 This setup ensures the quickest route to demonstrating value with minimal complexity, clear security considerations, and an excellent foundation for incremental enhancements.
-

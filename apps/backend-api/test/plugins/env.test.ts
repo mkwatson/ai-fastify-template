@@ -35,7 +35,7 @@ const EnvSchema = z.object({
       }),
     })
     .default('info'),
-  
+
   // MVP-specific environment variables
   OPENAI_API_KEY: z
     .string({
@@ -67,15 +67,16 @@ const EnvSchema = z.object({
       return origins.split(',').map(origin => origin.trim());
     })
     .refine(
-      origins => origins.every(origin => {
-        try {
-          // Validate each origin is a valid URL
-          const url = new URL(origin);
-          return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch {
-          return false;
-        }
-      }),
+      origins =>
+        origins.every(origin => {
+          try {
+            // Validate each origin is a valid URL
+            const url = new URL(origin);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+          } catch {
+            return false;
+          }
+        }),
       'ALLOWED_ORIGIN must contain valid HTTP(S) URLs (comma-separated if multiple)'
     ),
 
@@ -99,7 +100,10 @@ const EnvSchema = z.object({
     .string({
       invalid_type_error: 'RATE_LIMIT_TIME_WINDOW must be a string',
     })
-    .regex(/^\d+$/, 'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)')
+    .regex(
+      /^\d+$/,
+      'RATE_LIMIT_TIME_WINDOW must be a positive integer (milliseconds)'
+    )
     .transform(Number)
     .refine(n => n > 0, 'RATE_LIMIT_TIME_WINDOW must be greater than 0')
     .default('100000'),
@@ -124,17 +128,17 @@ describe('Environment Schema Validation', () => {
     });
 
     it('should parse custom PORT value', () => {
-      const result = EnvSchema.parse({ 
+      const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        PORT: '8080' 
+        PORT: '8080',
       });
       expect(result.PORT).toBe(8080);
     });
 
     it('should accept valid NODE_ENV values', () => {
-      const result = EnvSchema.parse({ 
+      const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        NODE_ENV: 'production' 
+        NODE_ENV: 'production',
       });
       expect(result.NODE_ENV).toBe('production');
     });
@@ -142,45 +146,53 @@ describe('Environment Schema Validation', () => {
 
   describe('PORT validation', () => {
     it('should reject non-numeric PORT', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        PORT: 'invalid' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          PORT: 'invalid',
+        })
+      ).toThrow();
     });
 
     it('should reject PORT with letters', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        PORT: '80a0' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          PORT: '80a0',
+        })
+      ).toThrow();
     });
 
     it('should reject PORT = 0', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        PORT: '0' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          PORT: '0',
+        })
+      ).toThrow();
     });
 
     it('should reject PORT > 65535', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        PORT: '65536' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          PORT: '65536',
+        })
+      ).toThrow();
     });
 
     it('should accept PORT = 1', () => {
-      const result = EnvSchema.parse({ 
+      const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        PORT: '1' 
+        PORT: '1',
       });
       expect(result.PORT).toBe(1);
     });
 
     it('should accept PORT = 65535', () => {
-      const result = EnvSchema.parse({ 
+      const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        PORT: '65535' 
+        PORT: '65535',
       });
       expect(result.PORT).toBe(65535);
     });
@@ -188,16 +200,18 @@ describe('Environment Schema Validation', () => {
 
   describe('NODE_ENV validation', () => {
     it('should reject invalid NODE_ENV', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        NODE_ENV: 'invalid' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          NODE_ENV: 'invalid',
+        })
+      ).toThrow();
     });
 
     it('should accept test environment', () => {
-      const result = EnvSchema.parse({ 
+      const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        NODE_ENV: 'test' 
+        NODE_ENV: 'test',
       });
       expect(result.NODE_ENV).toBe('test');
     });
@@ -205,19 +219,21 @@ describe('Environment Schema Validation', () => {
 
   describe('LOG_LEVEL validation', () => {
     it('should reject invalid LOG_LEVEL', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        LOG_LEVEL: 'invalid' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          LOG_LEVEL: 'invalid',
+        })
+      ).toThrow();
     });
 
     it('should accept all valid log levels', () => {
       const levels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
 
       for (const level of levels) {
-        const result = EnvSchema.parse({ 
+        const result = EnvSchema.parse({
           OPENAI_API_KEY: validApiKey,
-          LOG_LEVEL: level 
+          LOG_LEVEL: level,
         });
         expect(result.LOG_LEVEL).toBe(level);
       }
@@ -226,16 +242,18 @@ describe('Environment Schema Validation', () => {
 
   describe('HOST validation', () => {
     it('should reject empty HOST', () => {
-      expect(() => EnvSchema.parse({ 
-        OPENAI_API_KEY: validApiKey,
-        HOST: '' 
-      })).toThrow();
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          HOST: '',
+        })
+      ).toThrow();
     });
 
     it('should accept custom HOST', () => {
-      const result = EnvSchema.parse({ 
+      const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        HOST: '0.0.0.0' 
+        HOST: '0.0.0.0',
       });
       expect(result.HOST).toBe('0.0.0.0');
     });
@@ -251,7 +269,9 @@ describe('Environment Schema Validation', () => {
     });
 
     it('should reject invalid OPENAI_API_KEY format', () => {
-      expect(() => EnvSchema.parse({ OPENAI_API_KEY: 'invalid-key' })).toThrow();
+      expect(() =>
+        EnvSchema.parse({ OPENAI_API_KEY: 'invalid-key' })
+      ).toThrow();
       expect(() => EnvSchema.parse({ OPENAI_API_KEY: 'sk_invalid' })).toThrow();
       expect(() => EnvSchema.parse({ OPENAI_API_KEY: 'sk-' })).toThrow();
     });
@@ -280,10 +300,12 @@ describe('Environment Schema Validation', () => {
     });
 
     it('should reject JWT_SECRET shorter than 32 characters', () => {
-      expect(() => EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        JWT_SECRET: 'too-short',
-      })).toThrow('JWT_SECRET must be at least 32 characters');
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          JWT_SECRET: 'too-short',
+        })
+      ).toThrow('JWT_SECRET must be at least 32 characters');
     });
 
     it('should accept valid JWT_SECRET', () => {
@@ -315,7 +337,8 @@ describe('Environment Schema Validation', () => {
     it('should parse comma-separated origins', () => {
       const result = EnvSchema.parse({
         OPENAI_API_KEY: validApiKey,
-        ALLOWED_ORIGIN: 'https://example.com, http://localhost:3000, https://app.example.com',
+        ALLOWED_ORIGIN:
+          'https://example.com, http://localhost:3000, https://app.example.com',
       });
       expect(result.ALLOWED_ORIGIN).toEqual([
         'https://example.com',
@@ -336,17 +359,21 @@ describe('Environment Schema Validation', () => {
     });
 
     it('should reject invalid URLs', () => {
-      expect(() => EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        ALLOWED_ORIGIN: 'not-a-url',
-      })).toThrow('valid HTTP(S) URLs');
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          ALLOWED_ORIGIN: 'not-a-url',
+        })
+      ).toThrow('valid HTTP(S) URLs');
     });
 
     it('should reject non-HTTP(S) protocols', () => {
-      expect(() => EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        ALLOWED_ORIGIN: 'ftp://example.com',
-      })).toThrow('valid HTTP(S) URLs');
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          ALLOWED_ORIGIN: 'ftp://example.com',
+        })
+      ).toThrow('valid HTTP(S) URLs');
     });
   });
 
@@ -384,17 +411,21 @@ describe('Environment Schema Validation', () => {
     });
 
     it('should reject non-numeric values', () => {
-      expect(() => EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        RATE_LIMIT_MAX: 'abc',
-      })).toThrow('positive integer');
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          RATE_LIMIT_MAX: 'abc',
+        })
+      ).toThrow('positive integer');
     });
 
     it('should reject zero or negative values', () => {
-      expect(() => EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        RATE_LIMIT_MAX: '0',
-      })).toThrow('greater than 0');
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          RATE_LIMIT_MAX: '0',
+        })
+      ).toThrow('greater than 0');
     });
   });
 
@@ -415,19 +446,21 @@ describe('Environment Schema Validation', () => {
     });
 
     it('should reject non-numeric values', () => {
-      expect(() => EnvSchema.parse({
-        OPENAI_API_KEY: validApiKey,
-        RATE_LIMIT_TIME_WINDOW: '1min',
-      })).toThrow('positive integer');
+      expect(() =>
+        EnvSchema.parse({
+          OPENAI_API_KEY: validApiKey,
+          RATE_LIMIT_TIME_WINDOW: '1min',
+        })
+      ).toThrow('positive integer');
     });
   });
 
   describe('Error message content', () => {
     it('should contain field names in error messages', () => {
       try {
-        EnvSchema.parse({ 
+        EnvSchema.parse({
           OPENAI_API_KEY: validApiKey,
-          PORT: 'invalid' 
+          PORT: 'invalid',
         });
         expect.fail('Should have thrown an error');
       } catch (error) {
@@ -440,9 +473,9 @@ describe('Environment Schema Validation', () => {
 
     it('should format validation errors properly for multiple fields', () => {
       try {
-        EnvSchema.parse({ 
-          NODE_ENV: 'invalid', 
-          PORT: 'also-invalid' 
+        EnvSchema.parse({
+          NODE_ENV: 'invalid',
+          PORT: 'also-invalid',
         });
         expect.fail('Should have thrown an error');
       } catch (error) {

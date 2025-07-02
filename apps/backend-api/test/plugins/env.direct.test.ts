@@ -85,7 +85,7 @@ describe('Environment Plugin Direct Tests', () => {
   it('should use default values when env vars not set', async () => {
     const app = Fastify({ logger: false });
     const originalEnv = process.env;
-    process.env = { 
+    process.env = {
       ...originalEnv,
       OPENAI_API_KEY: validApiKey, // Required
     };
@@ -128,11 +128,12 @@ describe('Environment Plugin Direct Tests', () => {
 
     for (const value of validValues) {
       const testApp = Fastify({ logger: false });
-      process.env = { 
-        ...originalEnv, 
+      process.env = {
+        ...originalEnv,
         NODE_ENV: value,
         OPENAI_API_KEY: validApiKey,
-        JWT_SECRET: value === 'production' ? randomBytes(32).toString('hex') : undefined,
+        JWT_SECRET:
+          value === 'production' ? randomBytes(32).toString('hex') : undefined,
       };
 
       try {
@@ -173,7 +174,10 @@ describe('Environment Plugin Direct Tests', () => {
       expect(app.config?.HOST).toBe('0.0.0.0');
       expect(app.config?.LOG_LEVEL).toBe('warn');
       expect(app.config?.JWT_SECRET).toBe(jwtSecret);
-      expect(app.config?.ALLOWED_ORIGIN).toEqual(['https://example.com', 'https://app.example.com']);
+      expect(app.config?.ALLOWED_ORIGIN).toEqual([
+        'https://example.com',
+        'https://app.example.com',
+      ]);
     } finally {
       process.env = originalEnv;
       await app.close();
@@ -215,9 +219,9 @@ describe('Environment Plugin Direct Tests', () => {
     };
     delete process.env['JWT_SECRET'];
 
-    await expect(
-      app.register(envPlugin).ready()
-    ).rejects.toThrow('JWT_SECRET is required in production');
+    await expect(app.register(envPlugin).ready()).rejects.toThrow(
+      'JWT_SECRET is required in production'
+    );
 
     process.env = originalEnv;
   });
@@ -228,7 +232,8 @@ describe('Environment Plugin Direct Tests', () => {
     process.env = {
       ...originalEnv,
       OPENAI_API_KEY: validApiKey,
-      ALLOWED_ORIGIN: 'https://example.com, http://localhost:3000, https://app.example.com',
+      ALLOWED_ORIGIN:
+        'https://example.com, http://localhost:3000, https://app.example.com',
     };
 
     try {
@@ -254,9 +259,9 @@ describe('Environment Plugin Direct Tests', () => {
       OPENAI_API_KEY: 'invalid-key-format',
     };
 
-    await expect(
-      app.register(envPlugin).ready()
-    ).rejects.toThrow('OPENAI_API_KEY');
+    await expect(app.register(envPlugin).ready()).rejects.toThrow(
+      'OPENAI_API_KEY'
+    );
 
     process.env = originalEnv;
   });

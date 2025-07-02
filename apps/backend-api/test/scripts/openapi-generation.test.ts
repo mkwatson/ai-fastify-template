@@ -45,10 +45,14 @@ describe('OpenAPI Generation Scripts', () => {
         unlinkSync(openApiPath);
       }
 
-      // Run the generation script
+      // Run the generation script with test API key
       const { stdout, stderr } = await execAsync(`node ${generationScript}`, {
         cwd: backendApiPath,
         timeout: 30000, // 30 second timeout
+        env: {
+          ...process.env,
+          OPENAI_API_KEY: 'sk-test1234567890abcdef',
+        },
       });
 
       // Should have success output
@@ -80,6 +84,10 @@ describe('OpenAPI Generation Scripts', () => {
       await execAsync(`node ${generationScript}`, {
         cwd: backendApiPath,
         timeout: 30000,
+        env: {
+          ...process.env,
+          OPENAI_API_KEY: 'sk-test1234567890abcdef',
+        },
       });
 
       const content = readFileSync(openApiPath, 'utf8');
