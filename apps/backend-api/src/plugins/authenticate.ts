@@ -16,13 +16,6 @@ const authenticatePlugin: FastifyPluginAsync = async fastify => {
     async function (request: FastifyRequest, reply: FastifyReply) {
       try {
         await request.jwtVerify();
-
-        // Additional validation could go here
-        // For example, checking if token type is 'access'
-        const token = request.user as { type?: string };
-        if (!token || token.type !== 'access') {
-          throw new Error('Invalid token type');
-        }
       } catch (err) {
         reply.send(err);
       }
