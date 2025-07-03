@@ -30,7 +30,9 @@ describe('POST /api/token', () => {
       expect(body).toHaveProperty('tokenType');
       expect(body).toHaveProperty('expiresIn');
       expect(body.tokenType).toBe('Bearer');
-      expect(body.expiresIn).toBe(900);
+      // expiresIn has jitter: 900-960 seconds
+      expect(body.expiresIn).toBeGreaterThanOrEqual(900);
+      expect(body.expiresIn).toBeLessThanOrEqual(960);
       expect(typeof body.token).toBe('string');
       expect(body.token.split('.')).toHaveLength(3);
     });
@@ -56,7 +58,13 @@ describe('POST /api/token', () => {
       expect(decoded['iss']).toBe('airbolt-api');
 
       const expirationTime = (decoded.exp ?? 0) - (decoded.iat ?? 0);
-      expect(expirationTime).toBe(900);
+      // expiresIn has jitter: 900-960 seconds
+      expect(expirationTime).toBeGreaterThanOrEqual(900);
+      expect(expirationTime).toBeLessThanOrEqual(960);
+      // Verify new custom claims
+      expect(decoded['origin']).toBe('http://localhost:3000');
+      expect(decoded['fingerprint']).toBeDefined();
+      expect(typeof decoded['fingerprint']).toBe('string');
     });
   });
 
@@ -129,6 +137,9 @@ describe('POST /api/token', () => {
       expect((verified as any)['iss']).toBe('airbolt-api');
       expect((verified as any).iat).toBeDefined();
       expect((verified as any).exp).toBeDefined();
+      // Verify new custom claims
+      expect((verified as any)['origin']).toBe('http://localhost:3000');
+      expect((verified as any)['fingerprint']).toBeDefined();
     });
   });
 
@@ -152,10 +163,74 @@ describe('POST /api/token', () => {
     });
   });
 
+  describe('token introspection', () => {
+    it('should verify token and return decoded claims', async () => {
+      // First, generate a token
+      const tokenResponse = await app.inject({
+        method: 'POST',
+        url: '/api/token',
+        headers: {
+          origin: 'http://localhost:3000',
+        },
+      });
+
+      const { token } = JSON.parse(tokenResponse.payload);
+
+      // Then verify it
+      const verifyResponse = await app.inject({
+        method: 'GET',
+        url: '/api/token/verify',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      expect(verifyResponse.statusCode).toBe(200);
+      const body = JSON.parse(verifyResponse.payload);
+
+      expect(body.valid).toBe(true);
+      expect(body.expires).toBeDefined();
+      expect(body.remaining).toBeDefined();
+      expect(body.remaining).toBeGreaterThan(0);
+      expect(body.remaining).toBeLessThanOrEqual(960);
+
+      // Check claims structure
+      expect(body.claims).toBeDefined();
+      expect(body.claims.sub).toBeDefined();
+      expect(body.claims.aud).toBe('api');
+      expect(body.claims.type).toBe('access');
+      expect(body.claims.origin).toBe('http://localhost:3000');
+      expect(body.claims.fingerprint).toBeDefined();
+      expect(body.claims.iat).toBeDefined();
+      expect(body.claims.exp).toBeDefined();
+    });
+
+    it('should return 401 for invalid token', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/token/verify',
+        headers: {
+          authorization: 'Bearer invalid.token.here',
+        },
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+
+    it('should return 401 when no token provided', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/token/verify',
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
   describe('rate limiting', () => {
     it('should enforce rate limiting on token endpoint', async () => {
-      // Token endpoint has specific rate limit: 10 requests per minute
-      const maxRequests = 10;
+      // Token endpoint has specific rate limit: 3 requests per minute (per Linear spec)
+      const maxRequests = 3;
       const responses = [];
 
       // Make requests sequentially

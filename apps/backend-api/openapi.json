@@ -144,6 +144,67 @@
         }
       }
     },
+    "/api/token/verify": {
+      "get": {
+        "summary": "Verify and introspect token",
+        "tags": ["Authentication"],
+        "description": "Validates the current token and returns decoded claims. Useful for debugging authentication issues.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "expires": {
+                      "type": "number"
+                    },
+                    "remaining": {
+                      "type": "number"
+                    },
+                    "claims": {
+                      "type": "object",
+                      "properties": {
+                        "sub": {
+                          "type": "string"
+                        },
+                        "aud": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "origin": {
+                          "type": "string"
+                        },
+                        "fingerprint": {
+                          "type": "string"
+                        },
+                        "iat": {
+                          "type": "number"
+                        },
+                        "exp": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/example/": {
       "get": {
         "summary": "Get example message",

@@ -1,97 +1,62 @@
 import type { FastifyRequest } from 'fastify';
-import type {
-  RequestFingerprint,
-  FingerprintStats,
-} from '../types/fingerprint.js';
+import { createHash } from 'node:crypto';
 
-// In-memory store for MVP - replace with Redis for production
-const fingerprintStore = new Map<string, FingerprintStats>();
+// Simplified fingerprinting for MVP abuse prevention
+// Tracks request patterns per origin without complex stats
+const recentRequests = new Map<string, number[]>();
 
-export function extractFingerprint(
-  request: FastifyRequest
-): RequestFingerprint {
-  const fingerprint: RequestFingerprint = {
-    ip: request.ip,
-    timestamp: Date.now(),
-  };
+// Cleanup interval reference for graceful shutdown
+let cleanupInterval: NodeJS.Timeout | undefined;
 
-  // Add optional fields only if they exist
-  const userAgent = request.headers['user-agent'];
-  if (userAgent) fingerprint.userAgent = userAgent;
+export function extractFingerprint(request: FastifyRequest): string {
+  // Create a simple hash of identifying characteristics
+  const parts = [
+    request.ip,
+    request.headers['user-agent'] || 'unknown',
+    request.headers['accept-language'] || 'unknown',
+  ].join('|');
 
-  const acceptLanguage = request.headers['accept-language'];
-  if (acceptLanguage) fingerprint.acceptLanguage = acceptLanguage;
-
-  const acceptEncoding = request.headers['accept-encoding'];
-  if (acceptEncoding) fingerprint.acceptEncoding = acceptEncoding;
-
-  const origin = request.headers.origin;
-  if (origin) fingerprint.origin = origin;
-
-  return fingerprint;
+  return createHash('sha256').update(parts).digest('hex').substring(0, 16);
 }
 
-export function trackFingerprint(
-  origin: string,
-  fingerprint: RequestFingerprint
-): void {
-  const key = `origin:${origin}`;
-  const stats = fingerprintStore.get(key) || {
-    uniqueIps: new Set<string>(),
-    uniqueUserAgents: new Set<string>(),
-    requestCount: 0,
-    firstSeen: Date.now(),
-    lastSeen: Date.now(),
-  };
+export function trackOriginRequest(origin: string): void {
+  const now = Date.now();
+  const requests = recentRequests.get(origin) || [];
 
-  stats.uniqueIps.add(fingerprint.ip);
-  if (fingerprint.userAgent) {
-    stats.uniqueUserAgents.add(fingerprint.userAgent);
-  }
-  stats.requestCount++;
-  stats.lastSeen = Date.now();
+  // Keep only requests from last hour
+  const recentHour = requests.filter(t => now - t < 3600000);
+  recentHour.push(now);
 
-  fingerprintStore.set(key, stats);
-}
-
-export function getOriginStats(origin: string): FingerprintStats | undefined {
-  return fingerprintStore.get(`origin:${origin}`);
+  recentRequests.set(origin, recentHour);
 }
 
 export function isOriginSuspicious(origin: string): boolean {
-  const stats = getOriginStats(origin);
-  if (!stats) return false;
+  const requests = recentRequests.get(origin) || [];
 
-  const timeWindowMs = 3600000; // 1 hour
-  const now = Date.now();
-
-  // Suspicious patterns:
-  // 1. Too many unique IPs in short time (distributed attack)
-  if (stats.uniqueIps.size > 100 && now - stats.firstSeen < timeWindowMs) {
-    return true;
-  }
-
-  // 2. High request rate from multiple IPs
-  const requestsPerMinute =
-    stats.requestCount / ((now - stats.firstSeen) / 60000);
-  if (stats.uniqueIps.size > 10 && requestsPerMinute > 100) {
-    return true;
-  }
-
-  // 3. Too many different user agents (bot behavior)
-  if (stats.uniqueUserAgents.size > 50) {
-    return true;
-  }
-
-  return false;
+  // Simple threshold: >1000 requests/hour suggests abuse
+  // This allows ~16 requests/minute across all IPs from an origin
+  return requests.length > 1000;
 }
 
-// Cleanup old entries periodically (every hour)
-setInterval(() => {
-  const oneHourAgo = Date.now() - 3600000;
-  for (const [key, stats] of fingerprintStore.entries()) {
-    if (stats.lastSeen < oneHourAgo) {
-      fingerprintStore.delete(key);
+// Start periodic cleanup (call during app initialization)
+export function startFingerprintCleanup(): void {
+  cleanupInterval = setInterval(() => {
+    const oneHourAgo = Date.now() - 3600000;
+    for (const [origin, requests] of recentRequests.entries()) {
+      const recent = requests.filter(t => t > oneHourAgo);
+      if (recent.length === 0) {
+        recentRequests.delete(origin);
+      } else {
+        recentRequests.set(origin, recent);
+      }
     }
+  }, 3600000); // Run every hour
+}
+
+// Stop cleanup (call during graceful shutdown)
+export function stopFingerprintCleanup(): void {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = undefined;
   }
-}, 3600000);
+}

@@ -9,4 +9,6 @@ export interface JWTPayload {
 
   // Custom claims
   type: 'access' | 'refresh'; // Token type for future extensions
+  origin: string; // Origin that issued this token
+  fingerprint: string; // One-way hash of request characteristics
 }
