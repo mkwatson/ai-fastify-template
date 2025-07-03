@@ -50,7 +50,10 @@ describe('POST /api/token', () => {
       expect(decoded).toBeTruthy();
       expect(decoded.iat).toBeDefined();
       expect(decoded.exp).toBeDefined();
-      expect(decoded['origin']).toBe('http://localhost:3000');
+      expect(decoded['sub']).toBeDefined();
+      expect(decoded['aud']).toBe('api');
+      expect(decoded['type']).toBe('access');
+      expect(decoded['iss']).toBe('airbolt-api');
 
       const expirationTime = (decoded.exp ?? 0) - (decoded.iat ?? 0);
       expect(expirationTime).toBe(900);
@@ -120,7 +123,10 @@ describe('POST /api/token', () => {
       const verified = app.jwt.verify(body.token);
 
       expect(verified).toBeTruthy();
-      expect((verified as any)['origin']).toBe('http://localhost:3000');
+      expect((verified as any)['sub']).toBeDefined();
+      expect((verified as any)['aud']).toBe('api');
+      expect((verified as any)['type']).toBe('access');
+      expect((verified as any)['iss']).toBe('airbolt-api');
       expect((verified as any).iat).toBeDefined();
       expect((verified as any).exp).toBeDefined();
     });

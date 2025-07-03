@@ -1,8 +1,12 @@
-// Minimal JWT types for the token endpoint
+// JWT types following standard claims
 
-// Simple JWT payload type for our tokens
 export interface JWTPayload {
-  origin: string;
-  iat?: number;
-  exp?: number;
+  // Standard JWT claims
+  sub: string; // Subject: session/client identifier
+  aud: string; // Audience: intended recipient (our API)
+  iat?: number; // Issued at (added by fastify-jwt)
+  exp?: number; // Expiration (added by fastify-jwt)
+
+  // Custom claims
+  type: 'access' | 'refresh'; // Token type for future extensions
 }

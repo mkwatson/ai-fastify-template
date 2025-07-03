@@ -1,4 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify';
+import { randomUUID } from 'node:crypto';
+import {
+  extractFingerprint,
+  trackFingerprint,
+  isOriginSuspicious,
+} from '../../services/fingerprint.js';
 
 // Token route will use allowed origins from config
 
@@ -70,8 +76,40 @@ const tokenRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
         );
       }
 
-      // Generate token with minimal payload
-      const token = fastify.jwt.sign({ origin });
+      // Extract and track request fingerprint
+      const fingerprint = extractFingerprint(request);
+      trackFingerprint(origin, fingerprint);
+
+      // Check for suspicious activity patterns
+      if (isOriginSuspicious(origin)) {
+        fastify.log.warn(
+          { origin, fingerprint },
+          'Suspicious origin activity detected'
+        );
+        throw fastify.httpErrors.tooManyRequests(
+          'Unusual activity detected. Please try again later.'
+        );
+      }
+
+      // Generate token with standard claims
+      const sessionId = randomUUID();
+      const token = fastify.jwt.sign({
+        sub: sessionId, // Subject: unique session identifier
+        aud: 'api', // Audience: this API
+        type: 'access', // Token type for future refresh token support
+      });
+
+      // Log token issuance for monitoring
+      fastify.log.info(
+        {
+          event: 'token_issued',
+          sessionId,
+          origin,
+          ip: request.ip,
+          userAgent: request.headers['user-agent'],
+        },
+        'JWT token issued'
+      );
 
       return {
         token,

@@ -9,6 +9,7 @@ import envPlugin from './plugins/env.js';
 import fastifyJwt from '@fastify/jwt';
 import rateLimitPlugin from './plugins/rate-limit.js';
 import openaiService from './services/openai.js';
+import authenticatePlugin from './plugins/authenticate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,8 +33,15 @@ const app: FastifyPluginAsync<AppOptions> = async (
     sign: {
       algorithm: 'HS256',
       expiresIn: '15m',
+      iss: 'airbolt-api', // Issuer claim for token validation
+    },
+    verify: {
+      allowedIss: 'airbolt-api', // Only accept tokens from our API
     },
   });
+
+  // Register authenticate plugin after JWT
+  await fastify.register(authenticatePlugin);
 
   // Register rate limit plugin after env (it depends on RATE_LIMIT_* from env)
   await fastify.register(rateLimitPlugin);
@@ -50,7 +58,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    ignorePattern: /.*(env|rate-limit)\.(ts|js)$/,
+    ignorePattern: /.*(env|rate-limit|authenticate)\.(ts|js)$/,
     options: opts,
   });
 
