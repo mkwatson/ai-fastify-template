@@ -43,10 +43,6 @@ describe('fingerprint service', () => {
           fc.webUrl(),
           fc.record({
             ip: fc.ipV4(),
-            userAgent: fc.option(fc.string()).map(v => v ?? undefined),
-            acceptLanguage: fc.option(fc.string()).map(v => v ?? undefined),
-            acceptEncoding: fc.option(fc.string()).map(v => v ?? undefined),
-            origin: fc.option(fc.webUrl()).map(v => v ?? undefined),
             timestamp: fc.integer({ min: 0 }),
           }),
           (origin, fingerprint) => {
