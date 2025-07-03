@@ -56,7 +56,11 @@ const tokenRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
       const { origin } = request.headers;
 
       // Validate origin
-      if (!origin) {
+      if (origin === undefined) {
+        throw fastify.httpErrors.badRequest('Origin header is required');
+      }
+
+      if (!origin || origin.trim() === '') {
         throw fastify.httpErrors.forbidden('Origin header is required');
       }
 
