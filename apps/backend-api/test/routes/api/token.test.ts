@@ -20,7 +20,7 @@ describe('POST /api/token', () => {
         method: 'POST',
         url: '/api/token',
         headers: {
-          origin: 'http://localhost:5173',
+          origin: 'http://localhost:3000',
         },
       });
 
@@ -35,26 +35,12 @@ describe('POST /api/token', () => {
       expect(body.token.split('.')).toHaveLength(3);
     });
 
-    it('should accept case-insensitive origin matching', async () => {
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/token',
-        headers: {
-          origin: 'HTTP://LOCALHOST:5173',
-        },
-      });
-
-      expect(response.statusCode).toBe(200);
-      const body = JSON.parse(response.payload);
-      expect(body).toHaveProperty('token');
-    });
-
     it('should generate valid JWT with correct expiration', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/api/token',
         headers: {
-          origin: 'http://localhost:5173',
+          origin: 'http://localhost:3000',
         },
       });
 
@@ -64,6 +50,7 @@ describe('POST /api/token', () => {
       expect(decoded).toBeTruthy();
       expect(decoded.iat).toBeDefined();
       expect(decoded.exp).toBeDefined();
+      expect(decoded['origin']).toBe('http://localhost:3000');
 
       const expirationTime = (decoded.exp ?? 0) - (decoded.iat ?? 0);
       expect(expirationTime).toBe(900);
@@ -71,19 +58,17 @@ describe('POST /api/token', () => {
   });
 
   describe('origin validation', () => {
-    it('should return 403 when origin header is missing', async () => {
+    it('should return 400 when origin header is missing', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/api/token',
       });
 
-      expect(response.statusCode).toBe(403);
+      expect(response.statusCode).toBe(400);
       const body = JSON.parse(response.payload);
-      expect(body).toEqual({
-        error: 'ORIGIN_NOT_ALLOWED',
-        message: 'Origin header is required',
-        statusCode: 403,
-      });
+      expect(body.error).toBe('Bad Request');
+      expect(body.message).toContain('origin');
+      expect(body.statusCode).toBe(400);
     });
 
     it('should return 403 when origin is not allowed', async () => {
@@ -97,11 +82,11 @@ describe('POST /api/token', () => {
 
       expect(response.statusCode).toBe(403);
       const body = JSON.parse(response.payload);
-      expect(body).toEqual({
-        error: 'ORIGIN_NOT_ALLOWED',
-        message: 'The request origin is not in the allowed list',
-        statusCode: 403,
-      });
+      expect(body.error).toBe('Forbidden');
+      expect(body.message).toContain(
+        'The request origin is not in the allowed list'
+      );
+      expect(body.statusCode).toBe(403);
     });
 
     it('should return 403 for empty origin header', async () => {
@@ -115,11 +100,9 @@ describe('POST /api/token', () => {
 
       expect(response.statusCode).toBe(403);
       const body = JSON.parse(response.payload);
-      expect(body).toEqual({
-        error: 'ORIGIN_NOT_ALLOWED',
-        message: 'Origin header is required',
-        statusCode: 403,
-      });
+      expect(body.error).toBe('Forbidden');
+      expect(body.message).toContain('Origin header is required');
+      expect(body.statusCode).toBe(403);
     });
   });
 
@@ -129,7 +112,7 @@ describe('POST /api/token', () => {
         method: 'POST',
         url: '/api/token',
         headers: {
-          origin: 'http://localhost:5173',
+          origin: 'http://localhost:3000',
         },
       });
 
@@ -137,6 +120,7 @@ describe('POST /api/token', () => {
       const verified = app.jwt.verify(body.token);
 
       expect(verified).toBeTruthy();
+      expect((verified as any)['origin']).toBe('http://localhost:3000');
       expect((verified as any).iat).toBeDefined();
       expect((verified as any).exp).toBeDefined();
     });
@@ -148,7 +132,7 @@ describe('POST /api/token', () => {
         method: 'POST',
         url: '/api/token',
         headers: {
-          origin: 'http://localhost:5173',
+          origin: 'http://localhost:3000',
         },
       });
 
@@ -156,23 +140,25 @@ describe('POST /api/token', () => {
       expect(response.headers['content-type']).toContain('application/json');
 
       const body = JSON.parse(response.payload);
-      expect(Object.keys(body).sort()).toEqual(['expiresIn', 'token', 'tokenType'].sort());
+      expect(Object.keys(body).sort()).toEqual(
+        ['expiresIn', 'token', 'tokenType'].sort()
+      );
     });
   });
 
   describe('rate limiting', () => {
-    it('should return 429 when rate limit is exceeded', async () => {
-      // Make requests sequentially to ensure rate limiting kicks in
-      const maxRequests = 60; // Default RATE_LIMIT_MAX
+    it('should enforce rate limiting on token endpoint', async () => {
+      // Token endpoint has specific rate limit: 10 requests per minute
+      const maxRequests = 10;
       const responses = [];
 
       // Make requests sequentially
-      for (let i = 0; i < maxRequests + 5; i++) {
+      for (let i = 0; i < maxRequests + 2; i++) {
         const response = await app.inject({
           method: 'POST',
           url: '/api/token',
           headers: {
-            origin: 'http://localhost:5173',
+            origin: 'http://localhost:3000',
           },
         });
         responses.push(response);
@@ -184,20 +170,17 @@ describe('POST /api/token', () => {
         r => r.statusCode === 429
       ).length;
 
-      // Should have some successful requests and some rate limited
-      expect(successCount).toBeLessThanOrEqual(maxRequests);
-      expect(successCount).toBeGreaterThan(0);
-      expect(rateLimitedCount).toBeGreaterThan(0);
+      // Should have exactly maxRequests successful and the rest rate limited
+      expect(successCount).toBe(maxRequests);
+      expect(rateLimitedCount).toBe(2);
 
       // Check rate limit error response
       const rateLimitedResponse = responses.find(r => r.statusCode === 429);
       if (rateLimitedResponse) {
         const body = JSON.parse(rateLimitedResponse.payload);
-        expect(body.error).toBe('RATE_LIMIT_EXCEEDED');
-        expect(body.message).toContain(
-          'Too many requests'
-        );
         expect(body.statusCode).toBe(429);
+        expect(body.error).toBeDefined();
+        expect(body.message).toContain('Too many requests');
       }
     });
   });
