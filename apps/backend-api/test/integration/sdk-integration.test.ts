@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -19,6 +19,12 @@ describe('SDK Integration', () => {
   let serverUrl: string;
 
   beforeAll(async () => {
+    // Set higher rate limits for SDK integration tests to avoid conflicts
+    vi.stubEnv('RATE_LIMIT_MAX', '1000');
+    vi.stubEnv('RATE_LIMIT_TIME_WINDOW', '60000');
+    vi.stubEnv('OPENAI_API_KEY', 'sk-test123456789012345678901234567890');
+    vi.stubEnv('JWT_SECRET', 'test-secret-key-for-sdk-integration-tests-32');
+
     app = await build({
       logger: false,
     });
@@ -59,7 +65,11 @@ describe('SDK Integration', () => {
             expect(operation.description).toBeDefined();
             expect(operation.tags).toBeDefined();
             expect(operation.responses).toBeDefined();
-            expect(operation.responses['200']).toBeDefined();
+            // Should have at least one success response (200, 201, etc.)
+            const successResponses = Object.keys(operation.responses).filter(
+              code => code.startsWith('2')
+            );
+            expect(successResponses.length).toBeGreaterThan(0);
           }
         }
       }
@@ -310,7 +320,7 @@ describe('SDK Integration', () => {
       // Should have security schemes for authentication
       expect(spec.components).toBeDefined();
       expect(spec.components?.securitySchemes).toBeDefined();
-      expect(spec.components?.securitySchemes?.['bearerAuth']).toBeDefined();
+      expect(spec.components?.securitySchemes?.['BearerAuth']).toBeDefined();
 
       // Should have proper tagging for organization
       expect(spec.tags).toBeDefined();
